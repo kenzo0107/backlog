@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -12,18 +13,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// BacklogErrorResponse : backlog error response
-type BacklogErrorResponse struct {
-	Errors []BacklogError `json:"errors"`
+// ErrorResponse is backlog error response
+type ErrorResponse struct {
+	Errors []Error `json:"errors"`
 }
 
-type BacklogError struct {
+// Error is backlog error
+type Error struct {
 	Message  string `json:"message"`
 	Code     int    `json:"code"`
 	MoreInfo string `json:"moreInfo"`
 }
 
-func (t BacklogError) Err() error {
+// Err : error
+func (t Error) Err() error {
 	if strings.TrimSpace(t.Message) == "" {
 		return nil
 	}
@@ -31,11 +34,6 @@ func (t BacklogError) Err() error {
 	return errors.New(t.Message)
 }
 
-type statusCodeErrors struct {
-	Errors []statusCodeError `json:"errors"`
-}
-
-// StatusCodeError represents an http response error.
 // StatusCodeError represents an http response error.
 // type httpStatusCode interface { HTTPStatusCode() int } to handle it.
 type statusCodeError struct {
@@ -75,7 +73,11 @@ func doPost(ctx context.Context, client httpClient, req *http.Request, parser re
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	err = checkStatusCode(resp, d)
 	if err != nil {
@@ -87,8 +89,10 @@ func doPost(ctx context.Context, client httpClient, req *http.Request, parser re
 
 func checkStatusCode(resp *http.Response, d debug) error {
 	if resp.StatusCode != http.StatusOK {
-		logResponse(resp, d)
-		return statusCodeError{Code: resp.StatusCode}
+		if err := logResponse(resp, d); err != nil {
+			return err
+		}
+		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
 	return nil

@@ -66,14 +66,18 @@ func New(apiKey, endpoint string, options ...Option) *Client {
 // Debugf print a formatted debug line.
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
-		api.log.Output(2, fmt.Sprintf(format, v...))
+		if err := api.log.Output(2, fmt.Sprintf(format, v...)); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 // Debugln print a debug line.
 func (api *Client) Debugln(v ...interface{}) {
 	if api.debug {
-		api.log.Output(2, fmt.Sprintln(v...))
+		if err := api.log.Output(2, fmt.Sprintln(v...)); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

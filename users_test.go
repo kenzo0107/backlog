@@ -2,6 +2,7 @@ package backlog
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"reflect"
 	"testing"
@@ -34,13 +35,17 @@ func getTestUserWithID(id int) User {
 func getUser(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestUser())
-	rw.Write(response)
+	if _, err := rw.Write(response); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getUsers(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestUsers())
-	rw.Write(response)
+	if _, err := rw.Write(response); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TestGetUserMySelf(t *testing.T) {

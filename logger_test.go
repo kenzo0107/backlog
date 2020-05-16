@@ -20,7 +20,9 @@ func TestLogging(t *testing.T) {
 	logger.Printf("test line 123\n")
 	assert.Equal(t, buf.String(), "logger_test.go:20: test line 123\n")
 	buf.Truncate(0)
-	logger.Output(1, "test line 123\n")
+	if err := logger.Output(1, "test line 123\n"); err != nil {
+		log.Println(err)
+	}
 	assert.Equal(t, buf.String(), "logger_test.go:23: test line 123\n")
 	buf.Truncate(0)
 }

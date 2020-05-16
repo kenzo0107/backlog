@@ -1,6 +1,9 @@
 package backlog
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 type logger interface {
 	Output(int, string) error
@@ -30,15 +33,21 @@ type internalLog struct {
 
 // Println replicates the behaviour of the standard logger.
 func (t internalLog) Println(v ...interface{}) {
-	t.Output(2, fmt.Sprintln(v...))
+	if err := t.Output(2, fmt.Sprintln(v...)); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Printf replicates the behaviour of the standard logger.
 func (t internalLog) Printf(format string, v ...interface{}) {
-	t.Output(2, fmt.Sprintf(format, v...))
+	if err := t.Output(2, fmt.Sprintf(format, v...)); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Print replicates the behaviour of the standard logger.
 func (t internalLog) Print(v ...interface{}) {
-	t.Output(2, fmt.Sprint(v...))
+	if err := t.Output(2, fmt.Sprint(v...)); err != nil {
+		log.Fatal(err)
+	}
 }
