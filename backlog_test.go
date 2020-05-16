@@ -8,10 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	validToken = "testing-token"
-)
-
 var (
 	serverAddr string
 	once       sync.Once
