@@ -16,12 +16,12 @@ type User struct {
 	MailAddress string `json:"mailAddress"`
 }
 
-// GetUserMySelf return get my user by id
+// GetUserMySelf returns get my user information
 func (api *Client) GetUserMySelf() (*User, error) {
 	return api.GetUserMySelfContext(context.Background())
 }
 
-// GetUserMySelfContext will retrieve the complete user information by id with a custom context
+// GetUserMySelfContext will retrieve the complete my user information by id with a custom context
 func (api *Client) GetUserMySelfContext(ctx context.Context) (user *User, err error) {
 	if err = api.getMethod(ctx, "/api/v2/users/myself", url.Values{}, &user); err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (api *Client) GetUserMySelfContext(ctx context.Context) (user *User, err er
 	return user, nil
 }
 
-// GetUserByID return get a user by id
+// GetUserByID returns a user by id
 func (api *Client) GetUserByID(id int) (*User, error) {
 	return api.GetUserByIDContext(context.Background(), id)
 }
