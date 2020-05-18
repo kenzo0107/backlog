@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -73,10 +73,11 @@ func doPost(ctx context.Context, client httpClient, req *http.Request, parser re
 	if err != nil {
 		return err
 	}
-	defer func() {
+	defer func() error {
 		if err = resp.Body.Close(); err != nil {
-			log.Fatal(err)
+			return err
 		}
+		return nil
 	}()
 
 	err = checkStatusCode(resp, d)
@@ -116,4 +117,17 @@ func logResponse(resp *http.Response, d debug) error {
 	}
 
 	return nil
+}
+
+func projIDOrKey(projIDOrKey interface{}) (string, error) {
+	var idOrKey string
+	switch t := projIDOrKey.(type) {
+	case int:
+		idOrKey = strconv.Itoa(t)
+	case string:
+		idOrKey = t
+	default:
+		return idOrKey, fmt.Errorf("projectIDOrKey is int or string. you specify %t", t)
+	}
+	return idOrKey, nil
 }
