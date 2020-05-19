@@ -3,7 +3,6 @@ package backlog
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"reflect"
 	"testing"
@@ -30,7 +29,7 @@ func getTestWikiCount() Count {
 }
 
 func getTestWikiWithID(id int) Wiki {
-	t, _ := time.Parse("2014-01-06T11:10:45Z", "2014-01-06T11:10:45Z")
+	t, _ := time.Parse("2006-01-02 15:04:05 MST", "2014-12-31 12:31:24 JST")
 	return Wiki{
 		ID:        id,
 		ProjectID: 1,
@@ -118,6 +117,7 @@ func TestGetWikis(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
+
 	if !reflect.DeepEqual(expected, wikis) {
 		t.Fatal(ErrIncorrectResponse)
 	}
@@ -138,11 +138,11 @@ func TestGetWikisFailed(t *testing.T) {
 	http.HandleFunc("/api/v2/wikis", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
+
 	once.Do(startServer)
 	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetWikis(1, "test")
-	if err == nil {
+	if _, err := api.GetWikis(1, "test"); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -155,7 +155,6 @@ func TestGetWikiCount(t *testing.T) {
 	api := New("testing-token", "http://"+serverAddr+"/")
 
 	count, err := api.GetWikiCount(1)
-	log.Println(expected, count)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
