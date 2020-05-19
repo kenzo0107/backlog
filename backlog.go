@@ -26,7 +26,7 @@ type Client struct {
 // Option defines an option for a Client
 type Option func(*Client)
 
-// OptionHTTPClient - provide a custom http client to the slack client.
+// OptionHTTPClient - provide a custom http client to the backlog client.
 func OptionHTTPClient(client httpClient) func(*Client) {
 	return func(c *Client) {
 		c.httpclient = client
@@ -67,7 +67,7 @@ func New(apiKey, endpoint string, options ...Option) *Client {
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
 		if err := api.log.Output(2, fmt.Sprintf(format, v...)); err != nil {
-			log.Fatal(err)
+			api.Debugln(err)
 		}
 	}
 }
@@ -76,7 +76,7 @@ func (api *Client) Debugf(format string, v ...interface{}) {
 func (api *Client) Debugln(v ...interface{}) {
 	if api.debug {
 		if err := api.log.Output(2, fmt.Sprintln(v...)); err != nil {
-			log.Fatal(err)
+			api.Debugln(err)
 		}
 	}
 }
@@ -86,7 +86,7 @@ func (api *Client) Debug() bool {
 	return api.debug
 }
 
-// get a slack web method.
+// get a backlog method.
 func (api *Client) getMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
 	values.Add("apiKey", api.apiKey)
 	return getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
