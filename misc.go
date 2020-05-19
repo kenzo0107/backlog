@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -67,17 +68,16 @@ func getResource(ctx context.Context, client httpClient, endpoint string, values
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
-func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d debug) error {
+func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d debug) (err error) {
 	req = req.WithContext(ctx)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	defer func() error {
-		if err = resp.Body.Close(); err != nil {
-			return err
+	defer func() {
+		if er := resp.Body.Close(); er != nil {
+			err = er
 		}
-		return nil
 	}()
 
 	err = checkStatusCode(resp, d)
