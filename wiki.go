@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/url"
 	"strconv"
-	"time"
 )
 
 // Wiki : wiki
@@ -18,9 +17,9 @@ type Wiki struct {
 	SharedFiles []SharedFile `json:"sharedFiles"`
 	Stars       []Star       `json:"stars"`
 	CreatedUser User         `json:"createdUser"`
-	Created     time.Time    `json:"created"`
+	Created     JSONTime     `json:"created"`
 	UpdatedUser User         `json:"updatedUser"`
-	Updated     time.Time    `json:"updated"`
+	Updated     JSONTime     `json:"updated"`
 }
 
 // Tag : tag
@@ -31,24 +30,24 @@ type Tag struct {
 
 // Attachment : attachment of wiki
 type Attachment struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	Size        int       `json:"size"`
-	CreatedUser User      `json:"createdUser"`
-	Created     time.Time `json:"created"`
+	ID          int      `json:"id"`
+	Name        string   `json:"name"`
+	Size        int      `json:"size"`
+	CreatedUser User     `json:"createdUser"`
+	Created     JSONTime `json:"created"`
 }
 
 // SharedFile : shared file of wiki
 type SharedFile struct {
-	ID          int       `json:"id"`
-	Type        string    `json:"type"`
-	Dir         string    `json:"dir"`
-	Name        string    `json:"name"`
-	Size        int       `json:"size"`
-	CreatedUser User      `json:"createdUser"`
-	Created     time.Time `json:"created"`
-	UpdatedUser User      `json:"updatedUser"`
-	Updated     time.Time `json:"updated"`
+	ID          int      `json:"id"`
+	Type        string   `json:"type"`
+	Dir         string   `json:"dir"`
+	Name        string   `json:"name"`
+	Size        int      `json:"size"`
+	CreatedUser User     `json:"createdUser"`
+	Created     JSONTime `json:"created"`
+	UpdatedUser User     `json:"updatedUser"`
+	Updated     JSONTime `json:"updated"`
 }
 
 // Star : star of wiki
@@ -58,7 +57,7 @@ type Star struct {
 	URL       string      `json:"url"`
 	Title     string      `json:"title"`
 	Presenter User        `json:"presenter"`
-	Created   time.Time   `json:"created"`
+	Created   JSONTime    `json:"created"`
 }
 
 // Count : count

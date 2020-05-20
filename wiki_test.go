@@ -3,10 +3,10 @@ package backlog
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func getTestWiki() Wiki {
@@ -29,7 +29,6 @@ func getTestWikiCount() Count {
 }
 
 func getTestWikiWithID(id int) Wiki {
-	t, _ := time.Parse("2006-01-02 15:04:05 MST", "2014-12-31 12:31:24 JST")
 	return Wiki{
 		ID:        id,
 		ProjectID: 1,
@@ -53,7 +52,7 @@ func getTestWikiWithID(id int) Wiki {
 					Lang:        "ja",
 					MailAddress: "eguchi@nulab.example",
 				},
-				Created: t,
+				Created: JSONTime("2020-02-19T05:54:32Z"),
 			},
 		},
 	}
@@ -241,6 +240,10 @@ func TestGetWikiByID(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
+
+	log.Printf("expected: %#v\n", expected)
+	log.Printf("wiki: %#v\n", wiki)
+
 	if !reflect.DeepEqual(expected, wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
