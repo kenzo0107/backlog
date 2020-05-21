@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -67,15 +67,15 @@ func getResource(ctx context.Context, client httpClient, endpoint string, values
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
-func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d debug) error {
+func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d debug) (err error) {
 	req = req.WithContext(ctx)
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			log.Fatal(err)
+		if er := resp.Body.Close(); er != nil {
+			err = er
 		}
 	}()
 
@@ -116,4 +116,17 @@ func logResponse(resp *http.Response, d debug) error {
 	}
 
 	return nil
+}
+
+func projIDOrKey(projIDOrKey interface{}) (string, error) {
+	var idOrKey string
+	switch t := projIDOrKey.(type) {
+	case int:
+		idOrKey = strconv.Itoa(t)
+	case string:
+		idOrKey = t
+	default:
+		return idOrKey, fmt.Errorf("projectIDOrKey is int or string. you specify %t", t)
+	}
+	return idOrKey, nil
 }
