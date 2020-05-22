@@ -60,9 +60,9 @@ type Star struct {
 	Created   JSONTime    `json:"created"`
 }
 
-// Count : count
-type Count struct {
-	Count int `json:"count,omitempty"`
+// Page : wiki page information
+type Page struct {
+	Count int `json:"count"`
 }
 
 // GetWikis returns the list of wikis
@@ -71,19 +71,23 @@ func (api *Client) GetWikis(projectIDOrKey interface{}, keyword string) ([]Wiki,
 }
 
 // GetWikisContext returns the list of wikis
-func (api *Client) GetWikisContext(ctx context.Context, projectIDOrKey interface{}, keyword string) (wikis []Wiki, err error) {
+func (api *Client) GetWikisContext(ctx context.Context, projectIDOrKey interface{}, keyword string) ([]Wiki, error) {
 	projIDOrKey, err := projIDOrKey(projectIDOrKey)
 	if err != nil {
-		return nil, err
+		return []Wiki{}, err
 	}
 
 	values := url.Values{}
 	values.Add("projectIdOrKey", projIDOrKey)
-	values.Add("keyword", keyword)
-	if err = api.getMethod(ctx, "/api/v2/wikis", values, &wikis); err != nil {
+	if keyword != "" {
+		values.Add("keyword", keyword)
+	}
+
+	r := []Wiki{}
+	if err = api.getMethod(ctx, "/api/v2/wikis", values, &r); err != nil {
 		return nil, err
 	}
-	return wikis, nil
+	return r, nil
 }
 
 // GetWikiCount returns the number of wikis
@@ -101,11 +105,12 @@ func (api *Client) GetWikiCountContext(ctx context.Context, projectIDOrKey inter
 	values := url.Values{}
 	values.Add("projectIdOrKey", projIDOrKey)
 
-	c := new(Count)
-	if err := api.getMethod(ctx, "/api/v2/wikis/count", values, &c); err != nil {
+	r := Page{}
+	if err := api.getMethod(ctx, "/api/v2/wikis/count", values, &r); err != nil {
 		return 0, err
 	}
-	return c.Count, nil
+
+	return r.Count, nil
 }
 
 // GetWikiTags returns the tags of wikis
@@ -114,33 +119,103 @@ func (api *Client) GetWikiTags(projectIDOrKey interface{}) ([]Tag, error) {
 }
 
 // GetWikiTagsContext returns the tags of wikis
-func (api *Client) GetWikiTagsContext(ctx context.Context, projectIDOrKey interface{}) (tags []Tag, err error) {
+func (api *Client) GetWikiTagsContext(ctx context.Context, projectIDOrKey interface{}) ([]Tag, error) {
 	projIDOrKey, err := projIDOrKey(projectIDOrKey)
 	if err != nil {
-		return tags, err
+		return []Tag{}, err
 	}
 
 	values := url.Values{}
 	values.Add("projectIdOrKey", projIDOrKey)
-	if err := api.getMethod(ctx, "/api/v2/wikis/tags", values, &tags); err != nil {
+
+	r := []Tag{}
+	if err := api.getMethod(ctx, "/api/v2/wikis/tags", values, &r); err != nil {
 		return nil, err
 	}
-	return tags, nil
+	return r, nil
 }
 
-// GetWikiByID returns wiki by id
-func (api *Client) GetWikiByID(id int) (Wiki, error) {
-	return api.GetWikiByIDContext(context.Background(), id)
+// GetWiki returns wiki by id
+func (api *Client) GetWiki(wikiID int) (Wiki, error) {
+	return api.GetWikiContext(context.Background(), wikiID)
 }
 
-// GetWikiByIDContext returns wiki by id
-func (api *Client) GetWikiByIDContext(ctx context.Context, id int) (wiki Wiki, err error) {
-	if err = api.getMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(id), url.Values{}, &wiki); err != nil {
-		return wiki, err
+// GetWikiContext returns wiki by id
+func (api *Client) GetWikiContext(ctx context.Context, wikiID int) (Wiki, error) {
+	r := Wiki{}
+	if err := api.getMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID), url.Values{}, &r); err != nil {
+		return Wiki{}, err
 	}
-	return wiki, nil
+	return r, nil
 }
 
-// func (api *Client) AddWiki(projectID int, name, content string, mailNotify bool) {
+// CreateWiki creates a wiki
+func (api *Client) CreateWiki(input *CreateWikiInput) (Wiki, error) {
+	return api.CreateWikiContext(context.Background(), input)
+}
 
-// }
+// CreateWikiContext creates a wiki with Context
+func (api *Client) CreateWikiContext(ctx context.Context, input *CreateWikiInput) (Wiki, error) {
+	values := url.Values{
+		"projectId":  {strconv.Itoa(input.ProjectID)},
+		"name":       {input.Name},
+		"content":    {input.Content},
+		"mailNotify": {strconv.FormatBool(input.MailNotify)},
+	}
+
+	r := Wiki{}
+	if err := api.postMethod(ctx, "/api/v2/wikis", values, &r); err != nil {
+		return Wiki{}, err
+	}
+	return r, nil
+}
+
+// UpdateWiki updates a wiki
+func (api *Client) UpdateWiki(input *UpdateWikiInput) (Wiki, error) {
+	return api.UpdateWikiContext(context.Background(), input)
+}
+
+// UpdateWikiContext updates a wiki with Context
+func (api *Client) UpdateWikiContext(ctx context.Context, input *UpdateWikiInput) (Wiki, error) {
+	values := url.Values{
+		"name":       {input.Name},
+		"content":    {input.Content},
+		"mailNotify": {strconv.FormatBool(input.MailNotify)},
+	}
+
+	r := Wiki{}
+	if err := api.patchMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(input.WikiID), values, &r); err != nil {
+		return Wiki{}, err
+	}
+	return r, nil
+}
+
+// DeleteWiki deletes a wiki
+func (api *Client) DeleteWiki(wikiID int) (Wiki, error) {
+	return api.DeleteWikiContext(context.Background(), wikiID)
+}
+
+// DeleteWikiContext deletes a wiki with Context
+func (api *Client) DeleteWikiContext(ctx context.Context, wikiID int) (Wiki, error) {
+	r := Wiki{}
+	if err := api.deleteMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID), url.Values{}, &r); err != nil {
+		return Wiki{}, err
+	}
+	return r, nil
+}
+
+// CreateWikiInput contains all the parameters necessary (including the optional ones) for a CreateWiki() request.
+type CreateWikiInput struct {
+	ProjectID  int
+	Name       string
+	Content    string
+	MailNotify bool
+}
+
+// UpdateWikiInput contains all the parameters necessary (including the optional ones) for a UpdateWiki() request.
+type UpdateWikiInput struct {
+	WikiID     int
+	Name       string
+	Content    string
+	MailNotify bool
+}
