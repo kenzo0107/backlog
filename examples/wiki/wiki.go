@@ -12,7 +12,7 @@ func main() {
 	baseURL := os.Getenv("BASE_URL")
 	api := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
 
-	wiki, err := api.GetWikiByID(333028)
+	wiki, err := api.GetWiki(333028)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

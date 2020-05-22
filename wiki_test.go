@@ -3,7 +3,6 @@ package backlog
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"reflect"
 	"testing"
@@ -22,8 +21,8 @@ func getTestWikis() []Wiki {
 	}
 }
 
-func getTestWikiCount() Count {
-	return Count{
+func getTestWikiCount() Page {
+	return Page{
 		Count: len(getTestWikis()),
 	}
 }
@@ -96,7 +95,7 @@ func getWikiTags(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getWikiByID(rw http.ResponseWriter, r *http.Request) {
+func getWiki(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestWiki())
 	if _, err := rw.Write(response); err != nil {
@@ -229,20 +228,17 @@ func TestGetWikiTagsFailed(t *testing.T) {
 }
 
 func TestGetWikiByID(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis/1", getWikiByID)
+	http.HandleFunc("/api/v2/wikis/1", getWiki)
 	expected := getTestWiki()
 
 	once.Do(startServer)
 	api := New("testing-token", "http://"+serverAddr+"/")
 
-	wiki, err := api.GetWikiByID(1)
+	wiki, err := api.GetWiki(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-
-	log.Printf("expected: %#v\n", expected)
-	log.Printf("wiki: %#v\n", wiki)
 
 	if !reflect.DeepEqual(expected, wiki) {
 		t.Fatal(ErrIncorrectResponse)
@@ -257,7 +253,124 @@ func TestGetWikiByIDFailed(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetWikiByID(1)
+	_, err := api.GetWiki(1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateWiki(t *testing.T) {
+	http.HandleFunc("/api/v2/wikis", getWiki)
+	expected := getTestWiki()
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &CreateWikiInput{
+		ProjectID: 1,
+		Name:      "Home",
+		Content:   "test",
+	}
+	wiki, err := api.CreateWiki(input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, wiki) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestCreateWikiFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &CreateWikiInput{
+		ProjectID: 1,
+		Name:      "Home",
+		Content:   "test",
+	}
+	_, err := api.CreateWiki(input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateWiki(t *testing.T) {
+	http.HandleFunc("/api/v2/wikis/1", getWiki)
+	expected := getTestWiki()
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &UpdateWikiInput{
+		WikiID:  1,
+		Name:    "Home",
+		Content: "test",
+	}
+	wiki, err := api.UpdateWiki(input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, wiki) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestUpdateWikiFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &UpdateWikiInput{
+		WikiID:  1,
+		Name:    "Home",
+		Content: "test",
+	}
+	_, err := api.UpdateWiki(input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteWiki(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1", getWiki)
+	expected := getTestWiki()
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	wiki, err := api.DeleteWiki(1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, wiki) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestDeleteWikiFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	_, err := api.DeleteWiki(1)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}

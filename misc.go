@@ -48,28 +48,6 @@ func (t ErrorResponse) Errs() error {
 	return errors.New(strings.Join(s, ", "))
 }
 
-// StatusCodeError represents an http response error.
-// type httpStatusCode interface { HTTPStatusCode() int } to handle it.
-type statusCodeError struct {
-	Code   int
-	Status string
-}
-
-func (t statusCodeError) Error() string {
-	return fmt.Sprintf("backlog server error: %s", t.Status)
-}
-
-func (t statusCodeError) HTTPStatusCode() int {
-	return t.Code
-}
-
-func (t statusCodeError) Retryable() bool {
-	if t.Code >= 500 || t.Code == http.StatusTooManyRequests {
-		return true
-	}
-	return false
-}
-
 func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -78,6 +56,16 @@ func getResource(ctx context.Context, client httpClient, endpoint string, values
 
 	req.URL.RawQuery = values.Encode()
 
+	return doPost(ctx, client, req, newJSONParser(intf), d)
+}
+
+func postForm(ctx context.Context, client httpClient, method, endpoint string, values url.Values, intf interface{}, d debug) error {
+	reqBody := strings.NewReader(values.Encode())
+	req, err := http.NewRequest(method, endpoint, reqBody)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 

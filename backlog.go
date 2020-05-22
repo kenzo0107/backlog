@@ -86,8 +86,23 @@ func (api *Client) Debug() bool {
 	return api.debug
 }
 
-// get a backlog method.
+// get method
 func (api *Client) getMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
 	values.Add("apiKey", api.apiKey)
 	return getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+}
+
+// post method
+func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
+	return postForm(ctx, api.httpclient, "POST", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
+}
+
+// patch method
+func (api *Client) patchMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
+	return postForm(ctx, api.httpclient, "PATCH", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
+}
+
+// delete method
+func (api *Client) deleteMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
+	return postForm(ctx, api.httpclient, "DELETE", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
 }
