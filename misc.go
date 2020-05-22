@@ -34,6 +34,20 @@ func (t Error) Err() error {
 	return errors.New(t.Message)
 }
 
+// Errs : error
+func (t ErrorResponse) Errs() error {
+	s := []string{}
+	for _, err := range t.Errors {
+		s = append(s, err.Message)
+	}
+
+	if len(s) == 0 {
+		return nil
+	}
+
+	return errors.New(strings.Join(s, ", "))
+}
+
 // StatusCodeError represents an http response error.
 // type httpStatusCode interface { HTTPStatusCode() int } to handle it.
 type statusCodeError struct {
@@ -88,14 +102,20 @@ func doPost(ctx context.Context, client httpClient, req *http.Request, parser re
 }
 
 func checkStatusCode(resp *http.Response, d debug) error {
-	if resp.StatusCode != http.StatusOK {
-		if err := logResponse(resp, d); err != nil {
-			return err
-		}
-		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
+	// return no error if response returns status code 2xx
+	if resp.StatusCode/100 == 2 {
+		return nil
 	}
 
-	return nil
+	if err := logResponse(resp, d); err != nil {
+		return err
+	}
+
+	errorResponse := &ErrorResponse{}
+	if err := newJSONParser(errorResponse)(resp); err != nil {
+		return err
+	}
+	return errorResponse.Errs()
 }
 
 type responseParser func(*http.Response) error
