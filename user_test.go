@@ -65,6 +65,20 @@ func TestGetUserMySelf(t *testing.T) {
 	}
 }
 
+func TestGetUserMySelfFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	if _, err := api.GetUserMySelf(); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestGetUserByID(t *testing.T) {
 	http.HandleFunc("/api/v2/users/1", getUser)
 	expectedUser := getTestUser()
@@ -82,6 +96,20 @@ func TestGetUserByID(t *testing.T) {
 	}
 }
 
+func TestGetUserByIDFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	if _, err := api.GetUserByID(1); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestGetUsers(t *testing.T) {
 	http.HandleFunc("/api/v2/users", getUsers)
 	expectedUsers := getTestUsers()
@@ -96,5 +124,19 @@ func TestGetUsers(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedUsers, users) {
 		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUsersFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	if _, err := api.GetUsers(); err == nil {
+		t.Fatal("expected an error but got none")
 	}
 }

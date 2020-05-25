@@ -240,7 +240,7 @@ func TestGetWikiByID(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(expected, wiki) {
+	if !reflect.DeepEqual(expected, *wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
@@ -277,7 +277,7 @@ func TestCreateWiki(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(expected, wiki) {
+	if !reflect.DeepEqual(expected, *wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
@@ -319,7 +319,7 @@ func TestUpdateWiki(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(expected, wiki) {
+	if !reflect.DeepEqual(expected, *wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
@@ -357,7 +357,7 @@ func TestDeleteWiki(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(expected, wiki) {
+	if !reflect.DeepEqual(expected, *wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
