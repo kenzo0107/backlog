@@ -71,6 +71,29 @@ func getTestWikiTags() []Tag {
 	}
 }
 
+func getTestAddAttachmentToWiki() []Attachment {
+	return []Attachment{
+		getTestAddAttachmentToWikiWithID(1),
+	}
+}
+
+func getTestAddAttachmentToWikiWithID(id int) Attachment {
+	return Attachment{
+		ID:   id,
+		Name: "Duke.png",
+		Size: 196186,
+		CreatedUser: User{
+			ID:          1,
+			UserID:      "admin",
+			Name:        "admin",
+			RoleType:    1,
+			Lang:        "",
+			MailAddress: "eguchi@nulab.example",
+		},
+		Created: "2014-07-11T06:26:05Z",
+	}
+}
+
 func getWikis(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestWikis())
@@ -98,6 +121,14 @@ func getWikiTags(rw http.ResponseWriter, r *http.Request) {
 func getWiki(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestWiki())
+	if _, err := rw.Write(response); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func getAddAttachmentToWiki(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(getTestAddAttachmentToWiki())
 	if _, err := rw.Write(response); err != nil {
 		fmt.Println(err)
 	}
@@ -372,6 +403,46 @@ func TestDeleteWikiFailed(t *testing.T) {
 
 	_, err := api.DeleteWiki(1)
 	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestAddAttachmentToWiki(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1/attachments", getAddAttachmentToWiki)
+	expected := getTestAddAttachmentToWiki()
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &AddAttachmentToWikiInput{
+		WikiID:        1,
+		AttachmentIDs: []int{1},
+	}
+	attachment, err := api.AddAttachmentToWiki(input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, attachment) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestAddAttachmentToWikiFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	input := &AddAttachmentToWikiInput{
+		WikiID:        1,
+		AttachmentIDs: []int{1},
+	}
+	if _, err := api.AddAttachmentToWiki(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
