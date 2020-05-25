@@ -204,6 +204,25 @@ func (api *Client) DeleteWikiContext(ctx context.Context, wikiID int) (*Wiki, er
 	return &wiki, nil
 }
 
+// AddAttachmentToWiki adds attachments to a wiki
+func (api *Client) AddAttachmentToWiki(input *AddAttachmentToWikiInput) ([]Attachment, error) {
+	return api.AddAttachmentToWikiContext(context.Background(), input)
+}
+
+// AddAttachmentToWikiContext adds attachments to a wiki with context
+func (api *Client) AddAttachmentToWikiContext(ctx context.Context, input *AddAttachmentToWikiInput) ([]Attachment, error) {
+	values := url.Values{}
+	for _, attachmentID := range input.AttachmentIDs {
+		values.Add("attachmentId[]", strconv.Itoa(attachmentID))
+	}
+
+	attachements := []Attachment{}
+	if err := api.postMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(input.WikiID)+"/attachments", values, &attachements); err != nil {
+		return nil, err
+	}
+	return attachements, nil
+}
+
 // CreateWikiInput contains all the parameters necessary (including the optional ones) for a CreateWiki() request.
 type CreateWikiInput struct {
 	ProjectID  int    `required:"true"`
@@ -218,4 +237,10 @@ type UpdateWikiInput struct {
 	Name       string `required:"true"`
 	Content    string `required:"true"`
 	MailNotify bool   `required:"false"`
+}
+
+// AddAttachmentToWikiInput contains all the parameters necessary (including the optional ones) for a AddAttachmentToWiki() request.
+type AddAttachmentToWikiInput struct {
+	WikiID        int   `required:"true"`
+	AttachmentIDs []int `required:"true"`
 }
