@@ -204,6 +204,20 @@ func (api *Client) DeleteWikiContext(ctx context.Context, wikiID int) (*Wiki, er
 	return &wiki, nil
 }
 
+// GetWikiAttachments returns attachements of a wiki
+func (api *Client) GetWikiAttachments(wikiID int) ([]Attachment, error) {
+	return api.GetWikiAttachmentsContext(context.Background(), wikiID)
+}
+
+// GetWikiAttachmentsContext returns attachements of a wiki with context
+func (api *Client) GetWikiAttachmentsContext(ctx context.Context, wikiID int) ([]Attachment, error) {
+	attachments := []Attachment{}
+	if err := api.getMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID)+"/attachments", url.Values{}, &attachments); err != nil {
+		return nil, err
+	}
+	return attachments, nil
+}
+
 // AddAttachmentToWiki adds attachments to a wiki
 func (api *Client) AddAttachmentToWiki(input *AddAttachmentToWikiInput) ([]Attachment, error) {
 	return api.AddAttachmentToWikiContext(context.Background(), input)

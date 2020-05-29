@@ -71,6 +71,21 @@ func getTestWikiTags() []Tag {
 	}
 }
 
+func getTestGetWikiAttachments() []Attachment {
+	return []Attachment{
+		getTestAttachmentWithID(1),
+		getTestAttachmentWithID(2),
+	}
+}
+
+func getTestAttachmentWithID(id int) Attachment {
+	return Attachment{
+		ID:   id,
+		Name: "Duke.png",
+		Size: 196186,
+	}
+}
+
 func getTestAddAttachmentToWiki() []Attachment {
 	return []Attachment{
 		getTestAddAttachmentToWikiWithID(1),
@@ -121,6 +136,14 @@ func getWikiTags(rw http.ResponseWriter, r *http.Request) {
 func getWiki(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(getTestWiki())
+	if _, err := rw.Write(response); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func getGetAttachmentToWiki(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(getTestGetWikiAttachments())
 	if _, err := rw.Write(response); err != nil {
 		fmt.Println(err)
 	}
@@ -403,6 +426,38 @@ func TestDeleteWikiFailed(t *testing.T) {
 
 	_, err := api.DeleteWiki(1)
 	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetAttachmentToWiki(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1/attachments", getGetAttachmentToWiki)
+	expected := getTestGetWikiAttachments()
+
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	attachments, err := api.GetWikiAttachments(1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, attachments) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetWikiAttachmentsFailed(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/api/v2/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	once.Do(startServer)
+	api := New("testing-token", "http://"+serverAddr+"/")
+
+	if _, err := api.GetWikiAttachments(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
