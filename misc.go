@@ -1,6 +1,7 @@
 package backlog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -29,20 +30,11 @@ type Error struct {
 	MoreInfo string `json:"moreInfo"`
 }
 
-// Err : error
-func (t Error) Err() error {
-	if strings.TrimSpace(t.Message) == "" {
-		return nil
-	}
-
-	return errors.New(t.Message)
-}
-
 // Errs : error
 func (t ErrorResponse) Errs() error {
 	s := []string{}
 	for _, err := range t.Errors {
-		s = append(s, err.Message)
+		s = append(s, fmt.Sprintf("code:%d message:%s moreInfo:%s", err.Code, err.Message, err.MoreInfo))
 	}
 
 	if len(s) == 0 {
@@ -220,4 +212,41 @@ func projIDOrKey(projIDOrKey interface{}) (string, error) {
 		return idOrKey, fmt.Errorf("projectIDOrKey is int or string. you specify %t", t)
 	}
 	return idOrKey, nil
+}
+
+func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL string, writer io.Writer, d debug) (err error) {
+	if downloadURL == "" {
+		return fmt.Errorf("received empty download URL")
+	}
+
+	req, err := http.NewRequest("GET", downloadURL, &bytes.Buffer{})
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{}
+	values.Add("apiKey", apiKey)
+	req.URL.RawQuery = values.Encode()
+
+	req = req.WithContext(ctx)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if er := resp.Body.Close(); er != nil {
+			err = er
+		}
+	}()
+
+	err = checkStatusCode(resp, d)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(writer, resp.Body)
+
+	return err
 }
