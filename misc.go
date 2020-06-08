@@ -214,7 +214,7 @@ func projIDOrKey(projIDOrKey interface{}) (string, error) {
 	return idOrKey, nil
 }
 
-func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL string, writer io.Writer, d debug) error {
+func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL string, writer io.Writer, d debug) (err error) {
 	if downloadURL == "" {
 		return fmt.Errorf("received empty download URL")
 	}
@@ -228,14 +228,18 @@ func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL st
 	values.Add("apiKey", apiKey)
 	req.URL.RawQuery = values.Encode()
 
-	req.WithContext(ctx)
+	req = req.WithContext(ctx)
 
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if er := resp.Body.Close(); er != nil {
+			err = er
+		}
+	}()
 
 	err = checkStatusCode(resp, d)
 	if err != nil {
