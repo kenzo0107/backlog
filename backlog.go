@@ -97,6 +97,11 @@ func (api *Client) postMethod(ctx context.Context, path string, values url.Value
 	return postForm(ctx, api.httpclient, "POST", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
 }
 
+// put method
+func (api *Client) putMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
+	return postForm(ctx, api.httpclient, "PUT", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
+}
+
 // patch method
 func (api *Client) patchMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
 	return postForm(ctx, api.httpclient, "PATCH", api.endpoint+path+"?apiKey="+api.apiKey, values, intf, api)
