@@ -18,10 +18,11 @@ type Project struct {
 	ProjectLeaderCanEditProjectLeader bool   `json:"projectLeaderCanEditProjectLeader"`
 	TextFormattingRule                string `json:"textFormattingRule"`
 	Archived                          bool   `json:"archived"`
+	DisplayOrder                      int    `json:"displayOrder"`
 }
 
-// ProjectStatus : the status of project
-type ProjectStatus struct {
+// Status : the status of project
+type Status struct {
 	ID           int    `json:"id"`
 	ProjectID    int    `json:"projectId"`
 	Name         string `json:"name"`
@@ -67,18 +68,18 @@ func (api *Client) GetProjectContext(ctx context.Context, projectIDOrKey interfa
 }
 
 // GetProjectStatuses returns the statuses of a project
-func (api *Client) GetProjectStatuses(projectIDOrKey interface{}) ([]ProjectStatus, error) {
+func (api *Client) GetProjectStatuses(projectIDOrKey interface{}) ([]Status, error) {
 	return api.GetProjectStatusesContext(context.Background(), projectIDOrKey)
 }
 
 // GetProjectStatusesContext returns the statuses of a project with context
-func (api *Client) GetProjectStatusesContext(ctx context.Context, projectIDOrKey interface{}) ([]ProjectStatus, error) {
+func (api *Client) GetProjectStatusesContext(ctx context.Context, projectIDOrKey interface{}) ([]Status, error) {
 	projIDOrKey, err := projIDOrKey(projectIDOrKey)
 	if err != nil {
 		return nil, err
 	}
 
-	projectStatus := []ProjectStatus{}
+	projectStatus := []Status{}
 	if err := api.getMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/statuses", url.Values{}, &projectStatus); err != nil {
 		return nil, err
 	}
