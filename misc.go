@@ -44,6 +44,21 @@ func (t ErrorResponse) Errs() error {
 	return errors.New(strings.Join(s, ", "))
 }
 
+// StatusCodeError represents an http response error.
+// type httpStatusCode interface { HTTPStatusCode() int } to handle it.
+type statusCodeError struct {
+	Code   int
+	Status string
+}
+
+func (t statusCodeError) Error() string {
+	return fmt.Sprintf("backlog server error: %s", t.Status)
+}
+
+func (t statusCodeError) HTTPStatusCode() int {
+	return t.Code
+}
+
 func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -175,10 +190,11 @@ func checkStatusCode(resp *http.Response, d debug) error {
 	}
 
 	errorResponse := &ErrorResponse{}
-	if err := newJSONParser(errorResponse)(resp); err != nil {
-		return err
+	if err := newJSONParser(errorResponse)(resp); err == nil {
+		return errorResponse.Errs()
 	}
-	return errorResponse.Errs()
+
+	return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 }
 
 type responseParser func(*http.Response) error
