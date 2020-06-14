@@ -34,30 +34,30 @@ func getTestProjectWithID(id int) Project {
 	}
 }
 
-func getTestProjectStatuses() []ProjectStatus {
-	return []ProjectStatus{
-		ProjectStatus{
+func getTestProjectStatuses() []Status {
+	return []Status{
+		Status{
 			ID:           1,
 			ProjectID:    1,
 			Name:         "未対応",
 			Color:        "#ed8077",
 			DisplayOrder: 1000,
 		},
-		ProjectStatus{
+		Status{
 			ID:           2,
 			ProjectID:    1,
 			Name:         "処理中",
 			Color:        "#4488c5",
 			DisplayOrder: 2000,
 		},
-		ProjectStatus{
+		Status{
 			ID:           3,
 			ProjectID:    1,
 			Name:         "処理済み",
 			Color:        "#5eb5a6",
 			DisplayOrder: 3000,
 		},
-		ProjectStatus{
+		Status{
 			ID:           4,
 			ProjectID:    1,
 			Name:         "完了",
