@@ -2,7 +2,6 @@ package backlog
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,21 +9,95 @@ import (
 	"testing"
 )
 
-func get4xxError() http.Response {
-	return http.Response{
-		Status:     "400 Bad Request",
-		StatusCode: 400,
-		Proto:      "HTTP/2.0",
-	}
-}
+const testJSONUser string = `{
+	"id": 1,
+	"userId": "admin",
+	"name": "admin",
+	"roleType": 1,
+	"lang": "ja",
+	"mailAddress": "eguchi@nulab.example"
+}`
 
-func get4xxErrorResponse(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(http.StatusBadRequest)
-	response, _ := json.Marshal(get4xxError())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
+const testJSONActivity string = `{
+	"id": 1,
+	"project": {
+		"id": 92,
+		"projectKey": "SUB",
+		"name": "サブタスク",
+		"chartEnabled": true,
+		"subtaskingEnabled": true,
+		"projectLeaderCanEditProjectLeader": false,
+		"textFormattingRule": "",
+		"archived": false,
+		"displayOrder": 0
+	},
+	"type": 2,
+	"content": {
+		"id": 4809,
+		"key_id": 121,
+		"summary": "コメント",
+		"description": "",
+		"comment": {
+			"id": 7237,
+			"content": ""
+		},
+		"changes": [
+			{
+				"field": "milestone",
+				"new_value": " R2014-07-23",
+				"old_value": "",
+				"type": "standard"
+			},
+			{
+				"field": "status",
+				"new_value": "4",
+				"old_value": "1",
+				"type": "standard"
+			}
+		]
+	},
+	"notifications": [
+		{
+			"id": 25,
+			"alreadyRead": false,
+			"reason": 2,
+			"user": {
+				"id": 5686,
+				"userId": "takada",
+				"name": "takada",
+				"roleType": 2,
+				"lang": "ja",
+				"mailAddress": "takada@nulab.example"
+			},
+			"resourceAlreadyRead": false
+		}
+	],
+	"createdUser": {
+		"id": 1,
+		"userId": "admin",
+		"name": "admin",
+		"roleType": 1,
+		"lang": "ja",
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"created": "2006-01-02T15:04:05Z"
+}`
+
+const testJSONStar string = `{
+	"id": 1,
+	"comment": "",
+	"url": "https://xx.backlog.jp/view/BLG-1",
+	"title": "[BLG-1] first issue | 課題の表示 - Backlog",
+	"presenter":{
+		"id":1,
+		"userId": "admin",
+		"name":"admin",
+		"roleType":1,
+		"lang":"ja",
+		"mailAddress":"eguchi@nulab.example"
+	},
+	"created": "2006-01-02T15:04:05Z"
+}`
 
 func TestOrder_String(t *testing.T) {
 	tests := []struct {
@@ -109,573 +182,485 @@ func TestRoleType_Int(t *testing.T) {
 	}
 }
 
-func getTestUser() User {
-	return getTestUserWithID(1)
-}
-
-func getTestUsers() []User {
-	return []User{
-		getTestUserWithID(1),
-		getTestUserWithID(2),
-		getTestUserWithID(3),
-		getTestUserWithID(4),
+func getTestUser() *User {
+	return &User{
+		ID:          Int(1),
+		UserID:      String("admin"),
+		Name:        String("admin"),
+		RoleType:    RoleType(1),
+		Lang:        String("ja"),
+		MailAddress: String("eguchi@nulab.example"),
 	}
 }
 
-func getTestUserWithID(id int) User {
-	return User{
-		ID:          id,
-		UserID:      "admin",
-		Name:        "admin",
-		RoleType:    1,
-		Lang:        "ja",
-		MailAddress: "eguchi@nulab.example",
-	}
-}
-
-func getTestUserActivities() []UserActivity {
-	return []UserActivity{
-		getTestUserActivityWithID(1),
-		getTestUserActivityWithID(2),
-		getTestUserActivityWithID(3),
-	}
-}
-
-func getTestUserActivityWithID(id int) UserActivity {
-	return UserActivity{
-		ID: id,
-		Project: Project{
-			ID:                                92,
-			ProjectKey:                        "SUB",
-			Name:                              "サブタスク",
-			ChartEnabled:                      true,
-			SubtaskingEnabled:                 true,
-			ProjectLeaderCanEditProjectLeader: false,
-			TextFormattingRule:                "",
-			Archived:                          false,
-			DisplayOrder:                      0,
+func getTestUserActivity() *UserActivity {
+	return &UserActivity{
+		ID: Int(1),
+		Project: &Project{
+			ID:                                Int(92),
+			ProjectKey:                        String("SUB"),
+			Name:                              String("サブタスク"),
+			ChartEnabled:                      Bool(true),
+			SubtaskingEnabled:                 Bool(true),
+			ProjectLeaderCanEditProjectLeader: Bool(false),
+			TextFormattingRule:                String(""),
+			Archived:                          Bool(false),
+			DisplayOrder:                      Int(0),
 		},
-		Type: 2,
-		Content: Content{
-			ID:          4809,
-			KeyID:       121,
-			Summary:     "コメント",
-			Description: "",
-			Comment: Comment{
-				ID:      7237,
-				Content: "",
+		Type: Int(2),
+		Content: &Content{
+			ID:          Int(4809),
+			KeyID:       Int(121),
+			Summary:     String("コメント"),
+			Description: String(""),
+			Comment: &Comment{
+				ID:      Int(7237),
+				Content: String(""),
 			},
-			Changes: []Change{
+			Changes: []*Change{
 				{
-					Field:    "milestone",
-					NewValue: " R2014-07-23",
-					OldValue: "",
-					Type:     "standard",
+					Field:    String("milestone"),
+					NewValue: String(" R2014-07-23"),
+					OldValue: String(""),
+					Type:     String("standard"),
 				},
 				{
-					Field:    "status",
-					NewValue: "4",
-					OldValue: "1",
-					Type:     "standard",
+					Field:    String("status"),
+					NewValue: String("4"),
+					OldValue: String("1"),
+					Type:     String("standard"),
 				},
 			},
 		},
-		Notifications: []Notification{
+		Notifications: []*Notification{
 			{
-				ID:          25,
-				AlreadyRead: false,
-				Reason:      2,
-				User: User{
-					ID:          5686,
-					UserID:      "takada",
-					Name:        "takada",
+				ID:          Int(25),
+				AlreadyRead: Bool(false),
+				Reason:      Int(2),
+				User: &User{
+					ID:          Int(5686),
+					UserID:      String("takada"),
+					Name:        String("takada"),
 					RoleType:    RoleType(2),
-					Lang:        "ja",
-					MailAddress: "takada@nulab.example",
+					Lang:        String("ja"),
+					MailAddress: String("takada@nulab.example"),
 				},
-				ResourceAlreadyRead: false,
+				ResourceAlreadyRead: Bool(false),
 			},
 		},
-		CreatedUser: User{
-			ID:          1,
-			UserID:      "admin",
-			Name:        "admin",
+		CreatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
 			RoleType:    RoleType(1),
-			Lang:        "ja",
-			MailAddress: "eguchi@nulab.example",
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		Created: JSONTime("2013-12-27T07:50:44Z"),
+		Created: &Timestamp{referenceTime},
 	}
 }
 
-func getTestUserStars() []Star {
-	return []Star{
-		getTestUserStarsWitID(1),
-		getTestUserStarsWitID(2),
-		getTestUserStarsWitID(3),
-	}
-}
-
-func getTestUserStarsWitID(id int) Star {
-	return Star{
-		ID:      id,
-		Comment: "",
-		URL:     "https://xx.backlog.jp/view/BLG-1",
-		Title:   "[BLG-1] first issue | 課題の表示 - Backlog",
-		Presenter: User{
-			ID:          1,
-			UserID:      "admin",
-			Name:        "admin",
-			RoleType:    1,
-			Lang:        "ja",
-			MailAddress: "eguchi@nulab.example",
+func getTestUserStarsWitID(id int) *Star {
+	return &Star{
+		ID:      Int(id),
+		Comment: String(""),
+		URL:     String("https://xx.backlog.jp/view/BLG-1"),
+		Title:   String("[BLG-1] first issue | 課題の表示 - Backlog"),
+		Presenter: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
+			RoleType:    RoleType(1),
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		Created: JSONTime("2014-01-23T10:55:19Z"),
-	}
-}
-
-func getUser(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestUser())
-	if _, err := rw.Write(response); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getUsers(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestUsers())
-	if _, err := rw.Write(response); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getUserActivities(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestUserActivities())
-	if _, err := rw.Write(response); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getUserStars(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestUserStars())
-	if _, err := rw.Write(response); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getUserStarCount(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	type c struct {
-		Count int
-	}
-	t := c{Count: 1}
-	response, _ := json.Marshal(t)
-	if _, err := rw.Write(response); err != nil {
-		log.Fatal(err)
+		Created: &Timestamp{referenceTime},
 	}
 }
 
 func TestGetUserMySelf(t *testing.T) {
-	http.HandleFunc("/api/v2/users/myself", getUser)
-	expectedUser := getTestUser()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/myself", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	user, err := api.GetUserMySelf()
+	user, err := client.GetUserMySelf()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expectedUser, *user) {
+
+	want := getTestUser()
+	if !reflect.DeepEqual(want, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUserMySelfFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetUserMySelf(); err == nil {
+	if _, err := client.GetUserMySelf(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetUserByID(t *testing.T) {
-	http.HandleFunc("/api/v2/users/1", getUser)
-	expectedUser := getTestUser()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	user, err := api.GetUserByID(1)
+	user, err := client.GetUserByID(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expectedUser, *user) {
+
+	want := getTestUser()
+	if !reflect.DeepEqual(want, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUserByIDFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetUserByID(1); err == nil {
+	if _, err := client.GetUserByID(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetUsers(t *testing.T) {
-	http.HandleFunc("/api/v2/users", getUsers)
-	expectedUsers := getTestUsers()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONUser)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	users, err := api.GetUsers()
+	users, err := client.GetUsers()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expectedUsers, users) {
+	want := []*User{getTestUser()}
+	if !reflect.DeepEqual(want, users) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUsersFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetUsers(); err == nil {
+	if _, err := client.GetUsers(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestCreateUser(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users", getUser)
-	expected := getTestUser()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &CreateUserInput{
-		UserID:      "admin",
-		Password:    "password",
-		Name:        "admin",
-		MailAddress: "eguchi@nulab.example",
-		RoleType:    RoleTypeAdministrator,
+		UserID:      String("admin"),
+		Password:    String("password"),
+		Name:        String("admin"),
+		MailAddress: String("eguchi@nulab.example"),
+		RoleType:    RoleType(RoleTypeAdministrator),
 	}
-	user, err := api.CreateUser(input)
+	user, err := client.CreateUser(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *user) {
+	want := getTestUser()
+	if !reflect.DeepEqual(want, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestCreateUserFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
 	input := &CreateUserInput{
-		UserID:      "admin",
-		Password:    "password",
-		Name:        "admin",
-		MailAddress: "eguchi@nulab.example",
+		UserID:      String("admin"),
+		Password:    String("password"),
+		Name:        String("admin"),
+		MailAddress: String("eguchi@nulab.example"),
 		RoleType:    RoleTypeAdministrator,
 	}
-	if _, err := api.CreateUser(input); err == nil {
+	if _, err := client.CreateUser(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestUpdateUser(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1", getUser)
-	expected := getTestUser()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &UpdateUserInput{
-		ID:          1,
-		Password:    "password",
-		Name:        "admin",
-		MailAddress: "eguchi@nulab.example",
+		ID:          Int(1),
+		Password:    String("password"),
+		Name:        String("admin"),
+		MailAddress: String("eguchi@nulab.example"),
 		RoleType:    RoleTypeAdministrator,
 	}
-	user, err := api.UpdateUser(input)
+	user, err := client.UpdateUser(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *user) {
+	want := getTestUser()
+	if !reflect.DeepEqual(want, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestUpdateUserFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
 	input := &UpdateUserInput{
-		ID:          1,
-		Password:    "password",
-		Name:        "admin",
-		MailAddress: "eguchi@nulab.example",
+		ID:          Int(1),
+		Password:    String("password"),
+		Name:        String("admin"),
+		MailAddress: String("eguchi@nulab.example"),
 		RoleType:    RoleTypeAdministrator,
 	}
-	if _, err := api.UpdateUser(input); err == nil {
+	if _, err := client.UpdateUser(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestDeleteUser(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1", getUser)
-	expected := getTestUser()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	user, err := api.DeleteUser(1)
+	user, err := client.DeleteUser(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *user) {
+	want := getTestUser()
+	if !reflect.DeepEqual(want, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestDeleteUserFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.DeleteUser(1); err == nil {
+	if _, err := client.DeleteUser(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetUserIcon(t *testing.T) {
-	api := &Client{
-		endpoint:   "http://" + serverAddr + "/",
-		apiKey:     "testing-token",
-		httpclient: &mockHTTPClient{},
-	}
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	err := api.GetUserIcon(1, &bytes.Buffer{})
+	client.httpclient = &mockHTTPClient{}
+
+	err := client.GetUserIcon(1, &bytes.Buffer{})
 	if err != nil {
 		log.Fatalf("Unexpected error: %s in test", err)
 	}
 }
 
 func TestGetUserActivities(t *testing.T) {
-	http.HandleFunc("/api/v2/users/1/activities", getUserActivities)
-	expected := getTestUserActivities()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONActivity)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &GetUserActivityInput{
-		ID:              1,
+		ID:              Int(1),
 		ActivityTypeIDs: []int{1, 2, 3},
-		MinID:           1,
-		MaxID:           10,
-		Count:           20,
+		MinID:           Int(1),
+		MaxID:           Int(10),
+		Count:           Int(20),
 		Order:           OrderAsc,
 	}
-	activities, err := api.GetUserActivities(input)
+	activities, err := client.GetUserActivities(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expected, activities) {
+
+	want := []*UserActivity{getTestUserActivity()}
+
+	if !reflect.DeepEqual(want, activities) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUserActivitiesFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserActivityInput{}
-	if _, err := api.GetUserActivities(input); err == nil {
+	input := &GetUserActivityInput{
+		ID: Int(1),
+	}
+	if _, err := client.GetUserActivities(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetUserStars(t *testing.T) {
-	http.HandleFunc("/api/v2/users/1/stars", getUserStars)
-	expected := getTestUserStars()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONStar)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &GetUserStarsInput{
-		ID:    1,
-		MinID: 1,
-		MaxID: 10,
-		Count: 20,
+		ID:    Int(1),
+		MinID: Int(1),
+		MaxID: Int(10),
+		Count: Int(20),
 		Order: OrderAsc,
 	}
-	stars, err := api.GetUserStars(input)
+	stars, err := client.GetUserStars(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expected, stars) {
+
+	want := []*Star{getTestUserStarsWitID(1)}
+	if !reflect.DeepEqual(want, stars) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUserStarsFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserStarsInput{}
-	if _, err := api.GetUserStars(input); err == nil {
+	input := &GetUserStarsInput{
+		ID: Int(1),
+	}
+	if _, err := client.GetUserStars(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetUserStarCount(t *testing.T) {
-	http.HandleFunc("/api/v2/users/1/stars/count", getUserStarCount)
-	expected := 1
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"count":54 }`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &GetUserStarCountInput{
-		ID:    1,
-		Since: "2019-01-07",
-		Until: "2020-01-07",
+		ID:    Int(1),
+		Since: String("2019-01-07"),
+		Until: String("2020-01-07"),
 	}
-	count, err := api.GetUserStarCount(input)
+	count, err := client.GetUserStarCount(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expected, count) {
+	if !reflect.DeepEqual(54, count) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetUserStarCountFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserStarCountInput{}
-	if _, err := api.GetUserStarCount(input); err == nil {
-		t.Fatal("expected an error but got none")
+	input := &GetUserStarCountInput{
+		ID: Int(1),
 	}
-}
-
-func TestGetUserMySelfRecentrlyViewedIssues(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself/recentlyViewedIssues", getIssues)
-	expected := getTestIssues()
-
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserMySelfRecentrlyViewedIssuesInput{
-		Order:  OrderAsc,
-		Offset: 1,
-		Count:  100,
-	}
-	issues, err := api.GetUserMySelfRecentrlyViewedIssues(input)
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-	if !reflect.DeepEqual(expected, issues) {
-		t.Fatal(ErrIncorrectResponse)
-	}
-}
-
-func TestGetUserMySelfRecentrlyViewedIssuesFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-	})
-
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserMySelfRecentrlyViewedIssuesInput{}
-	_, err := api.GetUserMySelfRecentrlyViewedIssues(input)
-	if err == nil {
-		t.Fatal("expected an error but got none")
-	}
-}
-
-func TestGetUserMySelfRecentrlyViewedIssues4xxErrorFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/users/myself/recentlyViewedIssues", get4xxErrorResponse)
-
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	input := &GetUserMySelfRecentrlyViewedIssuesInput{}
-
-	if _, err := api.GetUserMySelfRecentrlyViewedIssues(input); err == nil {
+	if _, err := client.GetUserStarCount(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

@@ -1,384 +1,388 @@
 package backlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
 )
 
-func getTestProject() Project {
-	return getTestProjectWithID(1)
-}
+const testJSONProject string = `{
+	"id": 1,
+	"projectKey": "TEST",
+	"name": "test",
+	"chartEnabled": false,
+	"subtaskingEnabled": false,
+	"projectLeaderCanEditProjectLeader": false,
+	"textFormattingRule": "markdown",
+	"archived":false
+}`
 
-func getTestProjects() []Project {
-	return []Project{
-		getTestProjectWithID(1),
-		getTestProjectWithID(2),
-		getTestProjectWithID(3),
-		getTestProjectWithID(4),
+const testJSONProjectStatus string = `{
+	"id": 1,
+	"projectId": 1,
+	"name": "未対応",
+	"color": "#ed8077",
+	"displayOrder": 1000
+}`
+
+func getTestProject() *Project {
+	return &Project{
+		ID:                                Int(1),
+		ProjectKey:                        String("TEST"),
+		Name:                              String("test"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
+		Archived:                          Bool(false),
 	}
 }
 
-func getTestProjectWithID(id int) Project {
-	return Project{
-		ID:                                id,
-		ProjectKey:                        "TEST",
-		Name:                              "test",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "markdown",
-		Archived:                          false,
-	}
-}
-
-func getTestProjectStatuses() []Status {
-	return []Status{
-		Status{
-			ID:           1,
-			ProjectID:    1,
-			Name:         "未対応",
-			Color:        "#ed8077",
-			DisplayOrder: 1000,
-		},
-		Status{
-			ID:           2,
-			ProjectID:    1,
-			Name:         "処理中",
-			Color:        "#4488c5",
-			DisplayOrder: 2000,
-		},
-		Status{
-			ID:           3,
-			ProjectID:    1,
-			Name:         "処理済み",
-			Color:        "#5eb5a6",
-			DisplayOrder: 3000,
-		},
-		Status{
-			ID:           4,
-			ProjectID:    1,
-			Name:         "完了",
-			Color:        "#b0be3c",
-			DisplayOrder: 4000,
-		},
-	}
-}
-
-func getProjects(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestProjects())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getProject(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestProject())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getProjectStatuses(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestProjectStatuses())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
+func getTestProjectStatus() *Status {
+	return &Status{
+		ID:           Int(1),
+		ProjectID:    Int(1),
+		Name:         String("未対応"),
+		Color:        String("#ed8077"),
+		DisplayOrder: Int(1000),
 	}
 }
 
 func TestGetProjects(t *testing.T) {
-	http.HandleFunc("/api/v2/projects", getProjects)
-	expected := getTestProjects()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONProject)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	projects, err := api.GetProjects(false, false)
+	input := &GetProjectsInput{
+		All:      Bool(true),
+		Archived: Bool(false),
+	}
+	projects, err := client.GetProjects(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, projects) {
+	want := []*Project{getTestProject()}
+	if !reflect.DeepEqual(want, projects) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetProjectsFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetProjects(false, false)
+	input := &GetProjectsInput{}
+	_, err := client.GetProjects(input)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetProject(t *testing.T) {
-	http.HandleFunc("/api/v2/projects/1", getProject)
-	expected := getTestProject()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	project, err := api.GetProject(1)
+	project, err := client.GetProject(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *project) {
+	want := getTestProject()
+	if !reflect.DeepEqual(want, project) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetProjectFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetProject(1)
-	if err == nil {
+	if _, err := client.GetProject(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetProjectWithInvalidProjectIDOrKeyFailed(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.GetProject(true)
+	_, err := client.GetProject(true)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetProjectStatuses(t *testing.T) {
-	http.HandleFunc("/api/v2/projects/1/statuses", getProjectStatuses)
-	expected := getTestProjectStatuses()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONProjectStatus)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	projectStatuses, err := api.GetProjectStatuses(1)
+	projectStatuses, err := client.GetProjectStatuses(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, projectStatuses) {
+	want := []*Status{getTestProjectStatus()}
+	if !reflect.DeepEqual(want, projectStatuses) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetProjectStatusesFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetProjectStatuses(1)
-	if err == nil {
+	if _, err := client.GetProjectStatuses(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetProjectStatusesWithInvalidProjectIDOrKeyFailed(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.GetProjectStatuses(true)
-	if err == nil {
+	if _, err := client.GetProjectStatuses(true); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestCreateProject(t *testing.T) {
-	http.HandleFunc("/api/v2/projects", getProject)
-	expected := getTestProject()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &CreateProjectInput{
-		Name:                              "test",
-		Key:                               "TEST",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "markdown",
+		Name:                              String("test"),
+		Key:                               String("TEST"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
 	}
-	project, err := api.CreateProject(input)
+	project, err := client.CreateProject(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *project) {
+	want := getTestProject()
+	if !reflect.DeepEqual(want, project) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestCreateProjectFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &CreateProjectInput{
-		Name:                              "test",
-		Key:                               "TEST",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "markdown",
+		Name:                              String("test"),
+		Key:                               String("TEST"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
 	}
-	_, err := api.CreateProject(input)
+	_, err := client.CreateProject(input)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestCreateProjectWithInvalidTextFormattingRuleFailed(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
 	input := &CreateProjectInput{
-		Name:                              "test",
-		Key:                               "TEST",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "downtown",
+		Name:                              String("test"),
+		Key:                               String("TEST"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("downtown"),
 	}
 
-	_, err := api.CreateProject(input)
+	_, err := client.CreateProject(input)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestUpdateProject(t *testing.T) {
-	http.HandleFunc("/api/v2/projects/1", getProject)
-	expected := getTestProject()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &UpdateProjectInput{
-		ID:                                1,
-		Name:                              "test",
-		ProjectKey:                        "TEST",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "markdown",
+		ID:                                Int(1),
+		Name:                              String("test"),
+		ProjectKey:                        String("TEST"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
+		Archived:                          Bool(false),
 	}
-	project, err := api.UpdateProject(input)
+	project, err := client.UpdateProject(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *project) {
+	want := getTestProject()
+	if !reflect.DeepEqual(want, project) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestUpdateProjectFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &UpdateProjectInput{
-		Name:                              "test",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "markdown",
+		ID:                                Int(1),
+		Name:                              String("test"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
 	}
-	_, err := api.UpdateProject(input)
-	if err == nil {
+	if _, err := client.UpdateProject(input); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateProjectWithoutIDFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	input := &UpdateProjectInput{
+		Name:                              String("test"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("markdown"),
+	}
+	if _, err := client.UpdateProject(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestUpdateProjectWithInvalidTextFormattingRuleFailed(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
 	input := &UpdateProjectInput{
-		Name:                              "test",
-		ChartEnabled:                      false,
-		SubtaskingEnabled:                 false,
-		ProjectLeaderCanEditProjectLeader: false,
-		TextFormattingRule:                "downtown",
+		Name:                              String("test"),
+		ChartEnabled:                      Bool(false),
+		SubtaskingEnabled:                 Bool(false),
+		ProjectLeaderCanEditProjectLeader: Bool(false),
+		TextFormattingRule:                String("downtown"),
 	}
 
-	_, err := api.UpdateProject(input)
-	if err == nil {
+	if _, err := client.UpdateProject(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestDeleteProject(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects/1", getProject)
-	expected := getTestProject()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	project, err := api.DeleteProject(1)
+	project, err := client.DeleteProject(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *project) {
+	want := getTestProject()
+	if !reflect.DeepEqual(want, project) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestDeleteProjectFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.DeleteProject(1)
+	_, err := client.DeleteProject(1)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestDeleteProjectWithInvalidProjectIDOrKeyFailed(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.DeleteProject(true)
-	if err == nil {
+	if _, err := client.DeleteProject(true); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

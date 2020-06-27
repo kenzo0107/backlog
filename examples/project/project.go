@@ -12,10 +12,16 @@ func main() {
 	baseURL := os.Getenv("BASE_URL")
 	api := backlog.New(apiKey, baseURL)
 
-	project, err := api.GetProject("SRE")
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
+	// project, err := api.GetProject("SRE")
+	// if err != nil {
+	// 	fmt.Printf("%s\n", err)
+	// 	return
+	// }
+	// fmt.Printf("project ID: %d, Name %s\n", *project.ID, *project.Name)
+
+	input := &backlog.GetProjectsInput{}
+	projects, _ := api.GetProjects(input)
+	for _, project := range projects {
+		fmt.Printf("project ID: %d, Name %s\n", *project.ID, *project.Name)
 	}
-	fmt.Printf("project ID: %d, Name %s\n", project.ID, project.Name)
 }

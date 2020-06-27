@@ -17,5 +17,5 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("wiki ID: %d, Name: %s", wiki.ID, wiki.Name)
+	fmt.Printf("wiki ID: %d, Name: %s", *wiki.ID, *wiki.Name)
 }

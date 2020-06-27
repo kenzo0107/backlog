@@ -1,7 +1,6 @@
 package backlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -9,57 +8,47 @@ import (
 	"testing"
 )
 
-func getTestUploadFile() FileUploadResponse {
-	return getTestUploadFileWithID(1)
-}
-
-func getTestUploadFileWithID(id int) FileUploadResponse {
-	return FileUploadResponse{
-		ID:   id,
-		Name: "test.txt",
-		Size: 8857,
-	}
-}
-
-func getUploadFile(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestUploadFile())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
+func getTestUploadFile() *FileUploadResponse {
+	return &FileUploadResponse{
+		ID:   Int(1),
+		Name: String("test.txt"),
+		Size: Int(8857),
 	}
 }
 
 func TestUploadFile(t *testing.T) {
-	http.HandleFunc("/api/v2/space/attachment", getUploadFile)
-	expected := getTestUploadFile()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"id": 1, "name": "test.txt", "size": 8857}`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	fpath := filepath.Clean(filepath.Join("testdata", "test.jpg"))
-	fileUploadResponse, err := api.UploadFile(fpath)
+	fileUploadResponse, err := client.UploadFile(fpath)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *fileUploadResponse) {
+	want := getTestUploadFile()
+	if !reflect.DeepEqual(want, fileUploadResponse) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestUploadFileFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
 	fpath := filepath.Clean(filepath.Join("testdata", "test.jpg"))
-
-	if _, err := api.UploadFile(fpath); err == nil {
+	if _, err := client.UploadFile(fpath); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

@@ -11,11 +11,13 @@ func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
 	api := backlog.New(apiKey, baseURL)
-
-	user, err := api.GetUserMySelf()
+	webhooks, err := api.GetWebhooks("SRE")
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("user ID: %d, Name %s\n", *user.ID, *user.Name)
+
+	for _, webhook := range webhooks {
+		fmt.Printf("id: %d, name: %s, hook url :%s\n", *webhook.ID, *webhook.Name, *webhook.HookURL)
+	}
 }

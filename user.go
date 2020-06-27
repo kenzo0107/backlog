@@ -62,68 +62,68 @@ func (k Order) String() string {
 
 // User : backlog user
 type User struct {
-	ID          int      `json:"id"`
-	UserID      string   `json:"userId"`
-	Name        string   `json:"name"`
+	ID          *int     `json:"id,omitempty"`
+	UserID      *string  `json:"userId,omitempty"`
+	Name        *string  `json:"name,omitempty"`
 	RoleType    RoleType `json:"roleType"`
-	Lang        string   `json:"lang"`
-	MailAddress string   `json:"mailAddress"`
+	Lang        *string  `json:"lang,omitempty"`
+	MailAddress *string  `json:"mailAddress,omitempty"`
 }
 
 // UserActivity : user's activity
 type UserActivity struct {
-	ID            int            `json:"id"` // User.ID
-	Project       Project        `json:"project"`
-	Type          int            `json:"type"`
-	Content       Content        `json:"content"`
-	Notifications []Notification `json:"notifications"`
-	CreatedUser   User           `json:"createdUser"`
-	Created       JSONTime       `json:"created"`
+	ID            *int            `json:"id,omitempty"` // User.ID
+	Project       *Project        `json:"project,omitempty"`
+	Type          *int            `json:"type,omitempty"`
+	Content       *Content        `json:"content,omitempty"`
+	Notifications []*Notification `json:"notifications,omitempty"`
+	CreatedUser   *User           `json:"createdUser,omitempty"`
+	Created       *Timestamp      `json:"created,omitempty"`
 }
 
 // Notification : -
 type Notification struct {
-	ID                  int  `json:"id"`
-	AlreadyRead         bool `json:"alreadyRead"`
-	Reason              int  `json:"reason"`
-	User                User `json:"user"`
-	ResourceAlreadyRead bool `json:"resourceAlreadyRead"`
+	ID                  *int  `json:"id,omitempty"`
+	AlreadyRead         *bool `json:"alreadyRead,omitempty"`
+	Reason              *int  `json:"reason,omitempty"`
+	User                *User `json:"user,omitempty"`
+	ResourceAlreadyRead *bool `json:"resourceAlreadyRead,omitempty"`
 }
 
 // Content : -
 type Content struct {
-	ID          int      `json:"id"`
-	KeyID       int      `json:"key_id"`
-	Summary     string   `json:"summary"`
-	Description string   `json:"description"`
-	Comment     Comment  `json:"comment"`
-	Changes     []Change `json:"changes"`
+	ID          *int      `json:"id,omitempty"`
+	KeyID       *int      `json:"key_id,omitempty"`
+	Summary     *string   `json:"summary,omitempty"`
+	Description *string   `json:"description,omitempty"`
+	Comment     *Comment  `json:"comment,omitempty"`
+	Changes     []*Change `json:"changes,omitempty"`
 }
 
 // Comment : -
 type Comment struct {
-	ID      int    `json:"id"`
-	Content string `json:"content"`
+	ID      *int    `json:"id,omitempty"`
+	Content *string `json:"content,omitempty"`
 }
 
 // Change : -
 type Change struct {
-	Field    string `json:"field"`
-	NewValue string `json:"new_value"`
-	OldValue string `json:"old_value"`
-	Type     string `json:"type"`
+	Field    *string `json:"field,omitempty"`
+	NewValue *string `json:"new_value,omitempty"`
+	OldValue *string `json:"old_value,omitempty"`
+	Type     *string `json:"type,omitempty"`
 }
 
 // ResponseIssue : response of issue api
 type ResponseIssue struct {
-	Issue   Issue    `json:"issue"`
-	Updated JSONTime `json:"updated"`
+	Issue   *Issue     `json:"issue,omitempty"`
+	Updated *Timestamp `json:"updated,omitempty"`
 }
 
 // Priority : -
 type Priority struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID   *int    `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 // GetUserMySelf returns get my user information
@@ -133,11 +133,11 @@ func (api *Client) GetUserMySelf() (*User, error) {
 
 // GetUserMySelfContext will retrieve the complete my user information by id with a custom context
 func (api *Client) GetUserMySelfContext(ctx context.Context) (*User, error) {
-	user := User{}
+	user := new(User)
 	if err := api.getMethod(ctx, "/api/v2/users/myself", url.Values{}, &user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // GetUserByID returns a user by id
@@ -147,21 +147,21 @@ func (api *Client) GetUserByID(id int) (*User, error) {
 
 // GetUserByIDContext will retrieve the complete user information by id with a custom context
 func (api *Client) GetUserByIDContext(ctx context.Context, id int) (*User, error) {
-	var user User
+	user := new(User)
 	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(id), url.Values{}, &user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // GetUsers returns the list of users
-func (api *Client) GetUsers() ([]User, error) {
+func (api *Client) GetUsers() ([]*User, error) {
 	return api.GetUsersContext(context.Background())
 }
 
 // GetUsersContext returns the list of users
-func (api *Client) GetUsersContext(ctx context.Context) ([]User, error) {
-	var users []User
+func (api *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
+	var users []*User
 	if err := api.getMethod(ctx, "/api/v2/users", url.Values{}, &users); err != nil {
 		return nil, err
 	}
@@ -175,19 +175,31 @@ func (api *Client) CreateUser(input *CreateUserInput) (*User, error) {
 
 // CreateUserContext creates a user with Context
 func (api *Client) CreateUserContext(ctx context.Context, input *CreateUserInput) (*User, error) {
-	values := url.Values{
-		"userId":      {input.UserID},
-		"password":    {input.Password},
-		"name":        {input.Name},
-		"mailAddress": {input.MailAddress},
-		"roleType":    {strconv.Itoa(input.RoleType.Int())},
+	values := url.Values{}
+
+	if input.UserID != nil {
+		values.Add("userId", *input.UserID)
 	}
 
-	user := User{}
+	if input.Password != nil {
+		values.Add("password", *input.Password)
+	}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.MailAddress != nil {
+		values.Add("mailAddress", *input.MailAddress)
+	}
+
+	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
+
+	user := new(User)
 	if err := api.postMethod(ctx, "/api/v2/users", values, &user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // UpdateUser updates a user
@@ -197,18 +209,27 @@ func (api *Client) UpdateUser(input *UpdateUserInput) (*User, error) {
 
 // UpdateUserContext updates a user with Context
 func (api *Client) UpdateUserContext(ctx context.Context, input *UpdateUserInput) (*User, error) {
-	values := url.Values{
-		"password":    {input.Password},
-		"name":        {input.Name},
-		"mailAddress": {input.MailAddress},
-		"roleType":    {strconv.Itoa(input.RoleType.Int())},
+	values := url.Values{}
+
+	if input.Password != nil {
+		values.Add("password", *input.Password)
 	}
 
-	user := User{}
-	if err := api.patchMethod(ctx, "/api/v2/users/"+strconv.Itoa(input.ID), values, &user); err != nil {
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.MailAddress != nil {
+		values.Add("mailAddress", *input.MailAddress)
+	}
+
+	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
+
+	user := new(User)
+	if err := api.patchMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID), values, &user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // DeleteUser deletes a user
@@ -218,11 +239,11 @@ func (api *Client) DeleteUser(id int) (*User, error) {
 
 // DeleteUserContext deletes a user with Context
 func (api *Client) DeleteUserContext(ctx context.Context, id int) (*User, error) {
-	user := User{}
+	user := new(User)
 	if err := api.deleteMethod(ctx, "/api/v2/users/"+strconv.Itoa(id), url.Values{}, &user); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return user, nil
 }
 
 // GetUserIcon downloads user icon
@@ -236,12 +257,12 @@ func (api *Client) GetUserIconContext(ctx context.Context, id int, writer io.Wri
 }
 
 // GetUserActivities returns the list of a user's activities
-func (api *Client) GetUserActivities(input *GetUserActivityInput) ([]UserActivity, error) {
+func (api *Client) GetUserActivities(input *GetUserActivityInput) ([]*UserActivity, error) {
 	return api.GetUserActivitiesContext(context.Background(), input)
 }
 
 // GetUserActivitiesContext returns the list of a user's activities with context
-func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserActivityInput) ([]UserActivity, error) {
+func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserActivityInput) ([]*UserActivity, error) {
 	values := url.Values{}
 
 	if len(input.ActivityTypeIDs) > 0 {
@@ -250,16 +271,16 @@ func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserA
 		}
 	}
 
-	if input.MinID > 0 {
-		values.Add("minId", strconv.Itoa(input.MinID))
+	if input.MinID != nil {
+		values.Add("minId", strconv.Itoa(*input.MinID))
 	}
 
-	if input.MaxID > 0 {
-		values.Add("minId", strconv.Itoa(input.MaxID))
+	if input.MaxID != nil {
+		values.Add("minId", strconv.Itoa(*input.MaxID))
 	}
 
-	if input.Count > 0 {
-		values.Add("count", strconv.Itoa(input.Count))
+	if input.Count != nil {
+		values.Add("count", strconv.Itoa(*input.Count))
 	}
 
 	if input.Order.String() == "" {
@@ -268,43 +289,42 @@ func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserA
 		values.Add("order", input.Order.String())
 	}
 
-	var userActivities []UserActivity
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(input.ID)+"/activities", values, &userActivities); err != nil {
+	var userActivities []*UserActivity
+	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/activities", values, &userActivities); err != nil {
 		return nil, err
 	}
 	return userActivities, nil
 }
 
 // GetUserStars returns the list of stared contents
-func (api *Client) GetUserStars(input *GetUserStarsInput) ([]Star, error) {
+func (api *Client) GetUserStars(input *GetUserStarsInput) ([]*Star, error) {
 	return api.GetUserStarsContext(context.Background(), input)
 }
 
 // GetUserStarsContext returns the list of a user's activities with context
-func (api *Client) GetUserStarsContext(ctx context.Context, input *GetUserStarsInput) ([]Star, error) {
-
+func (api *Client) GetUserStarsContext(ctx context.Context, input *GetUserStarsInput) ([]*Star, error) {
 	values := url.Values{}
 
-	if input.MinID > 0 {
-		values.Add("minId", strconv.Itoa(input.MinID))
+	if input.MinID != nil {
+		values.Add("minId", strconv.Itoa(*input.MinID))
 	}
 
-	if input.MaxID > 0 {
-		values.Add("minId", strconv.Itoa(input.MaxID))
+	if input.MaxID != nil {
+		values.Add("minId", strconv.Itoa(*input.MaxID))
 	}
 
-	if input.Count > 0 {
-		values.Add("count", strconv.Itoa(input.Count))
+	if input.Count != nil {
+		values.Add("count", strconv.Itoa(*input.Count))
 	}
 
-	if input.Order.String() == "" {
-		values.Add("order", OrderDesc.String())
-	} else {
+	if input.Order.String() != "" {
 		values.Add("order", input.Order.String())
+	} else {
+		values.Add("order", OrderDesc.String())
 	}
 
-	var stars []Star
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(input.ID)+"/stars", values, &stars); err != nil {
+	var stars []*Star
+	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/stars", values, &stars); err != nil {
 		return nil, err
 	}
 	return stars, nil
@@ -317,15 +337,14 @@ func (api *Client) GetUserStarCount(input *GetUserStarCountInput) (int, error) {
 
 // GetUserStarCountContext returns the count of stars with context
 func (api *Client) GetUserStarCountContext(ctx context.Context, input *GetUserStarCountInput) (int, error) {
-
 	values := url.Values{}
 
-	if input.Since != "" {
-		values.Add("since", input.Since)
+	if input.Since != nil {
+		values.Add("since", *input.Since)
 	}
 
-	if input.Until != "" {
-		values.Add("until", input.Until)
+	if input.Until != nil {
+		values.Add("until", *input.Until)
 	}
 
 	type c struct {
@@ -333,90 +352,59 @@ func (api *Client) GetUserStarCountContext(ctx context.Context, input *GetUserSt
 	}
 	r := c{}
 
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(input.ID)+"/stars/count", values, &r); err != nil {
+	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/stars/count", values, &r); err != nil {
 		return 0, err
 	}
 	return r.Count, nil
 }
 
-// GetUserMySelfRecentrlyViewedIssues returns the list of issues a user view recently
-func (api *Client) GetUserMySelfRecentrlyViewedIssues(input *GetUserMySelfRecentrlyViewedIssuesInput) ([]Issue, error) {
-	return api.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), input)
-}
-
-// GetUserMySelfRecentrlyViewedIssuesContext returns the list of issues a user view recently with context
-func (api *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, input *GetUserMySelfRecentrlyViewedIssuesInput) ([]Issue, error) {
-
-	values := url.Values{}
-
-	if input.Order.String() == "" {
-		values.Add("order", OrderDesc.String())
-	} else {
-		values.Add("order", input.Order.String())
-	}
-
-	if input.Offset > 0 {
-		values.Add("offset", strconv.Itoa(input.Offset))
-	}
-
-	if input.Count > 0 {
-		values.Add("count", strconv.Itoa(input.Count))
-	}
-
-	var issues []Issue
-	if err := api.getMethod(ctx, "/api/v2/users/myself/recentlyViewedIssues", url.Values{}, &issues); err != nil {
-		return nil, err
-	}
-	return issues, nil
-}
-
 // CreateUserInput contains all the parameters necessary (including the optional ones) for a CreateUser() request.
 type CreateUserInput struct {
-	UserID      string   `required:"true"`
-	Password    string   `required:"true"`
-	Name        string   `required:"true"`
-	MailAddress string   `required:"true"`
+	UserID      *string  `required:"true"`
+	Password    *string  `required:"true"`
+	Name        *string  `required:"true"`
+	MailAddress *string  `required:"true"`
 	RoleType    RoleType `required:"true"`
 }
 
 // UpdateUserInput contains all the parameters necessary (including the optional ones) for a UpdateUser() request.
 type UpdateUserInput struct {
-	ID          int      `required:"true"`
-	Password    string   `required:"true"`
-	Name        string   `required:"true"`
-	MailAddress string   `required:"true"`
+	ID          *int     `required:"true"`
+	Password    *string  `required:"true"`
+	Name        *string  `required:"true"`
+	MailAddress *string  `required:"true"`
 	RoleType    RoleType `required:"true"`
 }
 
 // GetUserActivityInput contains all the parameters necessary (including the optional ones) for a GetUserActivities() request.
 type GetUserActivityInput struct {
-	ID              int   `required:"true"`
+	ID              *int  `required:"true"`
 	ActivityTypeIDs []int `required:"false"`
-	MinID           int   `required:"false"`
-	MaxID           int   `required:"false"`
-	Count           int   `required:"false"`
+	MinID           *int  `required:"false"`
+	MaxID           *int  `required:"false"`
+	Count           *int  `required:"false"`
 	Order           Order `required:"false"`
 }
 
 // GetUserStarsInput contains all the parameters necessary (including the optional ones) for a GetUserStars() request.
 type GetUserStarsInput struct {
-	ID    int   `required:"true"`
-	MinID int   `required:"false"`
-	MaxID int   `required:"false"`
-	Count int   `required:"false"`
+	ID    *int  `required:"true"`
+	MinID *int  `required:"false"`
+	MaxID *int  `required:"false"`
+	Count *int  `required:"false"`
 	Order Order `required:"false"`
 }
 
 // GetUserStarCountInput contains all the parameters necessary (including the optional ones) for a GetUserStarCount() request.
 type GetUserStarCountInput struct {
-	ID    int    `required:"true"`
-	Since string `required:"false"`
-	Until string `required:"false"`
+	ID    *int    `required:"true"`
+	Since *string `required:"false"`
+	Until *string `required:"false"`
 }
 
 // GetUserMySelfRecentrlyViewedIssuesInput contains all the parameters necessary (including the optional ones) for a GetUserMySelfRecentrlyViewedIssues() request.
 type GetUserMySelfRecentrlyViewedIssuesInput struct {
 	Order  Order `required:"false"`
-	Offset int   `required:"false"`
-	Count  int   `required:"false"`
+	Offset *int  `required:"false"`
+	Count  *int  `required:"false"`
 }

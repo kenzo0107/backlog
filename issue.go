@@ -79,62 +79,62 @@ func (k Sort) String() string {
 
 // Issue : -
 type Issue struct {
-	ID             int           `json:"id"`
-	ProjectID      int           `json:"projectId"`
-	IssueKey       string        `json:"issueKey"`
-	KeyID          int           `json:"keyId"`
-	IssueType      IssueType     `json:"issueType"`
-	Summary        string        `json:"summary"`
-	Description    string        `json:"description"`
-	Resolutions    interface{}   `json:"resolutions"`
-	Priority       Priority      `json:"priority"`
-	Status         Status        `json:"status"`
-	Assignee       User          `json:"assignee"`
-	Category       []interface{} `json:"category"`
-	Versions       []interface{} `json:"versions"`
-	Milestone      []Milestone   `json:"milestone"`
-	StartDate      interface{}   `json:"startDate"`
-	DueDate        interface{}   `json:"dueDate"`
-	EstimatedHours interface{}   `json:"estimatedHours"`
-	ActualHours    interface{}   `json:"actualHours"`
-	ParentIssueID  interface{}   `json:"parentIssueId"`
-	CreatedUser    User          `json:"createdUser"`
-	Created        JSONTime      `json:"created"`
-	UpdatedUser    User          `json:"updatedUser"`
-	Updated        JSONTime      `json:"updated"`
-	CustomFields   []interface{} `json:"customFields"`
-	Attachments    []Attachment  `json:"attachments"`
-	SharedFiles    []SharedFile  `json:"sharedFiles"`
-	Stars          []Star        `json:"stars"`
+	ID             *int           `json:"id,omitempty"`
+	ProjectID      *int           `json:"projectId,omitempty"`
+	IssueKey       *string        `json:"issueKey,omitempty"`
+	KeyID          *int           `json:"keyId,omitempty"`
+	IssueType      *IssueType     `json:"issueType,omitempty"`
+	Summary        *string        `json:"summary,omitempty"`
+	Description    *string        `json:"description,omitempty"`
+	Resolutions    *string        `json:"resolutions,omitempty"`
+	Priority       *Priority      `json:"priority,omitempty"`
+	Status         *Status        `json:"status,omitempty"`
+	Assignee       *User          `json:"assignee,omitempty"`
+	Category       []int          `json:"category,omitempty"`
+	Versions       []int          `json:"versions,omitempty"`
+	Milestone      []*Milestone   `json:"milestone,omitempty"`
+	StartDate      *string        `json:"startDate,omitempty"`
+	DueDate        *string        `json:"dueDate,omitempty"`
+	EstimatedHours *int           `json:"estimatedHours,omitempty"`
+	ActualHours    *int           `json:"actualHours,omitempty"`
+	ParentIssueID  *int           `json:"parentIssueId,omitempty"`
+	CreatedUser    *User          `json:"createdUser,omitempty"`
+	Created        *Timestamp     `json:"created,omitempty"`
+	UpdatedUser    *User          `json:"updatedUser,omitempty"`
+	Updated        *Timestamp     `json:"updated,omitempty"`
+	CustomFields   []*CustomField `json:"customFields,omitempty"`
+	Attachments    []*Attachment  `json:"attachments,omitempty"`
+	SharedFiles    []*SharedFile  `json:"sharedFiles,omitempty"`
+	Stars          []*Star        `json:"stars,omitempty"`
 }
 
 // IssueType : issue type
 type IssueType struct {
-	ID           int    `json:"id"`
-	ProjectID    int    `json:"projectId"`
-	Name         string `json:"name"`
-	Color        string `json:"color"`
-	DisplayOrder int    `json:"displayOrder"`
+	ID           *int    `json:"id,omitempty"`
+	ProjectID    *int    `json:"projectId,omitempty"`
+	Name         *string `json:"name,omitempty"`
+	Color        *string `json:"color,omitempty"`
+	DisplayOrder *int    `json:"displayOrder,omitempty"`
 }
 
 // Milestone : -
 type Milestone struct {
-	ID             int         `json:"id"`
-	ProjectID      int         `json:"projectId"`
-	Name           string      `json:"name"`
-	Description    string      `json:"description"`
-	StartDate      interface{} `json:"startDate"`
-	ReleaseDueDate interface{} `json:"releaseDueDate"`
-	Archived       bool        `json:"archived"`
+	ID             *int         `json:"id,omitempty"`
+	ProjectID      *int         `json:"projectId,omitempty"`
+	Name           *string      `json:"name,omitempty"`
+	Description    *string      `json:"description,omitempty"`
+	StartDate      *interface{} `json:"startDate,omitempty"`
+	ReleaseDueDate *interface{} `json:"releaseDueDate,omitempty"`
+	Archived       *bool        `json:"archived,omitempty"`
 }
 
 // GetIssues returns the list of issues
-func (api *Client) GetIssues(input *GetIssuesInput) ([]Issue, error) {
+func (api *Client) GetIssues(input *GetIssuesInput) ([]*Issue, error) {
 	return api.GetIssuesContext(context.Background(), input)
 }
 
 // GetIssuesContext returns the list of issues with context
-func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) ([]Issue, error) {
+func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) ([]*Issue, error) {
 
 	values := url.Values{}
 
@@ -198,13 +198,17 @@ func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) 
 		}
 	}
 
-	if input.ParentChild > 0 {
-		values.Add("parentChild", strconv.Itoa(input.ParentChild))
+	if input.ParentChild != nil && *input.ParentChild > 0 {
+		values.Add("parentChild", strconv.Itoa(*input.ParentChild))
 	}
 
-	values.Add("attachment", strconv.FormatBool(input.Attachment))
+	if input.Attachment != nil {
+		values.Add("attachment", strconv.FormatBool(*input.Attachment))
+	}
 
-	values.Add("sharedFile", strconv.FormatBool(input.SharedFile))
+	if input.SharedFile != nil {
+		values.Add("sharedFile", strconv.FormatBool(*input.SharedFile))
+	}
 
 	if input.Sort != "" {
 		values.Add("sort", input.Sort.String())
@@ -216,46 +220,46 @@ func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) 
 		values.Add("order", input.Order.String())
 	}
 
-	if input.Offset > 0 {
-		values.Add("offset", strconv.Itoa(input.Offset))
+	if input.Offset != nil {
+		values.Add("offset", strconv.Itoa(*input.Offset))
 	}
 
-	if input.Count == 0 {
-		values.Add("count", "20")
+	if input.Count != nil {
+		values.Add("count", strconv.Itoa(*input.Count))
 	} else {
-		values.Add("count", strconv.Itoa(input.Count))
+		values.Add("count", "20")
 	}
 
-	if input.CreatedSince != "" {
-		values.Add("createdSince", input.CreatedSince)
+	if input.CreatedSince != nil {
+		values.Add("createdSince", *input.CreatedSince)
 	}
 
-	if input.CreatedUntil != "" {
-		values.Add("createdUntil", input.CreatedUntil)
+	if input.CreatedUntil != nil {
+		values.Add("createdUntil", *input.CreatedUntil)
 	}
 
-	if input.UpdatedSince != "" {
-		values.Add("updatedSince", input.UpdatedSince)
+	if input.UpdatedSince != nil {
+		values.Add("updatedSince", *input.UpdatedSince)
 	}
 
-	if input.UpdatedUntil != "" {
-		values.Add("updatedUntil", input.UpdatedUntil)
+	if input.UpdatedUntil != nil {
+		values.Add("updatedUntil", *input.UpdatedUntil)
 	}
 
-	if input.StartDateSince != "" {
-		values.Add("startDateSince", input.StartDateSince)
+	if input.StartDateSince != nil {
+		values.Add("startDateSince", *input.StartDateSince)
 	}
 
-	if input.StartDateUntil != "" {
-		values.Add("startDateUntil", input.StartDateUntil)
+	if input.StartDateUntil != nil {
+		values.Add("startDateUntil", *input.StartDateUntil)
 	}
 
-	if input.DueDateSince != "" {
-		values.Add("dueDateSince", input.DueDateSince)
+	if input.DueDateSince != nil {
+		values.Add("dueDateSince", *input.DueDateSince)
 	}
 
-	if input.DueDateUntil != "" {
-		values.Add("dueDateUntil", input.DueDateUntil)
+	if input.DueDateUntil != nil {
+		values.Add("dueDateUntil", *input.DueDateUntil)
 	}
 
 	if len(input.IDs) > 0 {
@@ -270,45 +274,98 @@ func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) 
 		}
 	}
 
-	if input.Keyword != "" {
-		values.Add("keyword", input.Keyword)
+	if input.Keyword != nil {
+		values.Add("keyword", *input.Keyword)
 	}
 
-	r := []Issue{}
+	r := []*Issue{}
 	if err := api.getMethod(ctx, "/api/v2/issues", values, &r); err != nil {
 		return nil, err
 	}
 	return r, nil
 }
 
+// Issues : list of issue
+type Issues []*struct {
+	Issue *Issue `json:"issue"`
+}
+
+// GetUserMySelfRecentrlyViewedIssues returns the list of issues a user view recently
+// This api returns a json below:
+// [
+// 		{
+//         "issue":{
+// 				"id":1111111,
+// 				...
+// 			}
+// 		},
+// 		{
+//         "issue":{
+// 				"id":2222222,
+// 				...
+// 			}
+// 		}
+// 		...
+// ]
+func (api *Client) GetUserMySelfRecentrlyViewedIssues(input *GetUserMySelfRecentrlyViewedIssuesInput) (Issues, error) {
+	return api.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), input)
+}
+
+// GetUserMySelfRecentrlyViewedIssuesContext returns the list of issues a user view recently with context
+func (api *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, input *GetUserMySelfRecentrlyViewedIssuesInput) (Issues, error) {
+
+	values := url.Values{}
+
+	if input.Order.String() != "" {
+		values.Add("order", input.Order.String())
+	} else {
+		values.Add("order", OrderDesc.String())
+	}
+
+	if input.Offset != nil {
+		values.Add("offset", strconv.Itoa(*input.Offset))
+	}
+
+	if input.Count != nil {
+		values.Add("count", strconv.Itoa(*input.Count))
+	}
+
+	var issues Issues
+	if err := api.getMethod(ctx, "/api/v2/users/myself/recentlyViewedIssues", values, &issues); err != nil {
+		return nil, err
+	}
+
+	return issues, nil
+}
+
 // GetIssuesInput contains all the parameters necessary (including the optional ones) for a GetIssues() request.
 type GetIssuesInput struct {
-	ProjectIDs     []int
-	IssueTypeIDs   []int
-	CategoryIDs    []int
-	VersionIDs     []int
-	MilestoneIDs   []int
-	StatusIDs      []int
-	PriorityIDs    []int
-	AssigneeIDs    []int
-	CreatedUserIDs []int
-	ResolutionIDs  []int
-	ParentChild    int
-	Attachment     bool
-	SharedFile     bool
-	Sort           Sort
-	Order          Order
-	Offset         int
-	Count          int
-	CreatedSince   string
-	CreatedUntil   string
-	UpdatedSince   string
-	UpdatedUntil   string
-	StartDateSince string
-	StartDateUntil string
-	DueDateSince   string
-	DueDateUntil   string
-	IDs            []int
-	ParentIssueIDs []int
-	Keyword        string
+	ProjectIDs     []int   `required:"false"`
+	IssueTypeIDs   []int   `required:"false"`
+	CategoryIDs    []int   `required:"false"`
+	VersionIDs     []int   `required:"false"`
+	MilestoneIDs   []int   `required:"false"`
+	StatusIDs      []int   `required:"false"`
+	PriorityIDs    []int   `required:"false"`
+	AssigneeIDs    []int   `required:"false"`
+	CreatedUserIDs []int   `required:"false"`
+	ResolutionIDs  []int   `required:"false"`
+	ParentChild    *int    `required:"false"`
+	Attachment     *bool   `required:"false"`
+	SharedFile     *bool   `required:"false"`
+	Sort           Sort    `required:"false"`
+	Order          Order   `required:"false"`
+	Offset         *int    `required:"false"`
+	Count          *int    `required:"false"`
+	CreatedSince   *string `required:"false"`
+	CreatedUntil   *string `required:"false"`
+	UpdatedSince   *string `required:"false"`
+	UpdatedUntil   *string `required:"false"`
+	StartDateSince *string `required:"false"`
+	StartDateUntil *string `required:"false"`
+	DueDateSince   *string `required:"false"`
+	DueDateUntil   *string `required:"false"`
+	IDs            []int   `required:"false"`
+	ParentIssueIDs []int   `required:"false"`
+	Keyword        *string `required:"false"`
 }
