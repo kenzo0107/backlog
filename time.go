@@ -1,29 +1,25 @@
 package backlog
 
 import (
-	"bytes"
-	"fmt"
 	"time"
 )
 
-// JSONTime exists so that we can have a String method converting the date
-type JSONTime string
-
-// String converts the unix timestamp into a string
-func (t JSONTime) String() string {
-	tm := t.Time()
-	return fmt.Sprintf("\"%s\"", tm.Format(time.RFC3339))
+// Timestamp represents a time that can be unmarshalled from a JSON string
+// formatted as either an RFC3339 or Unix timestamp. This is necessary for some
+// fields since the GitHub API is inconsistent in how it represents times. All
+// exported methods of time.Time can be called on Timestamp.
+type Timestamp struct {
+	time.Time
 }
 
-// Time returns a `time.Time` representation of this value.
-func (t JSONTime) Time() time.Time {
-	tt, _ := time.Parse(time.RFC3339, string(t))
-	return tt
+func (t Timestamp) String() string {
+	return t.Time.String()
 }
 
-// UnmarshalJSON will unmarshal both string and int JSON values
-func (t *JSONTime) UnmarshalJSON(buf []byte) error {
-	s := bytes.Trim(buf, `"`)
-	*t = JSONTime(string(s))
-	return nil
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// Time is expected in RFC3339 or Unix format.
+func (t *Timestamp) UnmarshalJSON(data []byte) (err error) {
+	str := string(data)
+	t.Time, err = time.Parse(`"`+time.RFC3339+`"`, str)
+	return
 }

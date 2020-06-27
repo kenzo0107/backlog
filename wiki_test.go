@@ -1,503 +1,557 @@
 package backlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
+	"github.com/pkg/errors"
 )
 
-func getTestWiki() Wiki {
-	return getTestWikiWithID(1)
-}
-
-func getTestWikis() []Wiki {
-	return []Wiki{
-		getTestWikiWithID(1),
-		getTestWikiWithID(2),
-		getTestWikiWithID(3),
-		getTestWikiWithID(4),
-	}
-}
+const testJSONWiki string = `{
+	"id": 1,
+	"projectId": 1,
+	"name": "Home",
+	"content": "test",
+	"tags": [
+		{
+			"id": 12,
+			"name": "議事録"
+		}
+	],
+	"attachments": [
+		{
+			"id": 1,
+			"name": "test.json",
+			"size": 8857,
+			"createdUser": {
+				"id": 1,
+				"userId": "admin",
+				"name": null,
+				"roleType": 1,
+				"lang": "ja",
+				"mailAddress": "eguchi@nulab.example"
+			},
+			"created": "2006-01-02T15:04:05Z"
+		}
+	],
+	"createdUser": {
+		"id": 1,
+		"userId": "admin",
+		"name": "admin",
+		"roleType": 1,
+		"lang": "ja",
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"created": "2006-01-02T15:04:05Z",
+	"updatedUser": {
+		"id": 1,
+		"userId": "admin",
+		"name": "admin",
+		"roleType": 1,
+		"lang": "ja",
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"updated": "2006-01-02T15:04:05Z"
+}`
 
 func getTestWikiCount() Page {
 	return Page{
-		Count: len(getTestWikis()),
+		Count: Int(1),
 	}
 }
 
-func getTestWikiWithID(id int) Wiki {
-	return Wiki{
-		ID:        id,
-		ProjectID: 1,
-		Name:      "Home",
-		Content:   "test",
-		Tags: []Tag{
+func getTestWiki() *Wiki {
+	return &Wiki{
+		ID:        Int(1),
+		ProjectID: Int(1),
+		Name:      String("Home"),
+		Content:   String("test"),
+		Tags: []*Tag{
 			{
-				ID:   12,
-				Name: "議事録",
+				ID:   Int(12),
+				Name: String("議事録"),
 			},
 		},
-		Attachments: []Attachment{
+		Attachments: []*Attachment{
 			{
-				ID:   1,
-				Name: "test.json",
-				Size: 8857,
-				CreatedUser: User{
-					ID:          1,
-					UserID:      "admin",
-					RoleType:    1,
-					Lang:        "ja",
-					MailAddress: "eguchi@nulab.example",
+				ID:   Int(1),
+				Name: String("test.json"),
+				Size: Int(8857),
+				CreatedUser: &User{
+					ID:          Int(1),
+					UserID:      String("admin"),
+					RoleType:    RoleType(1),
+					Lang:        String("ja"),
+					MailAddress: String("eguchi@nulab.example"),
 				},
-				Created: JSONTime("2020-02-19T05:54:32Z"),
+				Created: &Timestamp{referenceTime},
 			},
 		},
-	}
-}
-
-func getTestWikiTagWithID(id int) Tag {
-	return Tag{
-		ID:   id,
-		Name: "test",
-	}
-}
-
-func getTestWikiTags() []Tag {
-	return []Tag{
-		getTestWikiTagWithID(1),
-		getTestWikiTagWithID(2),
-	}
-}
-
-func getTestGetWikiAttachments() []Attachment {
-	return []Attachment{
-		getTestAttachmentWithID(1),
-		getTestAttachmentWithID(2),
-	}
-}
-
-func getTestAttachmentWithID(id int) Attachment {
-	return Attachment{
-		ID:   id,
-		Name: "Duke.png",
-		Size: 196186,
-	}
-}
-
-func getTestAddAttachmentToWiki() []Attachment {
-	return []Attachment{
-		getTestAddAttachmentToWikiWithID(1),
-	}
-}
-
-func getTestAddAttachmentToWikiWithID(id int) Attachment {
-	return Attachment{
-		ID:   id,
-		Name: "Duke.png",
-		Size: 196186,
-		CreatedUser: User{
-			ID:          1,
-			UserID:      "admin",
-			Name:        "admin",
-			RoleType:    1,
-			Lang:        "",
-			MailAddress: "eguchi@nulab.example",
+		CreatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
+			RoleType:    RoleType(1),
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		Created: "2014-07-11T06:26:05Z",
+		Created: &Timestamp{referenceTime},
+		UpdatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
+			RoleType:    RoleType(1),
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
+		},
+		Updated: &Timestamp{referenceTime},
 	}
 }
 
-func getWikis(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestWikis())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
+func getTestWikiTag() *Tag {
+	return &Tag{
+		ID:   Int(1),
+		Name: String("test"),
 	}
 }
 
-func getWikiCount(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestWikiCount())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
+func getTestGetWikiAttachment() *Attachment {
+	return &Attachment{
+		ID:   Int(1),
+		Name: String("Duke.png"),
+		Size: Int(196186),
 	}
 }
 
-func getWikiTags(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestWikiTags())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getWiki(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestWiki())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getGetAttachmentToWiki(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestGetWikiAttachments())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getAddAttachmentToWiki(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestAddAttachmentToWiki())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
+func getTestAddAttachmentToWiki() *Attachment {
+	return &Attachment{
+		ID:   Int(1),
+		Name: String("Duke.png"),
+		Size: Int(196186),
+		CreatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
+			RoleType:    1,
+			Lang:        nil,
+			MailAddress: String("eguchi@nulab.example"),
+		},
+		Created: &Timestamp{referenceTime},
 	}
 }
 
 func TestGetWikis(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis", getWikis)
-	expected := getTestWikis()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONWiki)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	wikis, err := api.GetWikis(1, "test")
+	wikis, err := client.GetWikis(1, "test")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, wikis) {
-		t.Fatal(ErrIncorrectResponse)
+	want := []*Wiki{getTestWiki()}
+	if !reflect.DeepEqual(want, wikis) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, wikis)))
 	}
 }
 
 func TestGetWikisWithInvalidProjectKey(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.GetWikis(true, "test")
+	_, err := client.GetWikis(true, "test")
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikisFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetWikis(1, "test"); err == nil {
+	if _, err := client.GetWikis(1, "test"); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikiCount(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis/count", getWikiCount)
-	expected := getTestWikiCount()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"count": 1}`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	count, err := api.GetWikiCount(1)
+	count, err := client.GetWikiCount(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expected.Count, count) {
+
+	want := getTestWikiCount()
+	if !reflect.DeepEqual(*want.Count, count) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetWikiCountFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/count", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetWikiCount(1)
+	_, err := client.GetWikiCount(1)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikiCountWithInvalidProjectKey(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.GetWikiCount(true)
+	_, err := client.GetWikiCount(true)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikiTags(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis/tags", getWikiTags)
-	expected := getTestWikiTags()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `
+			[
+				{
+					"id": 1,
+					"name": "test"
+				}
+			]
+		`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	tags, err := api.GetWikiTags(1)
+	tags, err := client.GetWikiTags(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expected, tags) {
+
+	want := []*Tag{getTestWikiTag()}
+	if !reflect.DeepEqual(want, tags) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetWikiTagsWithInvalidProjectKey(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	_, err := api.GetWikiTags(true)
+	_, err := client.GetWikiTags(true)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikiTagsFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/tags", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetWikiTags(1)
+	_, err := client.GetWikiTags(1)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetWikiByID(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis/1", getWiki)
-	expected := getTestWiki()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	wiki, err := api.GetWiki(1)
+	wiki, err := client.GetWiki(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *wiki) {
+	want := getTestWiki()
+	if !reflect.DeepEqual(want, wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetWikiByIDFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.GetWiki(1)
+	_, err := client.GetWiki(1)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestCreateWiki(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis", getWiki)
-	expected := getTestWiki()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &CreateWikiInput{
-		ProjectID: 1,
-		Name:      "Home",
-		Content:   "test",
+		ProjectID:  Int(1),
+		Name:       String("Home"),
+		Content:    String("test"),
+		MailNotify: Bool(false),
 	}
-	wiki, err := api.CreateWiki(input)
+	wiki, err := client.CreateWiki(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *wiki) {
+	want := getTestWiki()
+	if !reflect.DeepEqual(want, wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestCreateWikiFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &CreateWikiInput{
-		ProjectID: 1,
-		Name:      "Home",
-		Content:   "test",
+		ProjectID: Int(1),
+		Name:      String("Home"),
+		Content:   String("test"),
 	}
-	_, err := api.CreateWiki(input)
+
+	_, err := client.CreateWiki(input)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestUpdateWiki(t *testing.T) {
-	http.HandleFunc("/api/v2/wikis/1", getWiki)
-	expected := getTestWiki()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &UpdateWikiInput{
-		WikiID:  1,
-		Name:    "Home",
-		Content: "test",
+		WikiID:     Int(1),
+		Name:       String("Home"),
+		Content:    String("test"),
+		MailNotify: Bool(false),
 	}
-	wiki, err := api.UpdateWiki(input)
+	wiki, err := client.UpdateWiki(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *wiki) {
+	want := getTestWiki()
+	if !reflect.DeepEqual(want, wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestUpdateWikiFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &UpdateWikiInput{
-		WikiID:  1,
-		Name:    "Home",
-		Content: "test",
+		WikiID:  Int(1),
+		Name:    String("Home"),
+		Content: String("test"),
 	}
-	_, err := api.UpdateWiki(input)
-	if err == nil {
+	if _, err := client.UpdateWiki(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestDeleteWiki(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1", getWiki)
-	expected := getTestWiki()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	wiki, err := api.DeleteWiki(1)
+	wiki, err := client.DeleteWiki(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, *wiki) {
+	want := getTestWiki()
+	if !reflect.DeepEqual(want, wiki) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestDeleteWikiFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	_, err := api.DeleteWiki(1)
-	if err == nil {
+	if _, err := client.DeleteWiki(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetAttachmentToWiki(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1/attachments", getGetAttachmentToWiki)
-	expected := getTestGetWikiAttachments()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `
+			[
+				{
+					"id": 1,
+					"name": "Duke.png",
+					"size": 196186
+				}
+			]
+		`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	attachments, err := api.GetWikiAttachments(1)
+	attachments, err := client.GetWikiAttachments(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, attachments) {
+	want := []*Attachment{getTestGetWikiAttachment()}
+	if !reflect.DeepEqual(want, attachments) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetWikiAttachmentsFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
-	if _, err := api.GetWikiAttachments(1); err == nil {
+	if _, err := client.GetWikiAttachments(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestAddAttachmentToWiki(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1/attachments", getAddAttachmentToWiki)
-	expected := getTestAddAttachmentToWiki()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `
+		[
+			{
+				"id": 1,
+				"name": "Duke.png",
+				"size": 196186,
+				"createdUser": {
+					"id": 1,
+					"userId": "admin",
+					"name": "admin",
+					"roleType": 1,
+					"lang": null,
+					"mailAddress": "eguchi@nulab.example"
+				},
+				"created": "2006-01-02T15:04:05Z"
+			}
+		]
+		`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &AddAttachmentToWikiInput{
-		WikiID:        1,
+		WikiID:        Int(1),
 		AttachmentIDs: []int{1},
 	}
-	attachment, err := api.AddAttachmentToWiki(input)
+	attachment, err := client.AddAttachmentToWiki(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, attachment) {
+	want := []*Attachment{getTestAddAttachmentToWiki()}
+	if !reflect.DeepEqual(want, attachment) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestAddAttachmentToWikiFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &AddAttachmentToWikiInput{
-		WikiID:        1,
+		WikiID:        Int(1),
 		AttachmentIDs: []int{1},
 	}
-	if _, err := api.AddAttachmentToWiki(input); err == nil {
+	if _, err := client.AddAttachmentToWiki(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

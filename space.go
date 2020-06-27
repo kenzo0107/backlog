@@ -8,44 +8,44 @@ import (
 
 // Space : backlog space
 type Space struct {
-	SpaceKey           string   `json:"spaceKey"`
-	Name               string   `json:"name"`
-	OwnerID            int      `json:"ownerId"`
-	Lang               string   `json:"lang"`
-	Timezone           string   `json:"timezone"`
-	ReportSendTime     string   `json:"reportSendTime"`
-	TextFormattingRule string   `json:"textFormattingRule"`
-	Created            JSONTime `json:"created"`
-	Updated            JSONTime `json:"updated"`
+	SpaceKey           *string    `json:"spaceKey,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	OwnerID            *int       `json:"ownerId,omitempty"`
+	Lang               *string    `json:"lang,omitempty"`
+	Timezone           *string    `json:"timezone,omitempty"`
+	ReportSendTime     *string    `json:"reportSendTime,omitempty"`
+	TextFormattingRule *string    `json:"textFormattingRule,omitempty"`
+	Created            *Timestamp `json:"created,omitempty"`
+	Updated            *Timestamp `json:"updated,omitempty"`
 }
 
 // SpaceNotification : backlog space notification
 type SpaceNotification struct {
-	Content string   `json:"content"`
-	Updated JSONTime `json:"updated"`
+	Content *string    `json:"content,omitempty"`
+	Updated *Timestamp `json:"updated,omitempty"`
 }
 
 // SpaceDiskUsage : disk usage of space
 type SpaceDiskUsage struct {
-	Capacity   int                    `json:"capacity"`
-	Issue      int                    `json:"issue"`
-	Wiki       int                    `json:"wiki"`
-	File       int                    `json:"file"`
-	Subversion int                    `json:"subversion"`
-	Git        int                    `json:"git"`
-	GitLFS     int                    `json:"gitLFS"`
-	Details    []SpaceDiskUsageDetail `json:"details"`
+	Capacity   *int                    `json:"capacity,omitempty"`
+	Issue      *int                    `json:"issue,omitempty"`
+	Wiki       *int                    `json:"wiki,omitempty"`
+	File       *int                    `json:"file,omitempty"`
+	Subversion *int                    `json:"subversion,omitempty"`
+	Git        *int                    `json:"git,omitempty"`
+	GitLFS     *int                    `json:"gitLFS,omitempty"`
+	Details    []*SpaceDiskUsageDetail `json:"details,omitempty"`
 }
 
 // SpaceDiskUsageDetail : the detail of disk usage of a space
 type SpaceDiskUsageDetail struct {
-	ProjectID  int `json:"projectId"`
-	Issue      int `json:"issue"`
-	Wiki       int `json:"wiki"`
-	File       int `json:"file"`
-	Subversion int `json:"subversion"`
-	Git        int `json:"git"`
-	GitLFS     int `json:"gitLFS"`
+	ProjectID  *int `json:"projectId,omitempty"`
+	Issue      *int `json:"issue,omitempty"`
+	Wiki       *int `json:"wiki,omitempty"`
+	File       *int `json:"file,omitempty"`
+	Subversion *int `json:"subversion,omitempty"`
+	Git        *int `json:"git,omitempty"`
+	GitLFS     *int `json:"gitLFS,omitempty"`
 }
 
 // GetSpace returns backlog space
@@ -55,11 +55,11 @@ func (api *Client) GetSpace() (*Space, error) {
 
 // GetSpaceContext returns backlog space with context
 func (api *Client) GetSpaceContext(ctx context.Context) (*Space, error) {
-	space := Space{}
+	space := new(Space)
 	if err := api.getMethod(ctx, "/api/v2/space", url.Values{}, &space); err != nil {
 		return nil, err
 	}
-	return &space, nil
+	return space, nil
 }
 
 // GetSpaceIcon downloads space icon
@@ -79,11 +79,11 @@ func (api *Client) GetSpaceNotification() (*SpaceNotification, error) {
 
 // GetSpaceNotificationContext returns a space notification with context
 func (api *Client) GetSpaceNotificationContext(ctx context.Context) (*SpaceNotification, error) {
-	spaceNotification := SpaceNotification{}
+	spaceNotification := new(SpaceNotification)
 	if err := api.getMethod(ctx, "/api/v2/space/notification", url.Values{}, &spaceNotification); err != nil {
 		return nil, err
 	}
-	return &spaceNotification, nil
+	return spaceNotification, nil
 }
 
 // UpdateSpaceNotification updates a space notification
@@ -96,11 +96,12 @@ func (api *Client) UpdateSpaceNotificationContext(ctx context.Context, content s
 	values := url.Values{
 		"content": {content},
 	}
-	spaceNotification := SpaceNotification{}
+
+	spaceNotification := new(SpaceNotification)
 	if err := api.putMethod(ctx, "/api/v2/space/notification", values, &spaceNotification); err != nil {
 		return nil, err
 	}
-	return &spaceNotification, nil
+	return spaceNotification, nil
 }
 
 // GetSpaceDiskUsage returns the disk usage of a space
@@ -110,9 +111,9 @@ func (api *Client) GetSpaceDiskUsage() (*SpaceDiskUsage, error) {
 
 // GetSpaceDiskUsageContext returns the disk usage of a space with context
 func (api *Client) GetSpaceDiskUsageContext(ctx context.Context) (*SpaceDiskUsage, error) {
-	diskUsage := SpaceDiskUsage{}
+	diskUsage := new(SpaceDiskUsage)
 	if err := api.getMethod(ctx, "/api/v2/space/diskUsage", url.Values{}, &diskUsage); err != nil {
 		return nil, err
 	}
-	return &diskUsage, nil
+	return diskUsage, nil
 }

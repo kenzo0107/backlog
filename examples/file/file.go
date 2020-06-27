@@ -20,11 +20,11 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("id: %d, name: %s, size: %d\n", fileUploadResponse.ID, fileUploadResponse.Name, fileUploadResponse.Size)
+	fmt.Printf("id: %d, name: %s, size: %d\n", *fileUploadResponse.ID, *fileUploadResponse.Name, fileUploadResponse.Size)
 
 	i := &backlog.AddAttachmentToWikiInput{
-		WikiID:        451845,
-		AttachmentIDs: []int{fileUploadResponse.ID},
+		WikiID:        backlog.Int(451845),
+		AttachmentIDs: []int{*fileUploadResponse.ID},
 	}
 	attachments, err := api.AddAttachmentToWiki(i)
 	if err != nil {

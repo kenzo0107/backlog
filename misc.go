@@ -20,21 +20,21 @@ import (
 
 // ErrorResponse is backlog error response
 type ErrorResponse struct {
-	Errors []Error `json:"errors"`
+	Errors []*Error `json:"errors"`
 }
 
 // Error is backlog error
 type Error struct {
-	Message  string `json:"message"`
-	Code     int    `json:"code"`
-	MoreInfo string `json:"moreInfo"`
+	Message  *string `json:"message,omitempty"`
+	Code     *int    `json:"code,omitempty"`
+	MoreInfo *string `json:"moreInfo,omitempty"`
 }
 
 // Errs : error
 func (t ErrorResponse) Errs() error {
 	s := []string{}
 	for _, err := range t.Errors {
-		s = append(s, fmt.Sprintf("code:%d message:%s moreInfo:%s", err.Code, err.Message, err.MoreInfo))
+		s = append(s, fmt.Sprintf("code:%d message:%s moreInfo:%s", *err.Code, *err.Message, *err.MoreInfo))
 	}
 
 	if len(s) == 0 {
@@ -189,7 +189,7 @@ func checkStatusCode(resp *http.Response, d debug) error {
 		return err
 	}
 
-	errorResponse := &ErrorResponse{}
+	errorResponse := new(ErrorResponse)
 	if err := newJSONParser(errorResponse)(resp); err == nil {
 		return errorResponse.Errs()
 	}
@@ -231,10 +231,6 @@ func projIDOrKey(projIDOrKey interface{}) (string, error) {
 }
 
 func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL string, writer io.Writer, d debug) (err error) {
-	if downloadURL == "" {
-		return fmt.Errorf("received empty download URL")
-	}
-
 	req, err := http.NewRequest("GET", downloadURL, &bytes.Buffer{})
 	if err != nil {
 		return err

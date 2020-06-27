@@ -2,155 +2,102 @@ package backlog
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"reflect"
 	"testing"
 )
 
+const testJSONSpace string = `{
+	"spaceKey": "nulab",
+	"name": "Nulab Inc.",
+	"ownerId": 1,
+	"lang": "ja",
+	"timezone": "Asia/Tokyo",
+	"reportSendTime": "08:00:00",
+	"textFormattingRule": "markdown",
+	"created": "2006-01-02T15:04:05Z",
+	"updated": "2006-01-02T15:04:05Z"
+}`
+
 func getTestSpace() *Space {
 	return &Space{
-		SpaceKey:           "nulab",
-		Name:               "Nulab Inc.",
-		OwnerID:            1,
-		Lang:               "ja",
-		Timezone:           "Asia/Tokyo",
-		ReportSendTime:     "08:00:00",
-		TextFormattingRule: "markdown",
-		Created:            "2008-07-06T15:00:00Z",
-		Updated:            "2013-06-18T07:55:37Z",
+		SpaceKey:           String("nulab"),
+		Name:               String("Nulab Inc."),
+		OwnerID:            Int(1),
+		Lang:               String("ja"),
+		Timezone:           String("Asia/Tokyo"),
+		ReportSendTime:     String("08:00:00"),
+		TextFormattingRule: String("markdown"),
+		Created:            &Timestamp{referenceTime},
+		Updated:            &Timestamp{referenceTime},
 	}
 }
 
-func getTestSpaceNotification(content string) *SpaceNotification {
+func getTestSpaceNotification() *SpaceNotification {
 	return &SpaceNotification{
-		Content: content,
-		Updated: JSONTime("2013-06-18T07:55:37Z"),
+		Content: String("Notification"),
+		Updated: &Timestamp{referenceTime},
 	}
 }
 
 func getTestSpaceDiskUsage() *SpaceDiskUsage {
 	return &SpaceDiskUsage{
-		Capacity:   1073741824,
-		Issue:      119511,
-		Wiki:       48575,
-		File:       0,
-		Subversion: 0,
-		Git:        0,
-		GitLFS:     0,
-		Details: []SpaceDiskUsageDetail{
+		Capacity:   Int(1073741824),
+		Issue:      Int(119511),
+		Wiki:       Int(48575),
+		File:       Int(0),
+		Subversion: Int(0),
+		Git:        Int(0),
+		GitLFS:     Int(0),
+		Details: []*SpaceDiskUsageDetail{
 			{
-				ProjectID:  1,
-				Issue:      11931,
-				Wiki:       0,
-				File:       0,
-				Subversion: 0,
-				Git:        0,
-				GitLFS:     0,
+				ProjectID:  Int(1),
+				Issue:      Int(11931),
+				Wiki:       Int(0),
+				File:       Int(0),
+				Subversion: Int(0),
+				Git:        Int(0),
+				GitLFS:     Int(0),
 			},
 		},
-	}
-}
-
-func errorResponse() ErrorResponse {
-	return ErrorResponse{
-		Errors: []Error{
-			{
-				Message:  "No space.",
-				Code:     6,
-				MoreInfo: "",
-			},
-		},
-	}
-}
-
-func getErrorResponse(rw http.ResponseWriter, r *http.Request) {
-	rw.WriteHeader(http.StatusInternalServerError)
-	response, _ := json.Marshal(errorResponse())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getSpace(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestSpace())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getSpaceNotification(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestSpaceNotification("test"))
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func getSpaceDiskUsage(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestSpaceDiskUsage())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
 	}
 }
 
 func TestGetSpace(t *testing.T) {
-	http.HandleFunc("/api/v2/space", getSpace)
-	expected := getTestSpace()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/space", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, testJSONSpace); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	space, err := api.GetSpace()
+	space, err := client.GetSpace()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, space) {
+	want := getTestSpace()
+	if !reflect.DeepEqual(want, space) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetSpaceFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetSpace(); err == nil {
-		t.Fatal("expected an error but got none")
-	}
-}
-
-func TestGetSpaceErrorResponse(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space", getErrorResponse)
-
-	once.Do(startServer)
-
-	logger := log.New(os.Stdout, "backlog: ", log.Lshortfile|log.LstdFlags)
-	api := New(
-		"testing-token",
-		"http://"+serverAddr+"/",
-		OptionDebug(true),
-		OptionHTTPClient(&http.Client{}),
-		OptionLog(logger),
-	)
-
-	api.Debugf("%s", "test")
-
-	if _, err := api.GetSpace(); err == nil {
-		log.Println("err", err)
+	if _, err := client.GetSpace(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -162,112 +109,139 @@ func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
 }
 
 func TestGetSpaceIcon(t *testing.T) {
-	api := &Client{
-		endpoint:   "http://" + serverAddr + "/",
-		apiKey:     "testing-token",
-		httpclient: &mockHTTPClient{},
-	}
+	client, _, _, teardown := setup()
+	defer teardown()
 
-	err := api.GetSpaceIcon(&bytes.Buffer{})
+	client.httpclient = &mockHTTPClient{}
+
+	err := client.GetSpaceIcon(&bytes.Buffer{})
 	if err != nil {
 		log.Fatalf("Unexpected error: %s in test", err)
 	}
 }
 
 func TestGetSpaceNotification(t *testing.T) {
-	http.HandleFunc("/api/v2/space/notification", getSpaceNotification)
-	expected := getTestSpaceNotification("test")
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"content": "Notification", "updated": "2006-01-02T15:04:05Z"}`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	spaceNotification, err := api.GetSpaceNotification()
+	spaceNotification, err := client.GetSpaceNotification()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, spaceNotification) {
+	want := getTestSpaceNotification()
+	if !reflect.DeepEqual(want, spaceNotification) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetSpaceNotificationFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetSpaceNotification(); err == nil {
+	if _, err := client.GetSpaceNotification(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestUpdateSpaceNotification(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space/notification", getSpaceNotification)
-	expected := getTestSpaceNotification("test")
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"content": "Notification", "updated": "2006-01-02T15:04:05Z"}`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	spaceNotification, err := api.UpdateSpaceNotification("test")
+	spaceNotification, err := client.UpdateSpaceNotification("test")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, spaceNotification) {
+	want := getTestSpaceNotification()
+	if !reflect.DeepEqual(want, spaceNotification) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestUpdateSpaceNotificationFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.UpdateSpaceNotification("test"); err == nil {
+	if _, err := client.UpdateSpaceNotification("test"); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestGetSpaceDiskUsage(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space/diskUsage", getSpaceDiskUsage)
-	expected := getTestSpaceDiskUsage()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `
+			{
+				"capacity": 1073741824,
+				"issue": 119511,
+				"wiki": 48575,
+				"file": 0,
+				"subversion": 0,
+				"git": 0,
+				"gitLFS": 0,
+				"details":[
+					{
+						"projectId": 1,
+						"issue": 11931,
+						"wiki": 0,
+						"file": 0,
+						"subversion": 0,
+						"git": 0,
+						"gitLFS": 0
+					}
+				]
+			}
+		`); err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	spaceNotification, err := api.GetSpaceDiskUsage()
+	spaceNotification, err := client.GetSpaceDiskUsage()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, spaceNotification) {
+	want := getTestSpaceDiskUsage()
+	if !reflect.DeepEqual(want, spaceNotification) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetSpaceDiskUsageFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/space/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
-
-	if _, err := api.GetSpaceDiskUsage(); err == nil {
+	if _, err := client.GetSpaceDiskUsage(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

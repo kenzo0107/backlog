@@ -1,157 +1,274 @@
 package backlog
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
+
+	"github.com/kylelemons/godebug/pretty"
 )
 
-func getTestIssues() []Issue {
-	return []Issue{
-		getTestIssuesWithID(1),
-		getTestIssuesWithID(2),
-		getTestIssuesWithID(3),
-		getTestIssuesWithID(4),
-	}
-}
+const testJSONIssue string = `{
+	"id": 1,
+	"projectId": 1,
+	"issueKey": "BLG-1",
+	"keyId": 1,
+	"issueType": {
+		"id": 2,
+		"projectId": 1,
+		"name": "タスク",
+		"color": "#7ea800",
+		"displayOrder": 0
+	},
+	"summary": "first issue",
+	"description": "",
+	"resolutions": "",
+	"priority": {
+		"id": 3,
+		"name": "中"
+	},
+	"status": {
+		"id": 1,
+		"projectId": 1,
+		"name": "未対応",
+		"color": "#ed8077",
+		"displayOrder": 1000
+	},
+	"assignee": {
+		"id": 2,
+		"name": "eguchi",
+		"roleType": 2,
+		"lang": null,
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"category": [],
+	"versions": [],
+	"milestone": [
+		{
+			"id": 30,
+			"projectId": 1,
+			"name": "wait for release",
+			"description": "",
+			"startDate": null,
+			"releaseDueDate": null,
+			"archived": false
+		}
+	],
+	"startDate": null,
+	"dueDate": null,
+	"estimatedHours": null,
+	"actualHours": null,
+	"parentIssueId": null,
+	"createdUser": {
+		"id": 1,
+		"userId": "admin",
+		"name": "admin",
+		"roleType": 1,
+		"lang": "ja",
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"created": "2006-01-02T15:04:05Z",
+	"updatedUser": {
+		"id": 1,
+		"userId": "admin",
+		"name": "admin",
+		"roleType": 1,
+		"lang": "ja",
+		"mailAddress": "eguchi@nulab.example"
+	},
+	"updated": "2006-01-02T15:04:05Z",
+	"customFields": [],
+	"attachments": [
+		{
+			"id": 1,
+			"name": "IMGP0088.JPG",
+			"size": 85079
+		}
+	],
+	"sharedFiles": [
+		{
+			"id": 454403,
+			"type": "file",
+			"dir": "/ユーザアイコン/",
+			"name": "01_サラリーマン.png",
+			"size": 2735,
+			"createdUser": {
+				"id": 5686,
+				"userId": "takada",
+				"name": "takada",
+				"roleType": 2,
+				"lang": "ja",
+				"mailAddress": "takada@nulab.example"
+			},
+			"created": "2006-01-02T15:04:05Z",
+			"updatedUser": {
+				"id": 5686,
+				"userId": "takada",
+				"name": "takada",
+				"roleType": 2,
+				"lang": "ja",
+				"mailAddress": "takada@nulab.example"
+			},
+			"updated": "2006-01-02T15:04:05Z"
+		}
+	],
+	"stars": [
+		{
+			"id": 10,
+			"comment": null,
+			"url": "https://xx.backlog.jp/view/BLG-1",
+			"title": "[BLG-1] first issue | 課題の表示 - Backlog",
+			"presenter": {
+				"id": 2,
+				"userId": "eguchi",
+				"name": "eguchi",
+				"roleType": 2,
+				"lang": "ja",
+				"mailAddress": "eguchi@nulab.example"
+			},
+			"created": "2006-01-02T15:04:05Z"
+		}
+	]
+}`
 
-func getTestIssuesWithID(id int) Issue {
-	return Issue{
-		ID:        id,
-		ProjectID: 1,
-		IssueKey:  "BLG-1",
-		KeyID:     1,
-		IssueType: IssueType{
-			ID:           2,
-			ProjectID:    1,
-			Name:         "タスク",
-			Color:        "#7ea800",
-			DisplayOrder: 0,
+func getTestIssuesWithID(id int) *Issue {
+	return &Issue{
+		ID:        Int(id),
+		ProjectID: Int(1),
+		IssueKey:  String("BLG-1"),
+		KeyID:     Int(1),
+		IssueType: &IssueType{
+			ID:           Int(2),
+			ProjectID:    Int(1),
+			Name:         String("タスク"),
+			Color:        String("#7ea800"),
+			DisplayOrder: Int(0),
 		},
-		Summary:     "first issue",
-		Description: "",
-		Resolutions: "",
-		Priority: Priority{
-			ID:   3,
-			Name: "中",
+		Summary:     String("first issue"),
+		Description: String(""),
+		Resolutions: String(""),
+		Priority: &Priority{
+			ID:   Int(3),
+			Name: String("中"),
 		},
-		Status: Status{
-			ID:           1,
-			ProjectID:    1,
-			Name:         "未対応",
-			Color:        "#ed8077",
-			DisplayOrder: 1000,
+		Status: &Status{
+			ID:           Int(1),
+			ProjectID:    Int(1),
+			Name:         String("未対応"),
+			Color:        String("#ed8077"),
+			DisplayOrder: Int(1000),
 		},
-		Assignee: User{
-			ID:          2,
-			Name:        "eguchi",
-			RoleType:    2,
-			Lang:        "",
-			MailAddress: "eguchi@nulab.example",
+		Assignee: &User{
+			ID:          Int(2),
+			Name:        String("eguchi"),
+			RoleType:    RoleType(2),
+			Lang:        nil,
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		// Category: []int{},
-		// Versions: []int{},
-		Milestone: []Milestone{
+		Category: []int{},
+		Versions: []int{},
+		Milestone: []*Milestone{
 			{
-				ID:        30,
-				ProjectID: 1,
+				ID:             Int(30),
+				ProjectID:      Int(1),
+				Name:           String("wait for release"),
+				Description:    String(""),
+				StartDate:      nil,
+				ReleaseDueDate: nil,
+				Archived:       Bool(false),
 			},
 		},
-		StartDate:      "",
-		DueDate:        "",
-		EstimatedHours: "",
-		ActualHours:    "",
+		StartDate:      nil,
+		DueDate:        nil,
+		EstimatedHours: nil,
+		ActualHours:    nil,
 		ParentIssueID:  nil,
-		CreatedUser: User{
-			ID:          1,
-			UserID:      "admin",
-			Name:        "admin",
+		CreatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
 			RoleType:    1,
-			Lang:        "ja",
-			MailAddress: "eguchi@nulab.example",
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		Created: JSONTime("2012-07-23T06:10:15Z"),
-		UpdatedUser: User{
-			ID:          1,
-			UserID:      "admin",
-			Name:        "admin",
-			RoleType:    1,
-			Lang:        "ja",
-			MailAddress: "eguchi@nulab.example",
+		Created: &Timestamp{referenceTime},
+		UpdatedUser: &User{
+			ID:          Int(1),
+			UserID:      String("admin"),
+			Name:        String("admin"),
+			RoleType:    RoleType(1),
+			Lang:        String("ja"),
+			MailAddress: String("eguchi@nulab.example"),
 		},
-		Updated:      JSONTime("2013-02-07T08:09:49Z"),
-		CustomFields: nil,
-		Attachments: []Attachment{
+		Updated:      &Timestamp{referenceTime},
+		CustomFields: []*CustomField{},
+		Attachments: []*Attachment{
 			{
-				ID:   1,
-				Name: "IMGP0088.JPG",
-				Size: 85079,
+				ID:   Int(1),
+				Name: String("IMGP0088.JPG"),
+				Size: Int(85079),
 			},
 		},
-		SharedFiles: []SharedFile{
+		SharedFiles: []*SharedFile{
 			{
-				ID:   454403,
-				Type: "file",
-				Dir:  "/ユーザアイコン/",
-				Name: "01_サラリーマン.png",
-				Size: 2735,
-				CreatedUser: User{
-					ID:          5686,
-					UserID:      "takada",
-					Name:        "takada",
+				ID:   Int(454403),
+				Type: String("file"),
+				Dir:  String("/ユーザアイコン/"),
+				Name: String("01_サラリーマン.png"),
+				Size: Int(2735),
+				CreatedUser: &User{
+					ID:          Int(5686),
+					UserID:      String("takada"),
+					Name:        String("takada"),
 					RoleType:    2,
-					Lang:        "ja",
-					MailAddress: "takada@nulab.example",
+					Lang:        String("ja"),
+					MailAddress: String("takada@nulab.example"),
 				},
-				Created: JSONTime("2009-02-27T03:26:15Z"),
-				UpdatedUser: User{
-					ID:          5686,
-					UserID:      "takada",
-					Name:        "takada",
+				Created: &Timestamp{referenceTime},
+				UpdatedUser: &User{
+					ID:          Int(5686),
+					UserID:      String("takada"),
+					Name:        String("takada"),
 					RoleType:    2,
-					Lang:        "ja",
-					MailAddress: "takada@nulab.example",
+					Lang:        String("ja"),
+					MailAddress: String("takada@nulab.example"),
 				},
-				Updated: JSONTime("2009-03-03T16:57:47Z"),
+				Updated: &Timestamp{referenceTime},
 			},
 		},
-		Stars: []Star{
+		Stars: []*Star{
 			{
-				ID:      10,
-				Comment: "",
-				URL:     "https://xx.backlog.jp/view/BLG-1",
-				Title:   "[BLG-1] first issue | 課題の表示 - Backlog",
-				Presenter: User{
-					ID:          2,
-					UserID:      "eguchi",
-					Name:        "eguchi",
+				ID:      Int(10),
+				Comment: nil,
+				URL:     String("https://xx.backlog.jp/view/BLG-1"),
+				Title:   String("[BLG-1] first issue | 課題の表示 - Backlog"),
+				Presenter: &User{
+					ID:          Int(2),
+					UserID:      String("eguchi"),
+					Name:        String("eguchi"),
 					RoleType:    2,
-					Lang:        "ja",
-					MailAddress: "eguchi@nulab.example",
+					Lang:        String("ja"),
+					MailAddress: String("eguchi@nulab.example"),
 				},
-				Created: JSONTime("2013-07-08T10:24:28Z"),
+				Created: &Timestamp{referenceTime},
 			},
 		},
-	}
-}
-
-func getIssues(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getTestIssues())
-	if _, err := rw.Write(response); err != nil {
-		fmt.Println(err)
 	}
 }
 
 func TestGetIssues(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/issues", getIssues)
-	expected := getTestIssues()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONIssue)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &GetIssuesInput{
 		ProjectIDs:     []int{1},
@@ -164,69 +281,76 @@ func TestGetIssues(t *testing.T) {
 		CreatedUserIDs: []int{8},
 		ResolutionIDs:  []int{9},
 		AssigneeIDs:    []int{10},
-		ParentChild:    11,
+		ParentChild:    Int(11),
+		Attachment:     Bool(false),
+		SharedFile:     Bool(false),
 		Sort:           SortIssueType,
-		Offset:         10,
-		CreatedSince:   "2019-01-07",
-		CreatedUntil:   "2020-01-07",
-		UpdatedSince:   "2019-01-07",
-		UpdatedUntil:   "2020-01-07",
-		StartDateSince: "2019-01-07",
-		StartDateUntil: "2020-01-07",
-		DueDateSince:   "2019-01-07",
-		DueDateUntil:   "2020-01-07",
+		Offset:         Int(10),
+		CreatedSince:   String("2019-01-07"),
+		CreatedUntil:   String("2020-01-07"),
+		UpdatedSince:   String("2019-01-07"),
+		UpdatedUntil:   String("2020-01-07"),
+		StartDateSince: String("2019-01-07"),
+		StartDateUntil: String("2020-01-07"),
+		DueDateSince:   String("2019-01-07"),
+		DueDateUntil:   String("2020-01-07"),
 		IDs:            []int{1},
 		ParentIssueIDs: []int{11, 12, 13},
-		Keyword:        "test",
+		Keyword:        String("test"),
 	}
-	issues, err := api.GetIssues(input)
+	issues, err := client.GetIssues(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, issues) {
+	want := []*Issue{getTestIssuesWithID(1)}
+	if !reflect.DeepEqual(want, issues) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetIssuesWithOrderAndCount(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/issues", getIssues)
-	expected := getTestIssues()
+	client, mux, _, teardown := setup()
+	defer teardown()
 
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf("[%s]", testJSONIssue)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	input := &GetIssuesInput{
 		Order: OrderAsc,
-		Count: 100,
+		Count: Int(100),
 		Sort:  SortCategory,
 	}
-	issues, err := api.GetIssues(input)
+
+	issues, err := client.GetIssues(input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(expected, issues) {
+	want := []*Issue{getTestIssuesWithID(1)}
+	if !reflect.DeepEqual(want, issues) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
 func TestGetIssuesFailed(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/api/v2/issues", func(w http.ResponseWriter, r *http.Request) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	once.Do(startServer)
-	api := New("testing-token", "http://"+serverAddr+"/")
 
 	input := &GetIssuesInput{
 		Sort: SortVersion,
 	}
-	_, err := api.GetIssues(input)
-	if err == nil {
+	if _, err := client.GetIssues(input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -344,5 +468,73 @@ func TestSort_String(t *testing.T) {
 				t.Errorf("Sort.String() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestGetUserMySelfRecentrlyViewedIssues(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[{"issue":%s, "updated": "2006-01-02T15:04:05Z"}]`, testJSONIssue)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &GetUserMySelfRecentrlyViewedIssuesInput{
+		Order:  OrderAsc,
+		Offset: Int(1),
+		Count:  Int(100),
+	}
+	issues, err := client.GetUserMySelfRecentrlyViewedIssues(input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := Issues{
+		{getTestIssuesWithID(1)},
+	}
+
+	if !reflect.DeepEqual(want, issues) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, issues)))
+	}
+}
+
+func TestGetUserMySelfRecentrlyViewedIssuesFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	input := &GetUserMySelfRecentrlyViewedIssuesInput{}
+	_, err := client.GetUserMySelfRecentrlyViewedIssues(input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetUserMySelfRecentrlyViewedIssues4xxErrorFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `
+			{
+				status:     "400 Bad Request",
+				status_code: 400,
+				proto:      "HTTP/2.0"
+			}
+		`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &GetUserMySelfRecentrlyViewedIssuesInput{}
+	if _, err := client.GetUserMySelfRecentrlyViewedIssues(input); err == nil {
+		t.Fatal("expected an error but got none")
 	}
 }
