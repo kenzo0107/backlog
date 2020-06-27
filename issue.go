@@ -340,32 +340,32 @@ func (api *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context
 
 // GetIssuesInput contains all the parameters necessary (including the optional ones) for a GetIssues() request.
 type GetIssuesInput struct {
-	ProjectIDs     []int
-	IssueTypeIDs   []int
-	CategoryIDs    []int
-	VersionIDs     []int
-	MilestoneIDs   []int
-	StatusIDs      []int
-	PriorityIDs    []int
-	AssigneeIDs    []int
-	CreatedUserIDs []int
-	ResolutionIDs  []int
-	ParentChild    *int
-	Attachment     *bool
-	SharedFile     *bool
-	Sort           Sort
-	Order          Order
-	Offset         *int
-	Count          *int
-	CreatedSince   *string
-	CreatedUntil   *string
-	UpdatedSince   *string
-	UpdatedUntil   *string
-	StartDateSince *string
-	StartDateUntil *string
-	DueDateSince   *string
-	DueDateUntil   *string
-	IDs            []int
-	ParentIssueIDs []int
-	Keyword        *string
+	ProjectIDs     []int   `required:"false"`
+	IssueTypeIDs   []int   `required:"false"`
+	CategoryIDs    []int   `required:"false"`
+	VersionIDs     []int   `required:"false"`
+	MilestoneIDs   []int   `required:"false"`
+	StatusIDs      []int   `required:"false"`
+	PriorityIDs    []int   `required:"false"`
+	AssigneeIDs    []int   `required:"false"`
+	CreatedUserIDs []int   `required:"false"`
+	ResolutionIDs  []int   `required:"false"`
+	ParentChild    *int    `required:"false"`
+	Attachment     *bool   `required:"false"`
+	SharedFile     *bool   `required:"false"`
+	Sort           Sort    `required:"false"`
+	Order          Order   `required:"false"`
+	Offset         *int    `required:"false"`
+	Count          *int    `required:"false"`
+	CreatedSince   *string `required:"false"`
+	CreatedUntil   *string `required:"false"`
+	UpdatedSince   *string `required:"false"`
+	UpdatedUntil   *string `required:"false"`
+	StartDateSince *string `required:"false"`
+	StartDateUntil *string `required:"false"`
+	DueDateSince   *string `required:"false"`
+	DueDateUntil   *string `required:"false"`
+	IDs            []int   `required:"false"`
+	ParentIssueIDs []int   `required:"false"`
+	Keyword        *string `required:"false"`
 }

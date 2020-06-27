@@ -175,13 +175,25 @@ func (api *Client) CreateUser(input *CreateUserInput) (*User, error) {
 
 // CreateUserContext creates a user with Context
 func (api *Client) CreateUserContext(ctx context.Context, input *CreateUserInput) (*User, error) {
-	values := url.Values{
-		"userId":      {*input.UserID},
-		"password":    {*input.Password},
-		"name":        {*input.Name},
-		"mailAddress": {*input.MailAddress},
-		"roleType":    {strconv.Itoa(input.RoleType.Int())},
+	values := url.Values{}
+
+	if input.UserID != nil {
+		values.Add("userId", *input.UserID)
 	}
+
+	if input.Password != nil {
+		values.Add("password", *input.Password)
+	}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.MailAddress != nil {
+		values.Add("mailAddress", *input.MailAddress)
+	}
+
+	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
 
 	user := new(User)
 	if err := api.postMethod(ctx, "/api/v2/users", values, &user); err != nil {
@@ -197,12 +209,21 @@ func (api *Client) UpdateUser(input *UpdateUserInput) (*User, error) {
 
 // UpdateUserContext updates a user with Context
 func (api *Client) UpdateUserContext(ctx context.Context, input *UpdateUserInput) (*User, error) {
-	values := url.Values{
-		"password":    {*input.Password},
-		"name":        {*input.Name},
-		"mailAddress": {*input.MailAddress},
-		"roleType":    {strconv.Itoa(input.RoleType.Int())},
+	values := url.Values{}
+
+	if input.Password != nil {
+		values.Add("password", *input.Password)
 	}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.MailAddress != nil {
+		values.Add("mailAddress", *input.MailAddress)
+	}
+
+	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
 
 	user := new(User)
 	if err := api.patchMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID), values, &user); err != nil {
@@ -250,15 +271,15 @@ func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserA
 		}
 	}
 
-	if input.MinID != nil && *input.MinID > 0 {
+	if input.MinID != nil {
 		values.Add("minId", strconv.Itoa(*input.MinID))
 	}
 
-	if input.MaxID != nil && *input.MaxID > 0 {
+	if input.MaxID != nil {
 		values.Add("minId", strconv.Itoa(*input.MaxID))
 	}
 
-	if input.Count != nil && *input.Count > 0 {
+	if input.Count != nil {
 		values.Add("count", strconv.Itoa(*input.Count))
 	}
 

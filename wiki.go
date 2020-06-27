@@ -8,18 +8,18 @@ import (
 
 // Wiki : wiki
 type Wiki struct {
-	ID          *int          `json:"id"`
-	ProjectID   *int          `json:"projectId"`
-	Name        *string       `json:"name"`
-	Content     *string       `json:"content"`
-	Tags        []*Tag        `json:"tags"`
-	Attachments []*Attachment `json:"attachments"`
-	SharedFiles []*SharedFile `json:"sharedFiles"`
-	Stars       []*Star       `json:"stars"`
-	CreatedUser *User         `json:"createdUser"`
-	Created     *Timestamp    `json:"created"`
-	UpdatedUser *User         `json:"updatedUser"`
-	Updated     *Timestamp    `json:"updated"`
+	ID          *int          `json:"id,omitempty"`
+	ProjectID   *int          `json:"projectId,omitempty"`
+	Name        *string       `json:"name,omitempty"`
+	Content     *string       `json:"content,omitempty"`
+	Tags        []*Tag        `json:"tags,omitempty"`
+	Attachments []*Attachment `json:"attachments,omitempty"`
+	SharedFiles []*SharedFile `json:"sharedFiles,omitempty"`
+	Stars       []*Star       `json:"stars,omitempty"`
+	CreatedUser *User         `json:"createdUser,omitempty"`
+	Created     *Timestamp    `json:"created,omitempty"`
+	UpdatedUser *User         `json:"updatedUser,omitempty"`
+	Updated     *Timestamp    `json:"updated,omitempty"`
 }
 
 // Tag : tag
@@ -180,9 +180,14 @@ func (api *Client) UpdateWiki(input *UpdateWikiInput) (*Wiki, error) {
 
 // UpdateWikiContext updates a wiki with Context
 func (api *Client) UpdateWikiContext(ctx context.Context, input *UpdateWikiInput) (*Wiki, error) {
-	values := url.Values{
-		"name":    {*input.Name},
-		"content": {*input.Content},
+	values := url.Values{}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.Content != nil {
+		values.Add("content", *input.Content)
 	}
 
 	if input.MailNotify != nil {

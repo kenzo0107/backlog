@@ -8,16 +8,16 @@ import (
 
 // Webhook : -
 type Webhook struct {
-	ID              *int       `json:"id"`
-	Name            *string    `json:"name"`
-	Description     *string    `json:"description"`
-	HookURL         *string    `json:"hookUrl"`
-	AllEvent        *bool      `json:"allEvent"`
-	ActivityTypeIds []int      `json:"activityTypeIds"`
-	CreatedUser     *User      `json:"createdUser"`
-	Created         *Timestamp `json:"created"`
-	UpdatedUser     *User      `json:"updatedUser"`
-	Updated         *Timestamp `json:"updated"`
+	ID              *int       `json:"id,omitempty"`
+	Name            *string    `json:"name,omitempty"`
+	Description     *string    `json:"description,omitempty"`
+	HookURL         *string    `json:"hookUrl,omitempty"`
+	AllEvent        *bool      `json:"allEvent,omitempty"`
+	ActivityTypeIds []int      `json:"activityTypeIds,omitempty"`
+	CreatedUser     *User      `json:"createdUser,omitempty"`
+	Created         *Timestamp `json:"created,omitempty"`
+	UpdatedUser     *User      `json:"updatedUser,omitempty"`
+	Updated         *Timestamp `json:"updated,omitempty"`
 }
 
 // GetWebhooks returns the list of webhooks
@@ -164,21 +164,21 @@ func (api *Client) DeleteWebhookContext(ctx context.Context, projectIDOrKey inte
 
 // AddWebhookInput contains all the parameters necessary (including the optional ones) for a AddWebhook() request.
 type AddWebhookInput struct {
-	ProjectIDOrKey  interface{}
-	Name            *string
-	Description     *string
-	HookURL         *string
-	AllEvent        *bool
-	ActivityTypeIDs []int
+	ProjectIDOrKey  interface{} `required:"true"`
+	Name            *string     `required:"true"`
+	Description     *string     `required:"false"`
+	HookURL         *string     `required:"true"`
+	AllEvent        *bool       `required:"false"`
+	ActivityTypeIDs []int       `required:"false"`
 }
 
 // UpdateWebhookInput contains all the parameters necessary (including the optional ones) for a UpdateWebhook() request.
 type UpdateWebhookInput struct {
-	ProjectIDOrKey  interface{}
-	WebhookID       *int
-	Name            *string
-	Description     *string
-	HookURL         *string
-	AllEvent        *bool
-	ActivityTypeIDs []int
+	ProjectIDOrKey  interface{} `required:"true"`
+	WebhookID       *int        `required:"true"`
+	Name            *string     `required:"true"`
+	Description     *string     `required:"false"`
+	HookURL         *string     `required:"true"`
+	AllEvent        *bool       `required:"false"`
+	ActivityTypeIDs []int       `required:"false"`
 }

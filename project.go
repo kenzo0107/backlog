@@ -103,13 +103,30 @@ func (api *Client) CreateProjectContext(ctx context.Context, input *CreateProjec
 		return nil, errors.New("textFormattingRule is invalid: textFormattingRule must be backlog or markdown")
 	}
 
-	values := url.Values{
-		"name":                              {*input.Name},
-		"key":                               {*input.Key},
-		"chartEnabled":                      {strconv.FormatBool(*input.ChartEnabled)},
-		"projectLeaderCanEditProjectLeader": {strconv.FormatBool(*input.ProjectLeaderCanEditProjectLeader)},
-		"subtaskingEnabled":                 {strconv.FormatBool(*input.SubtaskingEnabled)},
-		"textFormattingRule":                {*input.TextFormattingRule},
+	values := url.Values{}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
+	if input.Key != nil {
+		values.Add("key", *input.Key)
+	}
+
+	if input.ChartEnabled != nil {
+		values.Add("chartEnabled", strconv.FormatBool(*input.ChartEnabled))
+	}
+
+	if input.ProjectLeaderCanEditProjectLeader != nil {
+		values.Add("projectLeaderCanEditProjectLeader", strconv.FormatBool(*input.ProjectLeaderCanEditProjectLeader))
+	}
+
+	if input.SubtaskingEnabled != nil {
+		values.Add("subtaskingEnabled", strconv.FormatBool(*input.SubtaskingEnabled))
+	}
+
+	if input.TextFormattingRule != nil {
+		values.Add("textFormattingRule", *input.TextFormattingRule)
 	}
 
 	project := new(Project)
@@ -130,27 +147,38 @@ func (api *Client) UpdateProjectContext(ctx context.Context, input *UpdateProjec
 		return nil, errors.New("textFormattingRule is invalid: textFormattingRule must be backlog or markdown")
 	}
 
-	values := url.Values{
-		"name":                              {*input.Name},
-		"chartEnabled":                      {strconv.FormatBool(*input.ChartEnabled)},
-		"projectLeaderCanEditProjectLeader": {strconv.FormatBool(*input.ProjectLeaderCanEditProjectLeader)},
-		"subtaskingEnabled":                 {strconv.FormatBool(*input.SubtaskingEnabled)},
-	}
-
 	if input.ID == nil {
 		return nil, errors.New("id is empty")
 	}
 
+	values := url.Values{}
+
+	if input.Name != nil {
+		values.Add("name", *input.Name)
+	}
+
 	if input.ProjectKey != nil {
-		values.Add("archived", *input.ProjectKey)
+		values.Add("key", *input.ProjectKey)
+	}
+
+	if input.ChartEnabled != nil {
+		values.Add("chartEnabled", strconv.FormatBool(*input.ChartEnabled))
+	}
+
+	if input.ProjectLeaderCanEditProjectLeader != nil {
+		values.Add("projectLeaderCanEditProjectLeader", strconv.FormatBool(*input.ProjectLeaderCanEditProjectLeader))
+	}
+
+	if input.SubtaskingEnabled != nil {
+		values.Add("subtaskingEnabled", strconv.FormatBool(*input.SubtaskingEnabled))
+	}
+
+	if input.TextFormattingRule != nil {
+		values.Add("textFormattingRule", *input.TextFormattingRule)
 	}
 
 	if input.Archived != nil {
 		values.Add("archived", strconv.FormatBool(*input.Archived))
-	}
-
-	if input.TextFormattingRule != nil {
-		values.Add("archived", *input.TextFormattingRule)
 	}
 
 	project := new(Project)
