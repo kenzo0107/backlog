@@ -32,23 +32,6 @@ func TestErrorResponse(t *testing.T) {
 	}
 }
 
-func TestErrorResponseWithoutErrors(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/space", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		w.WriteHeader(http.StatusNotFound)
-		if _, err := fmt.Fprint(w, `{"errors":[]}`); err != nil {
-			t.Fatal(err)
-		}
-	})
-
-	if _, err := client.GetSpace(); err == nil {
-		t.Fatal("expected an error but got none", err)
-	}
-}
-
 func TestStatusUnAuthorized(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
