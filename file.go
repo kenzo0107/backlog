@@ -13,14 +13,14 @@ type FileUploadResponse struct {
 }
 
 // UploadFile uploads a file
-func (api *Client) UploadFile(fpath string) (*FileUploadResponse, error) {
-	return api.UploadFileContext(context.Background(), fpath)
+func (c *Client) UploadFile(fpath string) (*FileUploadResponse, error) {
+	return c.UploadFileContext(context.Background(), fpath)
 }
 
 // UploadFileContext uploads a file and setting a custom context
-func (api *Client) UploadFileContext(ctx context.Context, fpath string) (*FileUploadResponse, error) {
+func (c *Client) UploadFileContext(ctx context.Context, fpath string) (*FileUploadResponse, error) {
 	fileUploadResponse := new(FileUploadResponse)
-	if err := postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"/api/v2/space/attachment?apiKey="+api.apiKey, fpath, "file", url.Values{}, &fileUploadResponse, api); err != nil {
+	if err := postLocalWithMultipartResponse(ctx, c.httpclient, c.endpoint+"/api/v2/space/attachment?apiKey="+c.apiKey, fpath, "file", url.Values{}, &fileUploadResponse, c); err != nil {
 		return nil, err
 	}
 	return fileUploadResponse, nil

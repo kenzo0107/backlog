@@ -12,10 +12,10 @@ import (
 func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
-	api := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
+	c := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
 
 	fpath := filepath.Clean(filepath.Join("testdata", "test.jpg"))
-	fileUploadResponse, err := api.UploadFile(fpath)
+	fileUploadResponse, err := c.UploadFile(fpath)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
@@ -23,10 +23,9 @@ func main() {
 	fmt.Printf("id: %d, name: %s, size: %d\n", *fileUploadResponse.ID, *fileUploadResponse.Name, fileUploadResponse.Size)
 
 	i := &backlog.AddAttachmentToWikiInput{
-		WikiID:        backlog.Int(451845),
 		AttachmentIDs: []int{*fileUploadResponse.ID},
 	}
-	attachments, err := api.AddAttachmentToWiki(i)
+	attachments, err := c.AddAttachmentToWiki(451845, i)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

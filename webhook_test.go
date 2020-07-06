@@ -108,7 +108,7 @@ func TestGetWebhooksFailed(t *testing.T) {
 	}
 }
 
-func TestAddWebhook(t *testing.T) {
+func TestCreateWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -118,15 +118,14 @@ func TestAddWebhook(t *testing.T) {
 		}
 	})
 
-	input := &AddWebhookInput{
-		ProjectIDOrKey:  "SRE",
+	input := &CreateWebhookInput{
 		Name:            String("webhook"),
 		Description:     String(""),
 		HookURL:         String("https://webhook.example.com"),
 		AllEvent:        Bool(false),
 		ActivityTypeIDs: []int{1, 2, 3, 4, 5},
 	}
-	webhook, err := client.AddWebhook(input)
+	webhook, err := client.CreateWebhook("SRE", input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -142,12 +141,11 @@ func TestAddWebhookWithInvalidProjectID(t *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
-	input := &AddWebhookInput{
-		ProjectIDOrKey: true,
-		Name:           String("webhook"),
-		HookURL:        String("https://webhook.example.com"),
+	input := &CreateWebhookInput{
+		Name:    String("webhook"),
+		HookURL: String("https://webhook.example.com"),
 	}
-	if _, err := client.AddWebhook(input); err == nil {
+	if _, err := client.CreateWebhook(true, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -160,12 +158,11 @@ func TestAddWebhookFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &AddWebhookInput{
-		ProjectIDOrKey: "SRE",
-		Name:           String("webhook"),
-		HookURL:        String("https://webhook.example.com"),
+	input := &CreateWebhookInput{
+		Name:    String("webhook"),
+		HookURL: String("https://webhook.example.com"),
 	}
-	if _, err := client.AddWebhook(input); err == nil {
+	if _, err := client.CreateWebhook("SRE", input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -225,15 +222,13 @@ func TestUpdateWebhook(t *testing.T) {
 	})
 
 	input := &UpdateWebhookInput{
-		ProjectIDOrKey:  "SRE",
-		WebhookID:       Int(10),
 		Name:            String("webhook"),
 		Description:     String(""),
 		HookURL:         String("https://webhook.example.com"),
 		AllEvent:        Bool(false),
 		ActivityTypeIDs: []int{1, 2, 3, 4, 5},
 	}
-	webhook, err := client.UpdateWebhook(input)
+	webhook, err := client.UpdateWebhook("SRE", 10, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -250,11 +245,10 @@ func TestUpdateWebhookWithInvalidProjectID(t *testing.T) {
 	defer teardown()
 
 	input := &UpdateWebhookInput{
-		ProjectIDOrKey: true,
-		Name:           String("webhook"),
-		HookURL:        String("https://webhook.example.com"),
+		Name:    String("webhook"),
+		HookURL: String("https://webhook.example.com"),
 	}
-	if _, err := client.UpdateWebhook(input); err == nil {
+	if _, err := client.UpdateWebhook("SRE", 10, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -268,12 +262,10 @@ func TestUpdateWebhookFailed(t *testing.T) {
 	})
 
 	input := &UpdateWebhookInput{
-		WebhookID:      Int(1),
-		ProjectIDOrKey: "SRE",
-		Name:           String("webhook"),
-		HookURL:        String("https://webhook.example.com"),
+		Name:    String("webhook"),
+		HookURL: String("https://webhook.example.com"),
 	}
-	if _, err := client.UpdateWebhook(input); err == nil {
+	if _, err := client.UpdateWebhook("SRE", 1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

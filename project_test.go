@@ -60,7 +60,7 @@ func TestGetProjects(t *testing.T) {
 		}
 	})
 
-	input := &GetProjectsInput{
+	input := &GetProjectsOptions{
 		All:      Bool(true),
 		Archived: Bool(false),
 	}
@@ -84,7 +84,7 @@ func TestGetProjectsFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetProjectsInput{}
+	input := &GetProjectsOptions{}
 	_, err := client.GetProjects(input)
 	if err == nil {
 		t.Fatal("expected an error but got none")
@@ -263,16 +263,15 @@ func TestUpdateProject(t *testing.T) {
 	})
 
 	input := &UpdateProjectInput{
-		ID:                                Int(1),
 		Name:                              String("test"),
-		ProjectKey:                        String("TEST"),
+		Key:                               String("TEST"),
 		ChartEnabled:                      Bool(false),
 		SubtaskingEnabled:                 Bool(false),
 		ProjectLeaderCanEditProjectLeader: Bool(false),
 		TextFormattingRule:                String("markdown"),
 		Archived:                          Bool(false),
 	}
-	project, err := client.UpdateProject(input)
+	project, err := client.UpdateProject(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -293,14 +292,13 @@ func TestUpdateProjectFailed(t *testing.T) {
 	})
 
 	input := &UpdateProjectInput{
-		ID:                                Int(1),
 		Name:                              String("test"),
 		ChartEnabled:                      Bool(false),
 		SubtaskingEnabled:                 Bool(false),
 		ProjectLeaderCanEditProjectLeader: Bool(false),
 		TextFormattingRule:                String("markdown"),
 	}
-	if _, err := client.UpdateProject(input); err == nil {
+	if _, err := client.UpdateProject(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -320,7 +318,7 @@ func TestUpdateProjectWithoutIDFailed(t *testing.T) {
 		ProjectLeaderCanEditProjectLeader: Bool(false),
 		TextFormattingRule:                String("markdown"),
 	}
-	if _, err := client.UpdateProject(input); err == nil {
+	if _, err := client.UpdateProject(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -337,7 +335,7 @@ func TestUpdateProjectWithInvalidTextFormattingRuleFailed(t *testing.T) {
 		TextFormattingRule:                String("downtown"),
 	}
 
-	if _, err := client.UpdateProject(input); err == nil {
+	if _, err := client.UpdateProject(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

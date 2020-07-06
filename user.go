@@ -2,9 +2,8 @@ package backlog
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"net/url"
-	"strconv"
 )
 
 // RoleType : role type
@@ -127,232 +126,219 @@ type Priority struct {
 }
 
 // GetUserMySelf returns get my user information
-func (api *Client) GetUserMySelf() (*User, error) {
-	return api.GetUserMySelfContext(context.Background())
+func (c *Client) GetUserMySelf() (*User, error) {
+	return c.GetUserMySelfContext(context.Background())
 }
 
 // GetUserMySelfContext will retrieve the complete my user information by id with a custom context
-func (api *Client) GetUserMySelfContext(ctx context.Context) (*User, error) {
+func (c *Client) GetUserMySelfContext(ctx context.Context) (*User, error) {
+	u := "/api/v2/users/myself"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	user := new(User)
-	if err := api.getMethod(ctx, "/api/v2/users/myself", url.Values{}, &user); err != nil {
+	if err := c.Do(ctx, req, &user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-// GetUserByID returns a user by id
-func (api *Client) GetUserByID(id int) (*User, error) {
-	return api.GetUserByIDContext(context.Background(), id)
+// GetUser returns a user by id
+func (c *Client) GetUser(id int) (*User, error) {
+	return c.GetUserContext(context.Background(), id)
 }
 
-// GetUserByIDContext will retrieve the complete user information by id with a custom context
-func (api *Client) GetUserByIDContext(ctx context.Context, id int) (*User, error) {
+// GetUserContext will retrieve the complete user information by id with a custom context
+func (c *Client) GetUserContext(ctx context.Context, id int) (*User, error) {
+	u := fmt.Sprintf("/api/v2/users/%v", id)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	user := new(User)
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(id), url.Values{}, &user); err != nil {
+	if err := c.Do(ctx, req, &user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
 // GetUsers returns the list of users
-func (api *Client) GetUsers() ([]*User, error) {
-	return api.GetUsersContext(context.Background())
+func (c *Client) GetUsers() ([]*User, error) {
+	return c.GetUsersContext(context.Background())
 }
 
 // GetUsersContext returns the list of users
-func (api *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
+func (c *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
+	u := "/api/v2/users"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	var users []*User
-	if err := api.getMethod(ctx, "/api/v2/users", url.Values{}, &users); err != nil {
+	if err := c.Do(ctx, req, &users); err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
 // CreateUser creates a user
-func (api *Client) CreateUser(input *CreateUserInput) (*User, error) {
-	return api.CreateUserContext(context.Background(), input)
+func (c *Client) CreateUser(input *CreateUserInput) (*User, error) {
+	return c.CreateUserContext(context.Background(), input)
 }
 
 // CreateUserContext creates a user with Context
-func (api *Client) CreateUserContext(ctx context.Context, input *CreateUserInput) (*User, error) {
-	values := url.Values{}
+func (c *Client) CreateUserContext(ctx context.Context, input *CreateUserInput) (*User, error) {
+	u := "/api/v2/users"
 
-	if input.UserID != nil {
-		values.Add("userId", *input.UserID)
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
 	}
-
-	if input.Password != nil {
-		values.Add("password", *input.Password)
-	}
-
-	if input.Name != nil {
-		values.Add("name", *input.Name)
-	}
-
-	if input.MailAddress != nil {
-		values.Add("mailAddress", *input.MailAddress)
-	}
-
-	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
 
 	user := new(User)
-	if err := api.postMethod(ctx, "/api/v2/users", values, &user); err != nil {
+	if err := c.Do(ctx, req, &user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
 // UpdateUser updates a user
-func (api *Client) UpdateUser(input *UpdateUserInput) (*User, error) {
-	return api.UpdateUserContext(context.Background(), input)
+func (c *Client) UpdateUser(id int, input *UpdateUserInput) (*User, error) {
+	return c.UpdateUserContext(context.Background(), id, input)
 }
 
 // UpdateUserContext updates a user with Context
-func (api *Client) UpdateUserContext(ctx context.Context, input *UpdateUserInput) (*User, error) {
-	values := url.Values{}
+func (c *Client) UpdateUserContext(ctx context.Context, id int, input *UpdateUserInput) (*User, error) {
+	u := fmt.Sprintf("/api/v2/users/%v", id)
 
-	if input.Password != nil {
-		values.Add("password", *input.Password)
+	req, err := c.NewRequest("PATCH", u, input)
+	if err != nil {
+		return nil, err
 	}
-
-	if input.Name != nil {
-		values.Add("name", *input.Name)
-	}
-
-	if input.MailAddress != nil {
-		values.Add("mailAddress", *input.MailAddress)
-	}
-
-	values.Add("roleType", strconv.Itoa(input.RoleType.Int()))
 
 	user := new(User)
-	if err := api.patchMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID), values, &user); err != nil {
+	if err := c.Do(ctx, req, &user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
 // DeleteUser deletes a user
-func (api *Client) DeleteUser(id int) (*User, error) {
-	return api.DeleteUserContext(context.Background(), id)
+func (c *Client) DeleteUser(id int) (*User, error) {
+	return c.DeleteUserContext(context.Background(), id)
 }
 
 // DeleteUserContext deletes a user with Context
-func (api *Client) DeleteUserContext(ctx context.Context, id int) (*User, error) {
+func (c *Client) DeleteUserContext(ctx context.Context, id int) (*User, error) {
+	u := fmt.Sprintf("/api/v2/users/%v", id)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	user := new(User)
-	if err := api.deleteMethod(ctx, "/api/v2/users/"+strconv.Itoa(id), url.Values{}, &user); err != nil {
+	if err := c.Do(ctx, req, &user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
 // GetUserIcon downloads user icon
-func (api *Client) GetUserIcon(id int, writer io.Writer) error {
-	return api.GetUserIconContext(context.Background(), id, writer)
+func (c *Client) GetUserIcon(id int, writer io.Writer) error {
+	return c.GetUserIconContext(context.Background(), id, writer)
 }
 
 // GetUserIconContext downloads user icon with context
-func (api *Client) GetUserIconContext(ctx context.Context, id int, writer io.Writer) error {
-	return downloadFile(ctx, api.httpclient, api.apiKey, api.endpoint+"/api/v2/users/"+strconv.Itoa(id)+"/icon", writer, api)
+func (c *Client) GetUserIconContext(ctx context.Context, id int, writer io.Writer) error {
+	u := c.endpoint + fmt.Sprintf("/api/v2/users/%v/icon", id)
+	return downloadFile(ctx, c.httpclient, c.apiKey, u, writer, c)
 }
 
 // GetUserActivities returns the list of a user's activities
-func (api *Client) GetUserActivities(input *GetUserActivityInput) ([]*UserActivity, error) {
-	return api.GetUserActivitiesContext(context.Background(), input)
+func (c *Client) GetUserActivities(id int, opts *GetUserActivityOptions) ([]*UserActivity, error) {
+	return c.GetUserActivitiesContext(context.Background(), id, opts)
 }
 
 // GetUserActivitiesContext returns the list of a user's activities with context
-func (api *Client) GetUserActivitiesContext(ctx context.Context, input *GetUserActivityInput) ([]*UserActivity, error) {
-	values := url.Values{}
+func (c *Client) GetUserActivitiesContext(ctx context.Context, id int, opts *GetUserActivityOptions) ([]*UserActivity, error) {
+	u := fmt.Sprintf("/api/v2/users/%v/activities", id)
 
-	if len(input.ActivityTypeIDs) > 0 {
-		for _, i := range input.ActivityTypeIDs {
-			values.Add("activityTypeId[]", strconv.Itoa(i))
-		}
+	u, err := c.AddOptions(u, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	if input.MinID != nil {
-		values.Add("minId", strconv.Itoa(*input.MinID))
-	}
-
-	if input.MaxID != nil {
-		values.Add("minId", strconv.Itoa(*input.MaxID))
-	}
-
-	if input.Count != nil {
-		values.Add("count", strconv.Itoa(*input.Count))
-	}
-
-	if input.Order.String() == "" {
-		values.Add("order", OrderDesc.String())
-	} else {
-		values.Add("order", input.Order.String())
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
 	}
 
 	var userActivities []*UserActivity
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/activities", values, &userActivities); err != nil {
+	if err := c.Do(ctx, req, &userActivities); err != nil {
 		return nil, err
 	}
 	return userActivities, nil
 }
 
 // GetUserStars returns the list of stared contents
-func (api *Client) GetUserStars(input *GetUserStarsInput) ([]*Star, error) {
-	return api.GetUserStarsContext(context.Background(), input)
+func (c *Client) GetUserStars(id int, opts *GetUserStarsOptions) ([]*Star, error) {
+	return c.GetUserStarsContext(context.Background(), id, opts)
 }
 
 // GetUserStarsContext returns the list of a user's activities with context
-func (api *Client) GetUserStarsContext(ctx context.Context, input *GetUserStarsInput) ([]*Star, error) {
-	values := url.Values{}
+func (c *Client) GetUserStarsContext(ctx context.Context, id int, opts *GetUserStarsOptions) ([]*Star, error) {
+	u := fmt.Sprintf("/api/v2/users/%v/stars", id)
 
-	if input.MinID != nil {
-		values.Add("minId", strconv.Itoa(*input.MinID))
+	u, err := c.AddOptions(u, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	if input.MaxID != nil {
-		values.Add("minId", strconv.Itoa(*input.MaxID))
-	}
-
-	if input.Count != nil {
-		values.Add("count", strconv.Itoa(*input.Count))
-	}
-
-	if input.Order.String() != "" {
-		values.Add("order", input.Order.String())
-	} else {
-		values.Add("order", OrderDesc.String())
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
 	}
 
 	var stars []*Star
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/stars", values, &stars); err != nil {
+	if err := c.Do(ctx, req, &stars); err != nil {
 		return nil, err
 	}
 	return stars, nil
 }
 
 // GetUserStarCount returns the count of stars
-func (api *Client) GetUserStarCount(input *GetUserStarCountInput) (int, error) {
-	return api.GetUserStarCountContext(context.Background(), input)
+func (c *Client) GetUserStarCount(id int, opts *GetUserStarCountOptions) (int, error) {
+	return c.GetUserStarCountContext(context.Background(), id, opts)
 }
 
 // GetUserStarCountContext returns the count of stars with context
-func (api *Client) GetUserStarCountContext(ctx context.Context, input *GetUserStarCountInput) (int, error) {
-	values := url.Values{}
+func (c *Client) GetUserStarCountContext(ctx context.Context, id int, opts *GetUserStarCountOptions) (int, error) {
+	u := fmt.Sprintf("/api/v2/users/%v/stars/count", id)
 
-	if input.Since != nil {
-		values.Add("since", *input.Since)
+	u, err := c.AddOptions(u, opts)
+	if err != nil {
+		return 0, err
 	}
 
-	if input.Until != nil {
-		values.Add("until", *input.Until)
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return 0, err
 	}
 
-	type c struct {
+	type p struct {
 		Count int
 	}
-	r := c{}
+	r := new(p)
 
-	if err := api.getMethod(ctx, "/api/v2/users/"+strconv.Itoa(*input.ID)+"/stars/count", values, &r); err != nil {
+	if err := c.Do(ctx, req, &r); err != nil {
 		return 0, err
 	}
 	return r.Count, nil
@@ -360,51 +346,40 @@ func (api *Client) GetUserStarCountContext(ctx context.Context, input *GetUserSt
 
 // CreateUserInput contains all the parameters necessary (including the optional ones) for a CreateUser() request.
 type CreateUserInput struct {
-	UserID      *string  `required:"true"`
-	Password    *string  `required:"true"`
-	Name        *string  `required:"true"`
-	MailAddress *string  `required:"true"`
-	RoleType    RoleType `required:"true"`
+	UserID      *string
+	Password    *string
+	Name        *string
+	MailAddress *string
+	RoleType    RoleType
 }
 
 // UpdateUserInput contains all the parameters necessary (including the optional ones) for a UpdateUser() request.
 type UpdateUserInput struct {
-	ID          *int     `required:"true"`
-	Password    *string  `required:"true"`
-	Name        *string  `required:"true"`
-	MailAddress *string  `required:"true"`
-	RoleType    RoleType `required:"true"`
+	Password    *string
+	Name        *string
+	MailAddress *string
+	RoleType    RoleType
 }
 
-// GetUserActivityInput contains all the parameters necessary (including the optional ones) for a GetUserActivities() request.
-type GetUserActivityInput struct {
-	ID              *int  `required:"true"`
-	ActivityTypeIDs []int `required:"false"`
-	MinID           *int  `required:"false"`
-	MaxID           *int  `required:"false"`
-	Count           *int  `required:"false"`
-	Order           Order `required:"false"`
+// GetUserActivityOptions specifies optional parameters to the GetUserActivities method.
+type GetUserActivityOptions struct {
+	ActivityTypeIDs []int `url:"activityTypeId[],omitempty"`
+	MinID           *int  `url:"minId,omitempty"`
+	MaxID           *int  `url:"maxId,omitempty"`
+	Count           *int  `url:"count,omitempty"`
+	Order           Order `url:"order,omitempty"`
 }
 
-// GetUserStarsInput contains all the parameters necessary (including the optional ones) for a GetUserStars() request.
-type GetUserStarsInput struct {
-	ID    *int  `required:"true"`
-	MinID *int  `required:"false"`
-	MaxID *int  `required:"false"`
-	Count *int  `required:"false"`
-	Order Order `required:"false"`
+// GetUserStarsOptions specifies optional parameters to the GetUserStars method.
+type GetUserStarsOptions struct {
+	MinID *int  `url:"minId,omitempty"`
+	MaxID *int  `url:"maxId,omitempty"`
+	Count *int  `url:"count,omitempty"`
+	Order Order `url:"order,omitempty"`
 }
 
-// GetUserStarCountInput contains all the parameters necessary (including the optional ones) for a GetUserStarCount() request.
-type GetUserStarCountInput struct {
-	ID    *int    `required:"true"`
-	Since *string `required:"false"`
-	Until *string `required:"false"`
-}
-
-// GetUserMySelfRecentrlyViewedIssuesInput contains all the parameters necessary (including the optional ones) for a GetUserMySelfRecentrlyViewedIssues() request.
-type GetUserMySelfRecentrlyViewedIssuesInput struct {
-	Order  Order `required:"false"`
-	Offset *int  `required:"false"`
-	Count  *int  `required:"false"`
+// GetUserStarCountOptions specifies optional parameters to the GetUserStarCount method.
+type GetUserStarCountOptions struct {
+	Since *string `url:"since,omitempty"`
+	Until *string `url:"until,omitempty"`
 }

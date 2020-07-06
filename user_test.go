@@ -325,7 +325,7 @@ func TestGetUserByID(t *testing.T) {
 		}
 	})
 
-	user, err := client.GetUserByID(1)
+	user, err := client.GetUser(1)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -345,7 +345,7 @@ func TestGetUserByIDFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	if _, err := client.GetUserByID(1); err == nil {
+	if _, err := client.GetUser(1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -445,13 +445,12 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	input := &UpdateUserInput{
-		ID:          Int(1),
 		Password:    String("password"),
 		Name:        String("admin"),
 		MailAddress: String("eguchi@nulab.example"),
 		RoleType:    RoleTypeAdministrator,
 	}
-	user, err := client.UpdateUser(input)
+	user, err := client.UpdateUser(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -472,13 +471,12 @@ func TestUpdateUserFailed(t *testing.T) {
 	})
 
 	input := &UpdateUserInput{
-		ID:          Int(1),
 		Password:    String("password"),
 		Name:        String("admin"),
 		MailAddress: String("eguchi@nulab.example"),
 		RoleType:    RoleTypeAdministrator,
 	}
-	if _, err := client.UpdateUser(input); err == nil {
+	if _, err := client.UpdateUser(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -541,15 +539,14 @@ func TestGetUserActivities(t *testing.T) {
 		}
 	})
 
-	input := &GetUserActivityInput{
-		ID:              Int(1),
+	input := &GetUserActivityOptions{
 		ActivityTypeIDs: []int{1, 2, 3},
 		MinID:           Int(1),
 		MaxID:           Int(10),
 		Count:           Int(20),
 		Order:           OrderAsc,
 	}
-	activities, err := client.GetUserActivities(input)
+	activities, err := client.GetUserActivities(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -570,10 +567,8 @@ func TestGetUserActivitiesFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetUserActivityInput{
-		ID: Int(1),
-	}
-	if _, err := client.GetUserActivities(input); err == nil {
+	input := &GetUserActivityOptions{}
+	if _, err := client.GetUserActivities(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -589,14 +584,13 @@ func TestGetUserStars(t *testing.T) {
 		}
 	})
 
-	input := &GetUserStarsInput{
-		ID:    Int(1),
+	input := &GetUserStarsOptions{
 		MinID: Int(1),
 		MaxID: Int(10),
 		Count: Int(20),
 		Order: OrderAsc,
 	}
-	stars, err := client.GetUserStars(input)
+	stars, err := client.GetUserStars(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -616,10 +610,8 @@ func TestGetUserStarsFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetUserStarsInput{
-		ID: Int(1),
-	}
-	if _, err := client.GetUserStars(input); err == nil {
+	input := &GetUserStarsOptions{}
+	if _, err := client.GetUserStars(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -634,12 +626,11 @@ func TestGetUserStarCount(t *testing.T) {
 		}
 	})
 
-	input := &GetUserStarCountInput{
-		ID:    Int(1),
+	input := &GetUserStarCountOptions{
 		Since: String("2019-01-07"),
 		Until: String("2020-01-07"),
 	}
-	count, err := client.GetUserStarCount(input)
+	count, err := client.GetUserStarCount(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -657,10 +648,8 @@ func TestGetUserStarCountFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetUserStarCountInput{
-		ID: Int(1),
-	}
-	if _, err := client.GetUserStarCount(input); err == nil {
+	input := &GetUserStarCountOptions{}
+	if _, err := client.GetUserStarCount(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

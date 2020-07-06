@@ -10,9 +10,9 @@ import (
 func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
-	api := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
+	c := backlog.New(apiKey, baseURL)
 
-	wiki, err := api.GetWiki(333028)
+	wiki, err := c.GetWiki(333028)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

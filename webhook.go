@@ -2,8 +2,7 @@ package backlog
 
 import (
 	"context"
-	"net/url"
-	"strconv"
+	"fmt"
 )
 
 // Webhook : -
@@ -20,165 +19,125 @@ type Webhook struct {
 	Updated         *Timestamp `json:"updated,omitempty"`
 }
 
-// GetWebhooks returns the list of webhooks
-func (api *Client) GetWebhooks(projectIDOrKey interface{}) ([]*Webhook, error) {
-	return api.GetWebhooksContext(context.Background(), projectIDOrKey)
+// GetWebhook returns the list of webhooks
+func (c *Client) GetWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
+	return c.GetWebhookContext(context.Background(), projectIDOrKey, webhookID)
 }
 
-// GetWebhooksContext returns the list of webhooks with context
-func (api *Client) GetWebhooksContext(ctx context.Context, projectIDOrKey interface{}) ([]*Webhook, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+// GetWebhookContext returns the list of webhooks with context
+func (c *Client) GetWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
+	u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+	req, err := c.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	values := url.Values{}
-	values.Add("projectIdOrKey", projIDOrKey)
-
-	r := []*Webhook{}
-	if err = api.getMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/webhooks", values, &r); err != nil {
-		return nil, err
-	}
-	return r, nil
-}
-
-// AddWebhook adds a webhook
-func (api *Client) AddWebhook(input *AddWebhookInput) (*Webhook, error) {
-	return api.AddWebhookContext(context.Background(), input)
-}
-
-// AddWebhookContext adds a webhook with context
-func (api *Client) AddWebhookContext(ctx context.Context, input *AddWebhookInput) (*Webhook, error) {
-	projIDOrKey, err := projIDOrKey(input.ProjectIDOrKey)
-	if err != nil {
-		return nil, err
-	}
-
-	values := url.Values{}
-
-	if input.Name != nil {
-		values.Add("name", *input.Name)
-	}
-
-	if input.Description != nil {
-		values.Add("description", *input.Description)
-	}
-
-	if input.HookURL != nil {
-		values.Add("hookUrl", *input.HookURL)
-	}
-
-	if input.AllEvent != nil {
-		values.Add("allEvent", strconv.FormatBool(*input.AllEvent))
-	}
-
-	for _, i := range input.ActivityTypeIDs {
-		values.Add("activityTypeIds[]", strconv.Itoa(i))
 	}
 
 	webhook := new(Webhook)
-	if err = api.postMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/webhooks", values, &webhook); err != nil {
+	if err := c.Do(ctx, req, &webhook); err != nil {
 		return nil, err
 	}
 	return webhook, nil
 }
 
-// GetWebhook returns the list of webhooks
-func (api *Client) GetWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
-	return api.GetWebhookContext(context.Background(), projectIDOrKey, webhookID)
+// GetWebhooks returns the list of webhooks
+func (c *Client) GetWebhooks(projectIDOrKey interface{}) ([]*Webhook, error) {
+	return c.GetWebhooksContext(context.Background(), projectIDOrKey)
 }
 
-// GetWebhookContext returns the list of webhooks with context
-func (api *Client) GetWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+// GetWebhooksContext returns the list of webhooks with context
+func (c *Client) GetWebhooksContext(ctx context.Context, projectIDOrKey interface{}) ([]*Webhook, error) {
+	u := fmt.Sprintf("/api/v2/projects/%v/webhooks", projectIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	webhooks := []*Webhook{}
+	if err := c.Do(ctx, req, &webhooks); err != nil {
+		return nil, err
+	}
+	return webhooks, nil
+}
+
+// CreateWebhook adds a webhook
+func (c *Client) CreateWebhook(projectIDOrKey interface{}, webhook *CreateWebhookInput) (*Webhook, error) {
+	return c.CreateWebhookContext(context.Background(), projectIDOrKey, webhook)
+}
+
+// CreateWebhookContext adds a webhook with context
+func (c *Client) CreateWebhookContext(ctx context.Context, projectIDOrKey interface{}, input *CreateWebhookInput) (*Webhook, error) {
+	u := fmt.Sprintf("/api/v2/projects/%v/webhooks", projectIDOrKey)
+
+	req, err := c.NewRequest("POST", u, input)
 	if err != nil {
 		return nil, err
 	}
 
 	webhook := new(Webhook)
-	if err = api.getMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/webhooks/"+strconv.Itoa(webhookID), url.Values{}, &webhook); err != nil {
+	if err := c.Do(ctx, req, &webhook); err != nil {
 		return nil, err
 	}
 	return webhook, nil
 }
 
 // UpdateWebhook updates a webhook
-func (api *Client) UpdateWebhook(input *UpdateWebhookInput) (*Webhook, error) {
-	return api.UpdateWebhookContext(context.Background(), input)
+func (c *Client) UpdateWebhook(projectIDOrKey interface{}, webhookID int, input *UpdateWebhookInput) (*Webhook, error) {
+	return c.UpdateWebhookContext(context.Background(), projectIDOrKey, webhookID, input)
 }
 
 // UpdateWebhookContext updates a webhook with context
-func (api *Client) UpdateWebhookContext(ctx context.Context, input *UpdateWebhookInput) (*Webhook, error) {
-	projIDOrKey, err := projIDOrKey(input.ProjectIDOrKey)
+func (c *Client) UpdateWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int, input *UpdateWebhookInput) (*Webhook, error) {
+	u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+	req, err := c.NewRequest("PATCH", u, input)
 	if err != nil {
 		return nil, err
 	}
 
-	values := url.Values{}
-
-	if input.Name != nil {
-		values.Add("name", *input.Name)
-	}
-
-	if input.Description != nil {
-		values.Add("description", *input.Description)
-	}
-
-	if input.HookURL != nil {
-		values.Add("hookUrl", *input.HookURL)
-	}
-
-	if input.AllEvent != nil {
-		values.Add("allEvent", strconv.FormatBool(*input.AllEvent))
-	}
-
-	for _, i := range input.ActivityTypeIDs {
-		values.Add("activityTypeIds[]", strconv.Itoa(i))
-	}
-
 	webhook := new(Webhook)
-	if err = api.patchMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/webhooks/"+strconv.Itoa(*input.WebhookID), values, &webhook); err != nil {
+	if err := c.Do(ctx, req, &webhook); err != nil {
 		return nil, err
 	}
 	return webhook, nil
 }
 
 // DeleteWebhook deletes a webhook
-func (api *Client) DeleteWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
-	return api.DeleteWebhookContext(context.Background(), projectIDOrKey, webhookID)
+func (c *Client) DeleteWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
+	return c.DeleteWebhookContext(context.Background(), projectIDOrKey, webhookID)
 }
 
 // DeleteWebhookContext updates a webhook with context
-func (api *Client) DeleteWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+func (c *Client) DeleteWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) {
+	u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	webhook := new(Webhook)
-	if err = api.deleteMethod(ctx, "/api/v2/projects/"+projIDOrKey+"/webhooks/"+strconv.Itoa(webhookID), url.Values{}, &webhook); err != nil {
+	if err := c.Do(ctx, req, &webhook); err != nil {
 		return nil, err
 	}
 	return webhook, nil
 }
 
-// AddWebhookInput contains all the parameters necessary (including the optional ones) for a AddWebhook() request.
-type AddWebhookInput struct {
-	ProjectIDOrKey  interface{} `required:"true"`
-	Name            *string     `required:"true"`
-	Description     *string     `required:"false"`
-	HookURL         *string     `required:"true"`
-	AllEvent        *bool       `required:"false"`
-	ActivityTypeIDs []int       `required:"false"`
+// CreateWebhookInput contains all the parameters necessary (including the optional ones) for a CreateWebhook() request.
+type CreateWebhookInput struct {
+	Name            *string `json:"name"`
+	Description     *string `json:"description,omitempty"`
+	HookURL         *string `json:"hookUrl"`
+	AllEvent        *bool   `json:"allEvent,omitempty"`
+	ActivityTypeIDs []int   `json:"activityTypeIds,omitempty"`
 }
 
 // UpdateWebhookInput contains all the parameters necessary (including the optional ones) for a UpdateWebhook() request.
 type UpdateWebhookInput struct {
-	ProjectIDOrKey  interface{} `required:"true"`
-	WebhookID       *int        `required:"true"`
-	Name            *string     `required:"true"`
-	Description     *string     `required:"false"`
-	HookURL         *string     `required:"true"`
-	AllEvent        *bool       `required:"false"`
-	ActivityTypeIDs []int       `required:"false"`
+	Name            *string `json:"name,omitempty"`
+	Description     *string `json:"description,omitempty"`
+	HookURL         *string `json:"hookUrl,omitempty"`
+	AllEvent        *bool   `json:"allEvent,omitempty"`
+	ActivityTypeIDs []int   `json:"activityTypeIds,omitempty"`
 }

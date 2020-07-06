@@ -28,7 +28,7 @@ import (
 func main() {
 	api := backlog.New("YOUR API KEY", "YOUR BASE URL")
 
-	user, err := api.GetUserMySelf()
+	user, err := c.GetUserMySelf()
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

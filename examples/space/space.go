@@ -10,9 +10,9 @@ import (
 func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
-	api := backlog.New(apiKey, baseURL)
+	c := backlog.New(apiKey, baseURL)
 
-	space, err := api.GetSpace()
+	space, err := c.GetSpace()
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
