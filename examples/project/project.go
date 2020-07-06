@@ -12,13 +12,6 @@ func main() {
 	baseURL := os.Getenv("BASE_URL")
 	c := backlog.New(apiKey, baseURL)
 
-	// project, err := c.GetProject("SRE")
-	// if err != nil {
-	// 	fmt.Printf("%s\n", err)
-	// 	return
-	// }
-	// fmt.Printf("project ID: %d, Name %s\n", *project.ID, *project.Name)
-
 	input := &backlog.GetProjectsOptions{}
 	projects, _ := c.GetProjects(input)
 	for _, project := range projects {
