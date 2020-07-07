@@ -2,8 +2,7 @@ package backlog
 
 import (
 	"context"
-	"net/url"
-	"strconv"
+	"fmt"
 )
 
 // Wiki : wiki
@@ -66,47 +65,48 @@ type Page struct {
 }
 
 // GetWikis returns the list of wikis
-func (api *Client) GetWikis(projectIDOrKey interface{}, keyword string) ([]*Wiki, error) {
-	return api.GetWikisContext(context.Background(), projectIDOrKey, keyword)
+func (c *Client) GetWikis(opts *GetWikisOptions) ([]*Wiki, error) {
+	return c.GetWikisContext(context.Background(), opts)
 }
 
 // GetWikisContext returns the list of wikis
-func (api *Client) GetWikisContext(ctx context.Context, projectIDOrKey interface{}, keyword string) ([]*Wiki, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+func (c *Client) GetWikisContext(ctx context.Context, opts *GetWikisOptions) ([]*Wiki, error) {
+	u, err := c.AddOptions("/api/v2/wikis", opts)
 	if err != nil {
 		return nil, err
 	}
 
-	values := url.Values{}
-	values.Add("projectIdOrKey", projIDOrKey)
-	if keyword != "" {
-		values.Add("keyword", keyword)
-	}
-
-	r := []*Wiki{}
-	if err = api.getMethod(ctx, "/api/v2/wikis", values, &r); err != nil {
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
 		return nil, err
 	}
-	return r, nil
+
+	wikis := []*Wiki{}
+	if err := c.Do(ctx, req, &wikis); err != nil {
+		return nil, err
+	}
+	return wikis, nil
 }
 
 // GetWikiCount returns the number of wikis
-func (api *Client) GetWikiCount(projectIDOrKey interface{}) (int, error) {
-	return api.GetWikiCountContext(context.Background(), projectIDOrKey)
+func (c *Client) GetWikiCount(opts *GetWikiCountOptions) (int, error) {
+	return c.GetWikiCountContext(context.Background(), opts)
 }
 
 // GetWikiCountContext returns the number of wikis
-func (api *Client) GetWikiCountContext(ctx context.Context, projectIDOrKey interface{}) (int, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+func (c *Client) GetWikiCountContext(ctx context.Context, opts *GetWikiCountOptions) (int, error) {
+	u, err := c.AddOptions("/api/v2/wikis/count", opts)
 	if err != nil {
 		return 0, err
 	}
 
-	values := url.Values{}
-	values.Add("projectIdOrKey", projIDOrKey)
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return 0, err
+	}
 
-	page := &Page{}
-	if err := api.getMethod(ctx, "/api/v2/wikis/count", values, &page); err != nil {
+	page := new(Page)
+	if err := c.Do(ctx, req, &page); err != nil {
 		return 0, err
 	}
 
@@ -114,158 +114,187 @@ func (api *Client) GetWikiCountContext(ctx context.Context, projectIDOrKey inter
 }
 
 // GetWikiTags returns the tags of wikis
-func (api *Client) GetWikiTags(projectIDOrKey interface{}) ([]*Tag, error) {
-	return api.GetWikiTagsContext(context.Background(), projectIDOrKey)
+func (c *Client) GetWikiTags(opts *GetWikiTagsOptions) ([]*Tag, error) {
+	return c.GetWikiTagsContext(context.Background(), opts)
 }
 
 // GetWikiTagsContext returns the tags of wikis
-func (api *Client) GetWikiTagsContext(ctx context.Context, projectIDOrKey interface{}) ([]*Tag, error) {
-	projIDOrKey, err := projIDOrKey(projectIDOrKey)
+func (c *Client) GetWikiTagsContext(ctx context.Context, opts *GetWikiTagsOptions) ([]*Tag, error) {
+	u, err := c.AddOptions("/api/v2/wikis/tags", opts)
 	if err != nil {
 		return nil, err
 	}
 
-	values := url.Values{}
-	values.Add("projectIdOrKey", projIDOrKey)
-
-	r := []*Tag{}
-	if err := api.getMethod(ctx, "/api/v2/wikis/tags", values, &r); err != nil {
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
 		return nil, err
 	}
-	return r, nil
+
+	tags := []*Tag{}
+	if err := c.Do(ctx, req, &tags); err != nil {
+		return nil, err
+	}
+	return tags, nil
 }
 
 // GetWiki returns wiki by id
-func (api *Client) GetWiki(wikiID int) (*Wiki, error) {
-	return api.GetWikiContext(context.Background(), wikiID)
+func (c *Client) GetWiki(wikiID int) (*Wiki, error) {
+	return c.GetWikiContext(context.Background(), wikiID)
 }
 
 // GetWikiContext returns wiki by id
-func (api *Client) GetWikiContext(ctx context.Context, wikiID int) (*Wiki, error) {
+func (c *Client) GetWikiContext(ctx context.Context, wikiID int) (*Wiki, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	wiki := new(Wiki)
-	if err := api.getMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID), url.Values{}, &wiki); err != nil {
+	if err := c.Do(ctx, req, &wiki); err != nil {
 		return nil, err
 	}
 	return wiki, nil
 }
 
 // CreateWiki creates a wiki
-func (api *Client) CreateWiki(input *CreateWikiInput) (*Wiki, error) {
-	return api.CreateWikiContext(context.Background(), input)
+func (c *Client) CreateWiki(input *CreateWikiInput) (*Wiki, error) {
+	return c.CreateWikiContext(context.Background(), input)
 }
 
 // CreateWikiContext creates a wiki with Context
-func (api *Client) CreateWikiContext(ctx context.Context, input *CreateWikiInput) (*Wiki, error) {
-	values := url.Values{
-		"projectId": {strconv.Itoa(*input.ProjectID)},
-		"name":      {*input.Name},
-		"content":   {*input.Content},
-	}
+func (c *Client) CreateWikiContext(ctx context.Context, input *CreateWikiInput) (*Wiki, error) {
+	u := "/api/v2/wikis"
 
-	if input.MailNotify != nil {
-		values.Add("mailNotify", strconv.FormatBool(*input.MailNotify))
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
 	}
 
 	wiki := new(Wiki)
-	if err := api.postMethod(ctx, "/api/v2/wikis", values, &wiki); err != nil {
+	if err := c.Do(ctx, req, &wiki); err != nil {
 		return nil, err
 	}
 	return wiki, nil
 }
 
 // UpdateWiki updates a wiki
-func (api *Client) UpdateWiki(input *UpdateWikiInput) (*Wiki, error) {
-	return api.UpdateWikiContext(context.Background(), input)
+func (c *Client) UpdateWiki(wikiID int, input *UpdateWikiInput) (*Wiki, error) {
+	return c.UpdateWikiContext(context.Background(), wikiID, input)
 }
 
 // UpdateWikiContext updates a wiki with Context
-func (api *Client) UpdateWikiContext(ctx context.Context, input *UpdateWikiInput) (*Wiki, error) {
-	values := url.Values{}
+func (c *Client) UpdateWikiContext(ctx context.Context, wikiID int, input *UpdateWikiInput) (*Wiki, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
 
-	if input.Name != nil {
-		values.Add("name", *input.Name)
-	}
-
-	if input.Content != nil {
-		values.Add("content", *input.Content)
-	}
-
-	if input.MailNotify != nil {
-		values.Add("mailNotify", strconv.FormatBool(*input.MailNotify))
+	req, err := c.NewRequest("PATCH", u, input)
+	if err != nil {
+		return nil, err
 	}
 
 	wiki := new(Wiki)
-	if err := api.patchMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(*input.WikiID), values, &wiki); err != nil {
+	if err := c.Do(ctx, req, &wiki); err != nil {
 		return nil, err
 	}
 	return wiki, nil
 }
 
 // DeleteWiki deletes a wiki
-func (api *Client) DeleteWiki(wikiID int) (*Wiki, error) {
-	return api.DeleteWikiContext(context.Background(), wikiID)
+func (c *Client) DeleteWiki(wikiID int) (*Wiki, error) {
+	return c.DeleteWikiContext(context.Background(), wikiID)
 }
 
 // DeleteWikiContext deletes a wiki with Context
-func (api *Client) DeleteWikiContext(ctx context.Context, wikiID int) (*Wiki, error) {
+func (c *Client) DeleteWikiContext(ctx context.Context, wikiID int) (*Wiki, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	wiki := new(Wiki)
-	if err := api.deleteMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID), url.Values{}, &wiki); err != nil {
+	if err := c.Do(ctx, req, &wiki); err != nil {
 		return nil, err
 	}
 	return wiki, nil
 }
 
 // GetWikiAttachments returns attachements of a wiki
-func (api *Client) GetWikiAttachments(wikiID int) ([]*Attachment, error) {
-	return api.GetWikiAttachmentsContext(context.Background(), wikiID)
+func (c *Client) GetWikiAttachments(wikiID int) ([]*Attachment, error) {
+	return c.GetWikiAttachmentsContext(context.Background(), wikiID)
 }
 
 // GetWikiAttachmentsContext returns attachements of a wiki with context
-func (api *Client) GetWikiAttachmentsContext(ctx context.Context, wikiID int) ([]*Attachment, error) {
+func (c *Client) GetWikiAttachmentsContext(ctx context.Context, wikiID int) ([]*Attachment, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v/attachments", wikiID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	attachments := []*Attachment{}
-	if err := api.getMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(wikiID)+"/attachments", url.Values{}, &attachments); err != nil {
+	if err := c.Do(ctx, req, &attachments); err != nil {
 		return nil, err
 	}
 	return attachments, nil
 }
 
 // AddAttachmentToWiki adds attachments to a wiki
-func (api *Client) AddAttachmentToWiki(input *AddAttachmentToWikiInput) ([]*Attachment, error) {
-	return api.AddAttachmentToWikiContext(context.Background(), input)
+func (c *Client) AddAttachmentToWiki(wikiID int, input *AddAttachmentToWikiInput) ([]*Attachment, error) {
+	return c.AddAttachmentToWikiContext(context.Background(), wikiID, input)
 }
 
 // AddAttachmentToWikiContext adds attachments to a wiki with context
-func (api *Client) AddAttachmentToWikiContext(ctx context.Context, input *AddAttachmentToWikiInput) ([]*Attachment, error) {
-	values := url.Values{}
-	for _, attachmentID := range input.AttachmentIDs {
-		values.Add("attachmentId[]", strconv.Itoa(attachmentID))
-	}
+func (c *Client) AddAttachmentToWikiContext(ctx context.Context, wikiID int, input *AddAttachmentToWikiInput) ([]*Attachment, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v/attachments", wikiID)
 
-	attachements := []*Attachment{}
-	if err := api.postMethod(ctx, "/api/v2/wikis/"+strconv.Itoa(*input.WikiID)+"/attachments", values, &attachements); err != nil {
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
 		return nil, err
 	}
-	return attachements, nil
+
+	attachments := []*Attachment{}
+	if err := c.Do(ctx, req, &attachments); err != nil {
+		return nil, err
+	}
+	return attachments, nil
+}
+
+// GetWikisOptions specifies optional parameters to the GetWikis method.
+type GetWikisOptions struct {
+	ProjectIDOrKey interface{} `url:"projectIdOrKey"`
+	Keyword        *string     `url:"keyword,omitempty"`
+}
+
+// GetWikiCountOptions specifies optional parameters to the GetWikiCount method.
+type GetWikiCountOptions struct {
+	ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
+}
+
+// GetWikiTagsOptions specifies optional parameters to the GetWikiTags method.
+type GetWikiTagsOptions struct {
+	ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
 }
 
 // CreateWikiInput contains all the parameters necessary (including the optional ones) for a CreateWiki() request.
 type CreateWikiInput struct {
-	ProjectID  *int    `required:"true"`
-	Name       *string `required:"true"`
-	Content    *string `required:"true"`
-	MailNotify *bool   `required:"false"`
+	ProjectID  *int    `json:"projectId"`
+	Name       *string `json:"name"`
+	Content    *string `json:"content"`
+	MailNotify *bool   `json:"mailNotify,omitempty"`
 }
 
 // UpdateWikiInput contains all the parameters necessary (including the optional ones) for a UpdateWiki() request.
 type UpdateWikiInput struct {
-	WikiID     *int    `required:"true"`
-	Name       *string `required:"true"`
-	Content    *string `required:"true"`
-	MailNotify *bool   `required:"false"`
+	Name       *string `json:"name"`
+	Content    *string `json:"content"`
+	MailNotify *bool   `json:"mailNotify,omitempty"`
 }
 
 // AddAttachmentToWikiInput contains all the parameters necessary (including the optional ones) for a AddAttachmentToWiki() request.
 type AddAttachmentToWikiInput struct {
-	WikiID        *int  `required:"true"`
-	AttachmentIDs []int `required:"true"`
+	AttachmentIDs []int `json:"attachmentId"`
 }

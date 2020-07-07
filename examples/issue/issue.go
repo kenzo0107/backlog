@@ -10,14 +10,14 @@ import (
 func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
-	api := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
+	c := backlog.New(apiKey, baseURL, backlog.OptionDebug(true))
 
-	input := &backlog.GetUserMySelfRecentrlyViewedIssuesInput{
+	input := &backlog.GetUserMySelfRecentrlyViewedIssuesOptions{
 		Order:  backlog.OrderAsc,
 		Offset: backlog.Int(0),
 		Count:  backlog.Int(100),
 	}
-	issues, err := api.GetUserMySelfRecentrlyViewedIssues(input)
+	issues, err := c.GetUserMySelfRecentrlyViewedIssues(input)
 
 	if err != nil {
 		fmt.Printf("(>_<) %s\n", err)

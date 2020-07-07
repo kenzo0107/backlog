@@ -10,8 +10,9 @@ import (
 func main() {
 	apiKey := os.Getenv("API_KEY")
 	baseURL := os.Getenv("BASE_URL")
-	api := backlog.New(apiKey, baseURL)
-	webhooks, err := api.GetWebhooks("SRE")
+	c := backlog.New(apiKey, baseURL)
+
+	webhooks, err := c.GetWebhooks("SRE")
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

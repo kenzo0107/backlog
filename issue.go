@@ -2,8 +2,6 @@ package backlog
 
 import (
 	"context"
-	"net/url"
-	"strconv"
 )
 
 // Sort : sort
@@ -129,160 +127,27 @@ type Milestone struct {
 }
 
 // GetIssues returns the list of issues
-func (api *Client) GetIssues(input *GetIssuesInput) ([]*Issue, error) {
-	return api.GetIssuesContext(context.Background(), input)
+func (c *Client) GetIssues(opts *GetIssuesOptions) ([]*Issue, error) {
+	return c.GetIssuesContext(context.Background(), opts)
 }
 
 // GetIssuesContext returns the list of issues with context
-func (api *Client) GetIssuesContext(ctx context.Context, input *GetIssuesInput) ([]*Issue, error) {
-
-	values := url.Values{}
-
-	if len(input.ProjectIDs) > 0 {
-		for _, i := range input.ProjectIDs {
-			values.Add("projectId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.IssueTypeIDs) > 0 {
-		for _, i := range input.IssueTypeIDs {
-			values.Add("issueTypeId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.CategoryIDs) > 0 {
-		for _, i := range input.CategoryIDs {
-			values.Add("categoryId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.VersionIDs) > 0 {
-		for _, i := range input.VersionIDs {
-			values.Add("versionId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.MilestoneIDs) > 0 {
-		for _, i := range input.MilestoneIDs {
-			values.Add("milestoneId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.StatusIDs) > 0 {
-		for _, i := range input.StatusIDs {
-			values.Add("statusId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.PriorityIDs) > 0 {
-		for _, i := range input.PriorityIDs {
-			values.Add("priorityId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.AssigneeIDs) > 0 {
-		for _, i := range input.AssigneeIDs {
-			values.Add("assigneeId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.CreatedUserIDs) > 0 {
-		for _, i := range input.CreatedUserIDs {
-			values.Add("createdUserId[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.ResolutionIDs) > 0 {
-		for _, i := range input.ResolutionIDs {
-			values.Add("resolutionId[]", strconv.Itoa(i))
-		}
-	}
-
-	if input.ParentChild != nil && *input.ParentChild > 0 {
-		values.Add("parentChild", strconv.Itoa(*input.ParentChild))
-	}
-
-	if input.Attachment != nil {
-		values.Add("attachment", strconv.FormatBool(*input.Attachment))
-	}
-
-	if input.SharedFile != nil {
-		values.Add("sharedFile", strconv.FormatBool(*input.SharedFile))
-	}
-
-	if input.Sort != "" {
-		values.Add("sort", input.Sort.String())
-	}
-
-	if input.Order == "" {
-		values.Add("order", OrderDesc.String())
-	} else {
-		values.Add("order", input.Order.String())
-	}
-
-	if input.Offset != nil {
-		values.Add("offset", strconv.Itoa(*input.Offset))
-	}
-
-	if input.Count != nil {
-		values.Add("count", strconv.Itoa(*input.Count))
-	} else {
-		values.Add("count", "20")
-	}
-
-	if input.CreatedSince != nil {
-		values.Add("createdSince", *input.CreatedSince)
-	}
-
-	if input.CreatedUntil != nil {
-		values.Add("createdUntil", *input.CreatedUntil)
-	}
-
-	if input.UpdatedSince != nil {
-		values.Add("updatedSince", *input.UpdatedSince)
-	}
-
-	if input.UpdatedUntil != nil {
-		values.Add("updatedUntil", *input.UpdatedUntil)
-	}
-
-	if input.StartDateSince != nil {
-		values.Add("startDateSince", *input.StartDateSince)
-	}
-
-	if input.StartDateUntil != nil {
-		values.Add("startDateUntil", *input.StartDateUntil)
-	}
-
-	if input.DueDateSince != nil {
-		values.Add("dueDateSince", *input.DueDateSince)
-	}
-
-	if input.DueDateUntil != nil {
-		values.Add("dueDateUntil", *input.DueDateUntil)
-	}
-
-	if len(input.IDs) > 0 {
-		for _, i := range input.IDs {
-			values.Add("id[]", strconv.Itoa(i))
-		}
-	}
-
-	if len(input.ParentIssueIDs) > 0 {
-		for _, i := range input.ParentIssueIDs {
-			values.Add("parentIssueId[]", strconv.Itoa(i))
-		}
-	}
-
-	if input.Keyword != nil {
-		values.Add("keyword", *input.Keyword)
-	}
-
-	r := []*Issue{}
-	if err := api.getMethod(ctx, "/api/v2/issues", values, &r); err != nil {
+func (c *Client) GetIssuesContext(ctx context.Context, opts *GetIssuesOptions) ([]*Issue, error) {
+	u, err := c.AddOptions("/api/v2/issues", opts)
+	if err != nil {
 		return nil, err
 	}
-	return r, nil
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	issues := []*Issue{}
+	if err := c.Do(ctx, req, &issues); err != nil {
+		return nil, err
+	}
+	return issues, nil
 }
 
 // Issues : list of issue
@@ -307,65 +172,67 @@ type Issues []*struct {
 // 		}
 // 		...
 // ]
-func (api *Client) GetUserMySelfRecentrlyViewedIssues(input *GetUserMySelfRecentrlyViewedIssuesInput) (Issues, error) {
-	return api.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), input)
+func (c *Client) GetUserMySelfRecentrlyViewedIssues(opts *GetUserMySelfRecentrlyViewedIssuesOptions) (Issues, error) {
+	return c.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), opts)
 }
 
 // GetUserMySelfRecentrlyViewedIssuesContext returns the list of issues a user view recently with context
-func (api *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, input *GetUserMySelfRecentrlyViewedIssuesInput) (Issues, error) {
+func (c *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, opts *GetUserMySelfRecentrlyViewedIssuesOptions) (Issues, error) {
+	u := "/api/v2/users/myself/recentlyViewedIssues"
 
-	values := url.Values{}
-
-	if input.Order.String() != "" {
-		values.Add("order", input.Order.String())
-	} else {
-		values.Add("order", OrderDesc.String())
+	u, err := c.AddOptions(u, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	if input.Offset != nil {
-		values.Add("offset", strconv.Itoa(*input.Offset))
-	}
-
-	if input.Count != nil {
-		values.Add("count", strconv.Itoa(*input.Count))
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
 	}
 
 	var issues Issues
-	if err := api.getMethod(ctx, "/api/v2/users/myself/recentlyViewedIssues", values, &issues); err != nil {
+	if err := c.Do(ctx, req, &issues); err != nil {
 		return nil, err
 	}
 
 	return issues, nil
 }
 
-// GetIssuesInput contains all the parameters necessary (including the optional ones) for a GetIssues() request.
-type GetIssuesInput struct {
-	ProjectIDs     []int   `required:"false"`
-	IssueTypeIDs   []int   `required:"false"`
-	CategoryIDs    []int   `required:"false"`
-	VersionIDs     []int   `required:"false"`
-	MilestoneIDs   []int   `required:"false"`
-	StatusIDs      []int   `required:"false"`
-	PriorityIDs    []int   `required:"false"`
-	AssigneeIDs    []int   `required:"false"`
-	CreatedUserIDs []int   `required:"false"`
-	ResolutionIDs  []int   `required:"false"`
-	ParentChild    *int    `required:"false"`
-	Attachment     *bool   `required:"false"`
-	SharedFile     *bool   `required:"false"`
-	Sort           Sort    `required:"false"`
-	Order          Order   `required:"false"`
-	Offset         *int    `required:"false"`
-	Count          *int    `required:"false"`
-	CreatedSince   *string `required:"false"`
-	CreatedUntil   *string `required:"false"`
-	UpdatedSince   *string `required:"false"`
-	UpdatedUntil   *string `required:"false"`
-	StartDateSince *string `required:"false"`
-	StartDateUntil *string `required:"false"`
-	DueDateSince   *string `required:"false"`
-	DueDateUntil   *string `required:"false"`
-	IDs            []int   `required:"false"`
-	ParentIssueIDs []int   `required:"false"`
-	Keyword        *string `required:"false"`
+// GetIssuesOptions specifies optional parameters to the GetIssues method.
+type GetIssuesOptions struct {
+	ProjectIDs     []int   `url:"projectId[],omitempty"`
+	IssueTypeIDs   []int   `url:"issueTypeId[],omitempty"`
+	CategoryIDs    []int   `url:"categoryId[],omitempty"`
+	VersionIDs     []int   `url:"versionId[],omitempty"`
+	MilestoneIDs   []int   `url:"milestoneId[],omitempty"`
+	StatusIDs      []int   `url:"statusId[],omitempty"`
+	PriorityIDs    []int   `url:"priorityId[],omitempty"`
+	AssigneeIDs    []int   `url:"assigneeId[],omitempty"`
+	CreatedUserIDs []int   `url:"createdUserId[],omitempty"`
+	ResolutionIDs  []int   `url:"resolutionId[],omitempty"`
+	ParentChild    *int    `url:"parentChild,omitempty"`
+	Attachment     *bool   `url:"attachment,omitempty"`
+	SharedFile     *bool   `url:"sharedFile,omitempty"`
+	Sort           Sort    `url:"sort,omitempty"`
+	Order          Order   `url:"order,omitempty"`
+	Offset         *int    `url:"offset,omitempty"`
+	Count          *int    `url:"count,omitempty"`
+	CreatedSince   *string `url:"createdSince,omitempty"`
+	CreatedUntil   *string `url:"createdUntil,omitempty"`
+	UpdatedSince   *string `url:"updatedSince,omitempty"`
+	UpdatedUntil   *string `url:"updatedUntil,omitempty"`
+	StartDateSince *string `url:"startDateSince,omitempty"`
+	StartDateUntil *string `url:"startDateUntil,omitempty"`
+	DueDateSince   *string `url:"dueDateSince,omitempty"`
+	DueDateUntil   *string `url:"dueDateUntil,omitempty"`
+	IDs            []int   `url:"id[],omitempty"`
+	ParentIssueIDs []int   `url:"parentIssueId[],omitempty"`
+	Keyword        *string `url:"keyword,omitempty"`
+}
+
+// GetUserMySelfRecentrlyViewedIssuesOptions specifies optional parameters to the GetUserMySelfRecentrlyViewedIssues method.
+type GetUserMySelfRecentrlyViewedIssuesOptions struct {
+	Order  Order `url:"order,omitempty"`
+	Offset *int  `url:"offset,omitempty"`
+	Count  *int  `url:"count,omitempty"`
 }

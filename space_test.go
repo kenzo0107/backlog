@@ -165,7 +165,9 @@ func TestUpdateSpaceNotification(t *testing.T) {
 		}
 	})
 
-	spaceNotification, err := client.UpdateSpaceNotification("test")
+	spaceNotification, err := client.UpdateSpaceNotification(&UpdateSpaceNotificationInput{
+		Content: String("test"),
+	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -185,7 +187,9 @@ func TestUpdateSpaceNotificationFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	if _, err := client.UpdateSpaceNotification("test"); err == nil {
+	if _, err := client.UpdateSpaceNotification(&UpdateSpaceNotificationInput{
+		Content: String("test"),
+	}); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

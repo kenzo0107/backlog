@@ -3,7 +3,6 @@ package backlog
 import (
 	"context"
 	"io"
-	"net/url"
 )
 
 // Space : backlog space
@@ -49,71 +48,101 @@ type SpaceDiskUsageDetail struct {
 }
 
 // GetSpace returns backlog space
-func (api *Client) GetSpace() (*Space, error) {
-	return api.GetSpaceContext(context.Background())
+func (c *Client) GetSpace() (*Space, error) {
+	return c.GetSpaceContext(context.Background())
 }
 
 // GetSpaceContext returns backlog space with context
-func (api *Client) GetSpaceContext(ctx context.Context) (*Space, error) {
+func (c *Client) GetSpaceContext(ctx context.Context) (*Space, error) {
+	u := "/api/v2/space"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	space := new(Space)
-	if err := api.getMethod(ctx, "/api/v2/space", url.Values{}, &space); err != nil {
+	if err := c.Do(ctx, req, &space); err != nil {
 		return nil, err
 	}
 	return space, nil
 }
 
 // GetSpaceIcon downloads space icon
-func (api *Client) GetSpaceIcon(writer io.Writer) error {
-	return api.GetSpaceIconContext(context.Background(), writer)
+func (c *Client) GetSpaceIcon(writer io.Writer) error {
+	return c.GetSpaceIconContext(context.Background(), writer)
 }
 
 // GetSpaceIconContext downloads space icon with context
-func (api *Client) GetSpaceIconContext(ctx context.Context, writer io.Writer) error {
-	return downloadFile(ctx, api.httpclient, api.apiKey, api.endpoint+"/api/v2/space/image", writer, api)
+func (c *Client) GetSpaceIconContext(ctx context.Context, writer io.Writer) error {
+	u := c.endpoint + "/api/v2/space/image"
+	return downloadFile(ctx, c.httpclient, c.apiKey, u, writer, c)
 }
 
 // GetSpaceNotification returns a space notification
-func (api *Client) GetSpaceNotification() (*SpaceNotification, error) {
-	return api.GetSpaceNotificationContext(context.Background())
+func (c *Client) GetSpaceNotification() (*SpaceNotification, error) {
+	return c.GetSpaceNotificationContext(context.Background())
 }
 
 // GetSpaceNotificationContext returns a space notification with context
-func (api *Client) GetSpaceNotificationContext(ctx context.Context) (*SpaceNotification, error) {
+func (c *Client) GetSpaceNotificationContext(ctx context.Context) (*SpaceNotification, error) {
+	u := "/api/v2/space/notification"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	spaceNotification := new(SpaceNotification)
-	if err := api.getMethod(ctx, "/api/v2/space/notification", url.Values{}, &spaceNotification); err != nil {
+	if err := c.Do(ctx, req, &spaceNotification); err != nil {
 		return nil, err
 	}
 	return spaceNotification, nil
 }
 
 // UpdateSpaceNotification updates a space notification
-func (api *Client) UpdateSpaceNotification(content string) (*SpaceNotification, error) {
-	return api.UpdateSpaceNotificationContext(context.Background(), content)
+func (c *Client) UpdateSpaceNotification(input *UpdateSpaceNotificationInput) (*SpaceNotification, error) {
+	return c.UpdateSpaceNotificationContext(context.Background(), input)
 }
 
 // UpdateSpaceNotificationContext updates a space notification with context
-func (api *Client) UpdateSpaceNotificationContext(ctx context.Context, content string) (*SpaceNotification, error) {
-	values := url.Values{
-		"content": {content},
+func (c *Client) UpdateSpaceNotificationContext(ctx context.Context, input *UpdateSpaceNotificationInput) (*SpaceNotification, error) {
+	u := "/api/v2/space/notification"
+
+	req, err := c.NewRequest("PUT", u, input)
+	if err != nil {
+		return nil, err
 	}
 
 	spaceNotification := new(SpaceNotification)
-	if err := api.putMethod(ctx, "/api/v2/space/notification", values, &spaceNotification); err != nil {
+	if err := c.Do(ctx, req, &spaceNotification); err != nil {
 		return nil, err
 	}
 	return spaceNotification, nil
 }
 
 // GetSpaceDiskUsage returns the disk usage of a space
-func (api *Client) GetSpaceDiskUsage() (*SpaceDiskUsage, error) {
-	return api.GetSpaceDiskUsageContext(context.Background())
+func (c *Client) GetSpaceDiskUsage() (*SpaceDiskUsage, error) {
+	return c.GetSpaceDiskUsageContext(context.Background())
 }
 
 // GetSpaceDiskUsageContext returns the disk usage of a space with context
-func (api *Client) GetSpaceDiskUsageContext(ctx context.Context) (*SpaceDiskUsage, error) {
+func (c *Client) GetSpaceDiskUsageContext(ctx context.Context) (*SpaceDiskUsage, error) {
+	u := "/api/v2/space/diskUsage"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	diskUsage := new(SpaceDiskUsage)
-	if err := api.getMethod(ctx, "/api/v2/space/diskUsage", url.Values{}, &diskUsage); err != nil {
+	if err := c.Do(ctx, req, &diskUsage); err != nil {
 		return nil, err
 	}
 	return diskUsage, nil
+}
+
+// UpdateSpaceNotificationInput contains all the parameters necessary (including the optional ones) for a UpdateSpaceNotification() request.
+type UpdateSpaceNotificationInput struct {
+	Content *string `json:"content"`
 }

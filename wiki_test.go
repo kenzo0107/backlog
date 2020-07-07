@@ -154,7 +154,10 @@ func TestGetWikis(t *testing.T) {
 		}
 	})
 
-	wikis, err := client.GetWikis(1, "test")
+	wikis, err := client.GetWikis(&GetWikisOptions{
+		ProjectIDOrKey: 1,
+		Keyword:        String("test"),
+	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -170,7 +173,10 @@ func TestGetWikisWithInvalidProjectKey(t *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
-	_, err := client.GetWikis(true, "test")
+	_, err := client.GetWikis(&GetWikisOptions{
+		ProjectIDOrKey: true,
+		Keyword:        String("test"),
+	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -184,7 +190,10 @@ func TestGetWikisFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	if _, err := client.GetWikis(1, "test"); err == nil {
+	if _, err := client.GetWikis(&GetWikisOptions{
+		ProjectIDOrKey: 1,
+		Keyword:        String("test"),
+	}); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -199,7 +208,7 @@ func TestGetWikiCount(t *testing.T) {
 		}
 	})
 
-	count, err := client.GetWikiCount(1)
+	count, err := client.GetWikiCount(&GetWikiCountOptions{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -219,7 +228,9 @@ func TestGetWikiCountFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.GetWikiCount(1)
+	_, err := client.GetWikiCount(&GetWikiCountOptions{
+		ProjectIDOrKey: 1,
+	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -229,7 +240,9 @@ func TestGetWikiCountWithInvalidProjectKey(t *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
-	_, err := client.GetWikiCount(true)
+	_, err := client.GetWikiCount(&GetWikiCountOptions{
+		ProjectIDOrKey: true,
+	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -252,7 +265,7 @@ func TestGetWikiTags(t *testing.T) {
 		}
 	})
 
-	tags, err := client.GetWikiTags(1)
+	tags, err := client.GetWikiTags(&GetWikiTagsOptions{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -268,7 +281,9 @@ func TestGetWikiTagsWithInvalidProjectKey(t *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
-	_, err := client.GetWikiTags(true)
+	_, err := client.GetWikiTags(&GetWikiTagsOptions{
+		ProjectIDOrKey: true,
+	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -282,7 +297,9 @@ func TestGetWikiTagsFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.GetWikiTags(1)
+	_, err := client.GetWikiTags(&GetWikiTagsOptions{
+		ProjectIDOrKey: 1,
+	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -383,12 +400,11 @@ func TestUpdateWiki(t *testing.T) {
 	})
 
 	input := &UpdateWikiInput{
-		WikiID:     Int(1),
 		Name:       String("Home"),
 		Content:    String("test"),
 		MailNotify: Bool(false),
 	}
-	wiki, err := client.UpdateWiki(input)
+	wiki, err := client.UpdateWiki(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -409,11 +425,10 @@ func TestUpdateWikiFailed(t *testing.T) {
 	})
 
 	input := &UpdateWikiInput{
-		WikiID:  Int(1),
 		Name:    String("Home"),
 		Content: String("test"),
 	}
-	if _, err := client.UpdateWiki(input); err == nil {
+	if _, err := client.UpdateWiki(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -524,10 +539,9 @@ func TestAddAttachmentToWiki(t *testing.T) {
 	})
 
 	input := &AddAttachmentToWikiInput{
-		WikiID:        Int(1),
 		AttachmentIDs: []int{1},
 	}
-	attachment, err := client.AddAttachmentToWiki(input)
+	attachment, err := client.AddAttachmentToWiki(1, input)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -548,10 +562,9 @@ func TestAddAttachmentToWikiFailed(t *testing.T) {
 	})
 
 	input := &AddAttachmentToWikiInput{
-		WikiID:        Int(1),
 		AttachmentIDs: []int{1},
 	}
-	if _, err := client.AddAttachmentToWiki(input); err == nil {
+	if _, err := client.AddAttachmentToWiki(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
