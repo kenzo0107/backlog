@@ -258,8 +258,18 @@ func (c *Client) GetUserIcon(id int, writer io.Writer) error {
 
 // GetUserIconContext downloads user icon with context
 func (c *Client) GetUserIconContext(ctx context.Context, id int, writer io.Writer) error {
-	u := c.endpoint + fmt.Sprintf("/api/v2/users/%v/icon", id)
-	return downloadFile(ctx, c.httpclient, c.apiKey, u, writer, c)
+	u := fmt.Sprintf("/api/v2/users/%v/icon", id)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Do(ctx, req, writer); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetUserActivities returns the list of a user's activities

@@ -75,8 +75,17 @@ func (c *Client) GetSpaceIcon(writer io.Writer) error {
 
 // GetSpaceIconContext downloads space icon with context
 func (c *Client) GetSpaceIconContext(ctx context.Context, writer io.Writer) error {
-	u := c.endpoint + "/api/v2/space/image"
-	return downloadFile(ctx, c.httpclient, c.apiKey, u, writer, c)
+	u := "/api/v2/space/image"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Do(ctx, req, writer); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetSpaceNotification returns a space notification
