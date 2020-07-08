@@ -1,7 +1,6 @@
 package backlog
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -173,37 +172,4 @@ func logResponse(resp *http.Response, d debug) error {
 	}
 
 	return nil
-}
-
-func downloadFile(ctx context.Context, client httpClient, apiKey, downloadURL string, writer io.Writer, d debug) (err error) {
-	req, err := http.NewRequest("GET", downloadURL, &bytes.Buffer{})
-	if err != nil {
-		return err
-	}
-
-	values := url.Values{}
-	values.Add("apiKey", apiKey)
-	req.URL.RawQuery = values.Encode()
-
-	req = req.WithContext(ctx)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if er := resp.Body.Close(); er != nil {
-			err = er
-		}
-	}()
-
-	err = checkStatusCode(resp, d)
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(writer, resp.Body)
-
-	return err
 }
