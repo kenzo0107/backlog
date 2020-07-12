@@ -2,7 +2,6 @@ package backlog
 
 import (
 	"context"
-	"net/url"
 )
 
 // FileUploadResponse : response of uploading file
@@ -19,8 +18,10 @@ func (c *Client) UploadFile(fpath string) (*FileUploadResponse, error) {
 
 // UploadFileContext uploads a file and setting a custom context
 func (c *Client) UploadFileContext(ctx context.Context, fpath string) (*FileUploadResponse, error) {
+	u := "/api/v2/space/attachment"
+
 	fileUploadResponse := new(FileUploadResponse)
-	if err := postLocalWithMultipartResponse(ctx, c.httpclient, c.endpoint+"/api/v2/space/attachment?apiKey="+c.apiKey, fpath, "file", url.Values{}, &fileUploadResponse, c); err != nil {
+	if err := c.UploadMultipartFile(ctx, "POST", u, fpath, "file", &fileUploadResponse); err != nil {
 		return nil, err
 	}
 	return fileUploadResponse, nil
