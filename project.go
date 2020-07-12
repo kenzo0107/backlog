@@ -28,8 +28,8 @@ type Status struct {
 }
 
 // GetProjects returns the list of projects
-func (c *Client) GetProjects(input *GetProjectsOptions) ([]*Project, error) {
-	return c.GetProjectsContext(context.Background(), input)
+func (c *Client) GetProjects(opts *GetProjectsOptions) ([]*Project, error) {
+	return c.GetProjectsContext(context.Background(), opts)
 }
 
 // GetProjectsContext returns the list of projects
