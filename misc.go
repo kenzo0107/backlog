@@ -1,16 +1,10 @@
 package backlog
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -55,85 +49,6 @@ func (t statusCodeError) Error() string {
 
 func (t statusCodeError) HTTPStatusCode() int {
 	return t.Code
-}
-
-func postLocalWithMultipartResponse(ctx context.Context, client httpClient, endpoint, fpath, fieldname string, values url.Values, intf interface{}, d debug) (err error) {
-	fullpath, err := filepath.Abs(fpath)
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Open(filepath.Clean(fullpath))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if er := file.Close(); er != nil {
-			err = er
-		}
-	}()
-
-	if err := postWithMultipartResponse(ctx, client, endpoint, filepath.Base(fpath), fieldname, values, file, intf, d); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func postWithMultipartResponse(ctx context.Context, client httpClient, endpoint, filename, fieldname string, values url.Values, r io.Reader, intf interface{}, d debug) (err error) {
-	pipeReader, pipeWriter := io.Pipe()
-	wr := multipart.NewWriter(pipeWriter)
-	errc := make(chan error)
-	go func() {
-		defer func() {
-			if er := pipeWriter.Close(); er != nil {
-				errc <- er
-			}
-		}()
-		ioWriter, er := wr.CreateFormFile(fieldname, filename)
-		if er != nil {
-			errc <- er
-			return
-		}
-		_, errcp := io.Copy(ioWriter, r)
-		if errcp != nil {
-			errc <- errcp
-			return
-		}
-		if errcl := wr.Close(); errcl != nil {
-			errc <- errcl
-			return
-		}
-	}()
-
-	req, err := http.NewRequest("POST", endpoint, pipeReader)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", wr.FormDataContentType())
-	req = req.WithContext(ctx)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if er := resp.Body.Close(); er != nil {
-			err = er
-		}
-	}()
-
-	err = checkStatusCode(resp, d)
-	if err != nil {
-		return err
-	}
-
-	select {
-	case err = <-errc:
-		return err
-	default:
-		return newJSONParser(intf)(resp)
-	}
 }
 
 func checkStatusCode(resp *http.Response, d debug) error {

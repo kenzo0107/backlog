@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -148,6 +150,74 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		req.Header.Set("Content-Type", "application/json")
 	}
 	return req, nil
+}
+
+// UploadMultipartFile uploads multipart file
+func (c *Client) UploadMultipartFile(ctx context.Context, method, urlStr, fpath, field string, v interface{}) (err error) {
+	fullpath, err := filepath.Abs(fpath)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Open(filepath.Clean(fullpath))
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if er := file.Close(); er != nil {
+			err = er
+		}
+	}()
+
+	pr, pw := io.Pipe()
+	mw := multipart.NewWriter(pw)
+	errc := make(chan error)
+	go func() {
+		defer func() {
+			if er := pw.Close(); er != nil {
+				errc <- er
+			}
+		}()
+		ioWriter, er := mw.CreateFormFile(field, filepath.Base(fpath))
+		if er != nil {
+			errc <- er
+			return
+		}
+		_, errcp := io.Copy(ioWriter, file)
+		if errcp != nil {
+			errc <- errcp
+			return
+		}
+		if errcl := mw.Close(); errcl != nil {
+			errc <- errcl
+			return
+		}
+	}()
+
+	if strings.HasSuffix(c.baseURL.Path, "/") {
+		return fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
+	}
+
+	u, err := c.baseURL.Parse(urlStr)
+	if err != nil {
+		return err
+	}
+
+	// add 'apiKey' to the url path
+	q := u.Query()
+	q.Set("apiKey", c.apiKey)
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest(method, u.String(), pr)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	if err := c.Do(ctx, req, &v); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Do sends an API request and returns the API response. The API response is
