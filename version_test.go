@@ -86,8 +86,7 @@ func TestCreateVersion(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, r *http.Request) {
-		j := fmt.Sprintf("%s", testJSONVersion)
-		if _, err := fmt.Fprint(w, j); err != nil {
+		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -142,8 +141,7 @@ func TestUpdateVersion(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
-		j := fmt.Sprintf("%s", testJSONVersion)
-		if _, err := fmt.Fprint(w, j); err != nil {
+		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -198,8 +196,7 @@ func TestDeleteVersion(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
-		j := fmt.Sprintf("%s", testJSONVersion)
-		if _, err := fmt.Fprint(w, j); err != nil {
+		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
 	})
