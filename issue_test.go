@@ -168,8 +168,8 @@ func getTestIssuesWithID(id int) *Issue {
 			Lang:        nil,
 			MailAddress: String("eguchi@nulab.example"),
 		},
-		Category: []int{},
-		Versions: []int{},
+		Category: []*Category{},
+		Versions: []*Version{},
 		Milestone: []*Milestone{
 			{
 				ID:             Int(30),
@@ -270,7 +270,7 @@ func TestGetIssues(t *testing.T) {
 		}
 	})
 
-	input := &GetIssuesOptions{
+	opts := &GetIssuesOptions{
 		ProjectIDs:     []int{1},
 		IssueTypeIDs:   []int{2},
 		CategoryIDs:    []int{3},
@@ -298,7 +298,7 @@ func TestGetIssues(t *testing.T) {
 		ParentIssueIDs: []int{11, 12, 13},
 		Keyword:        String("test"),
 	}
-	issues, err := client.GetIssues(input)
+	issues, err := client.GetIssues(opts)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -321,13 +321,13 @@ func TestGetIssuesWithOrderAndCount(t *testing.T) {
 		}
 	})
 
-	input := &GetIssuesOptions{
+	opts := &GetIssuesOptions{
 		Order: OrderAsc,
 		Count: Int(100),
 		Sort:  SortCategory,
 	}
 
-	issues, err := client.GetIssues(input)
+	issues, err := client.GetIssues(opts)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -347,10 +347,10 @@ func TestGetIssuesFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetIssuesOptions{
+	opts := &GetIssuesOptions{
 		Sort: SortVersion,
 	}
-	if _, err := client.GetIssues(input); err == nil {
+	if _, err := client.GetIssues(opts); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
@@ -482,12 +482,12 @@ func TestGetUserMySelfRecentrlyViewedIssues(t *testing.T) {
 		}
 	})
 
-	input := &GetUserMySelfRecentrlyViewedIssuesOptions{
+	opts := &GetUserMySelfRecentrlyViewedIssuesOptions{
 		Order:  OrderAsc,
 		Offset: Int(1),
 		Count:  Int(100),
 	}
-	issues, err := client.GetUserMySelfRecentrlyViewedIssues(input)
+	issues, err := client.GetUserMySelfRecentrlyViewedIssues(opts)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -510,8 +510,8 @@ func TestGetUserMySelfRecentrlyViewedIssuesFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetUserMySelfRecentrlyViewedIssuesOptions{}
-	_, err := client.GetUserMySelfRecentrlyViewedIssues(input)
+	opts := &GetUserMySelfRecentrlyViewedIssuesOptions{}
+	_, err := client.GetUserMySelfRecentrlyViewedIssues(opts)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -533,8 +533,8 @@ func TestGetUserMySelfRecentrlyViewedIssues4xxErrorFailed(t *testing.T) {
 		}
 	})
 
-	input := &GetUserMySelfRecentrlyViewedIssuesOptions{}
-	if _, err := client.GetUserMySelfRecentrlyViewedIssues(input); err == nil {
+	opts := &GetUserMySelfRecentrlyViewedIssuesOptions{}
+	if _, err := client.GetUserMySelfRecentrlyViewedIssues(opts); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

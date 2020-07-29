@@ -88,8 +88,8 @@ type Issue struct {
 	Priority       *Priority      `json:"priority,omitempty"`
 	Status         *Status        `json:"status,omitempty"`
 	Assignee       *User          `json:"assignee,omitempty"`
-	Category       []int          `json:"category,omitempty"`
-	Versions       []int          `json:"versions,omitempty"`
+	Category       []*Category    `json:"category,omitempty"`
+	Versions       []*Version     `json:"versions,omitempty"`
 	Milestone      []*Milestone   `json:"milestone,omitempty"`
 	StartDate      *string        `json:"startDate,omitempty"`
 	DueDate        *string        `json:"dueDate,omitempty"`
@@ -106,24 +106,15 @@ type Issue struct {
 	Stars          []*Star        `json:"stars,omitempty"`
 }
 
-// IssueType : issue type
-type IssueType struct {
-	ID           *int    `json:"id,omitempty"`
-	ProjectID    *int    `json:"projectId,omitempty"`
-	Name         *string `json:"name,omitempty"`
-	Color        *string `json:"color,omitempty"`
-	DisplayOrder *int    `json:"displayOrder,omitempty"`
-}
-
 // Milestone : -
 type Milestone struct {
-	ID             *int         `json:"id,omitempty"`
-	ProjectID      *int         `json:"projectId,omitempty"`
-	Name           *string      `json:"name,omitempty"`
-	Description    *string      `json:"description,omitempty"`
-	StartDate      *interface{} `json:"startDate,omitempty"`
-	ReleaseDueDate *interface{} `json:"releaseDueDate,omitempty"`
-	Archived       *bool        `json:"archived,omitempty"`
+	ID             *int    `json:"id,omitempty"`
+	ProjectID      *int    `json:"projectId,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	StartDate      *string `json:"startDate,omitempty"`
+	ReleaseDueDate *string `json:"releaseDueDate,omitempty"`
+	Archived       *bool   `json:"archived,omitempty"`
 }
 
 // GetIssues returns the list of issues
@@ -198,7 +189,55 @@ func (c *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, 
 	return issues, nil
 }
 
-// GetIssuesOptions specifies optional parameters to the GetIssues method.
+// GetIssueCount returns the count of issues
+func (c *Client) GetIssueCount(opts *GetIssuesCountOptions) (int, error) {
+	return c.GetIssueCountContext(context.Background(), opts)
+}
+
+// GetIssueCountContext returns the count of issues with context
+func (c *Client) GetIssueCountContext(ctx context.Context, opts *GetIssuesCountOptions) (int, error) {
+	u := "/api/v2/issues/count"
+
+	u, err := c.AddOptions(u, opts)
+	if err != nil {
+		return 0, err
+	}
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	r := new(p)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return 0, err
+	}
+
+	return r.Count, nil
+}
+
+// CreateIssue creates a issue
+func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) {
+	return c.CreateIssueContext(context.Background(), input)
+}
+
+// CreateIssueContext creates a issue with Context
+func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput) (*Issue, error) {
+	u := "/api/v2/issues"
+
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	issue := new(Issue)
+	if err := c.Do(ctx, req, &issue); err != nil {
+		return nil, err
+	}
+	return issue, nil
+}
+
+// GetIssuesOptions specifies parameters to the GetIssues method.
 type GetIssuesOptions struct {
 	ProjectIDs     []int   `url:"projectId[],omitempty"`
 	IssueTypeIDs   []int   `url:"issueTypeId[],omitempty"`
@@ -230,9 +269,61 @@ type GetIssuesOptions struct {
 	Keyword        *string `url:"keyword,omitempty"`
 }
 
-// GetUserMySelfRecentrlyViewedIssuesOptions specifies optional parameters to the GetUserMySelfRecentrlyViewedIssues method.
+// GetUserMySelfRecentrlyViewedIssuesOptions specifies parameters to the GetUserMySelfRecentrlyViewedIssues method.
 type GetUserMySelfRecentrlyViewedIssuesOptions struct {
 	Order  Order `url:"order,omitempty"`
 	Offset *int  `url:"offset,omitempty"`
 	Count  *int  `url:"count,omitempty"`
+}
+
+// GetIssuesCountOptions specifies parameters to the GetIssueCount method.
+type GetIssuesCountOptions struct {
+	ProjectIDs     []int   `url:"projectId[],omitempty"`
+	IssueTypeIDs   []int   `url:"issueTypeId[],omitempty"`
+	CategoryIDs    []int   `url:"categoryId[],omitempty"`
+	VersionIDs     []int   `url:"versionId[],omitempty"`
+	MilestoneIDs   []int   `url:"milestoneId[],omitempty"`
+	StatusIDs      []int   `url:"statusId[],omitempty"`
+	PriorityIDs    []int   `url:"priorityId[],omitempty"`
+	AssigneeIDs    []int   `url:"assigneeId[],omitempty"`
+	CreatedUserIDs []int   `url:"createdUserId[],omitempty"`
+	ResolutionIDs  []int   `url:"resolutionId[],omitempty"`
+	ParentChild    *int    `url:"parentChild,omitempty"`
+	Attachment     *bool   `url:"attachment,omitempty"`
+	SharedFile     *bool   `url:"sharedFile,omitempty"`
+	Sort           Sort    `url:"sort,omitempty"`
+	Order          Order   `url:"order,omitempty"`
+	Offset         *int    `url:"offset,omitempty"`
+	Count          *int    `url:"count,omitempty"`
+	CreatedSince   *string `url:"createdSince,omitempty"`
+	CreatedUntil   *string `url:"createdUntil,omitempty"`
+	UpdatedSince   *string `url:"updatedSince,omitempty"`
+	UpdatedUntil   *string `url:"updatedUntil,omitempty"`
+	StartDateSince *string `url:"startDateSince,omitempty"`
+	StartDateUntil *string `url:"startDateUntil,omitempty"`
+	DueDateSince   *string `url:"dueDateSince,omitempty"`
+	DueDateUntil   *string `url:"dueDateUntil,omitempty"`
+	IDs            []int   `url:"id[],omitempty"`
+	ParentIssueIDs []int   `url:"parentIssueId[],omitempty"`
+	Keyword        *string `url:"keyword,omitempty"`
+}
+
+// CreateIssueInput specifies parameters to the CreateIssue method.
+type CreateIssueInput struct {
+	ProjectID       *int    `json:"projectId"`
+	Summary         *string `json:"summary"`
+	ParentIssueID   *int    `json:"parentIssueId,omitempty"`
+	Description     *string `json:"description,omitempty"`
+	StartDate       *string `json:"startDate,omitempty"`
+	DueDate         *string `json:"dueDate,omitempty"`
+	EstimatedHours  *int    `json:"estimatedHours,omitempty"`
+	ActualHours     *int    `json:"actualHours,omitempty"`
+	IssueTypeID     *int    `json:"issueTypeId"`
+	CategoryIDs     []int   `json:"categoryId,omitempty"`
+	VersionIDs      []int   `json:"versionId,omitempty"`
+	MilestoneIDs    []int   `json:"milestoneId,omitempty"`
+	PriorityID      *int    `json:"priorityId"`
+	AssigneeID      *int    `json:"assigneeId,omitempty"`
+	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
+	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
 }
