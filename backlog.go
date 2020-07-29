@@ -300,3 +300,7 @@ func (c *Client) AddOptions(s string, opts interface{}) (string, error) {
 
 	return u.String(), nil
 }
+
+type p struct {
+	Count int
+}
