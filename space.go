@@ -47,6 +47,43 @@ type SpaceDiskUsageDetail struct {
 	GitLFS     *int `json:"gitLFS,omitempty"`
 }
 
+// License : license
+type License struct {
+	Active                            *bool      `json:"active,omitempty"`
+	AttachmentLimit                   *int       `json:"attachmentLimit,omitempty"`
+	AttachmentLimitPerFile            *int       `json:"attachmentLimitPerFile,omitempty"`
+	AttachmentNumLimit                *int       `json:"attachmentNumLimit,omitempty"`
+	Attribute                         *bool      `json:"attribute,omitempty"`
+	AttributeLimit                    *int       `json:"attributeLimit,omitempty"`
+	Burndown                          *bool      `json:"burndown,omitempty"`
+	CommentLimit                      *int       `json:"commentLimit,omitempty"`
+	ComponentLimit                    *int       `json:"componentLimit,omitempty"`
+	FileSharing                       *bool      `json:"fileSharing,omitempty"`
+	Gantt                             *bool      `json:"gantt,omitempty"`
+	Git                               *bool      `json:"git,omitempty"`
+	IssueLimit                        *int       `json:"issueLimit,omitempty"`
+	LicenceTypeID                     *int       `json:"licenceTypeId,omitempty"`
+	LimitDate                         *Timestamp `json:"limitDate,omitempty"`
+	NulabAccount                      *bool      `json:"nulabAccount,omitempty"`
+	ParentChildIssue                  *bool      `json:"parentChildIssue,omitempty"`
+	PostIssueByMail                   *bool      `json:"postIssueByMail,omitempty"`
+	ProjectGroup                      *bool      `json:"projectGroup,omitempty"`
+	ProjectLimit                      *int       `json:"projectLimit,omitempty"`
+	PullRequestAttachmentLimitPerFile *int       `json:"pullRequestAttachmentLimitPerFile,omitempty"`
+	PullRequestAttachmentNumLimit     *int       `json:"pullRequestAttachmentNumLimit,omitempty"`
+	RemoteAddress                     *bool      `json:"remoteAddress,omitempty"`
+	RemoteAddressLimit                *int       `json:"remoteAddressLimit,omitempty"`
+	StartedOn                         *Timestamp `json:"startedOn,omitempty"`
+	StorageLimit                      *int64     `json:"storageLimit,omitempty"`
+	Subversion                        *bool      `json:"subversion,omitempty"`
+	SubversionExternal                *bool      `json:"subversionExternal,omitempty"`
+	UserLimit                         *int       `json:"userLimit,omitempty"`
+	VersionLimit                      *int       `json:"versionLimit,omitempty"`
+	WikiAttachment                    *bool      `json:"wikiAttachment,omitempty"`
+	WikiAttachmentLimitPerFile        *int       `json:"wikiAttachmentLimitPerFile,omitempty"`
+	WikiAttachmentNumLimit            *int       `json:"wikiAttachmentNumLimit,omitempty"`
+}
+
 // GetSpace returns backlog space
 func (c *Client) GetSpace() (*Space, error) {
 	return c.GetSpaceContext(context.Background())
@@ -149,6 +186,27 @@ func (c *Client) GetSpaceDiskUsageContext(ctx context.Context) (*SpaceDiskUsage,
 		return nil, err
 	}
 	return diskUsage, nil
+}
+
+// GetLicence returns the license information
+func (c *Client) GetLicence() (*License, error) {
+	return c.GetLicenceContext(context.Background())
+}
+
+// GetLicenceContext returns the license information with context
+func (c *Client) GetLicenceContext(ctx context.Context) (*License, error) {
+	u := "/api/v2/space/licence"
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	license := new(License)
+	if err := c.Do(ctx, req, &license); err != nil {
+		return nil, err
+	}
+	return license, nil
 }
 
 // UpdateSpaceNotificationInput contains all the parameters necessary (including the optional ones) for a UpdateSpaceNotification() request.

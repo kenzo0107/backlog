@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
+	"github.com/pkg/errors"
 )
 
 const testJSONSpace string = `{
@@ -117,6 +120,19 @@ func TestGetSpaceIcon(t *testing.T) {
 	err := client.GetSpaceIcon(&bytes.Buffer{})
 	if err != nil {
 		log.Fatalf("Unexpected error: %s in test", err)
+	}
+}
+
+func TestGetSpaceIconFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/image", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	if err := client.GetSpaceIcon(&bytes.Buffer{}); err == nil {
+		t.Fatal("expected an error but got none")
 	}
 }
 
@@ -246,6 +262,110 @@ func TestGetSpaceDiskUsageFailed(t *testing.T) {
 	})
 
 	if _, err := client.GetSpaceDiskUsage(); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetLicence(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/licence", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, `{
+			"active": true,
+			"attachmentLimit": 0,
+			"attachmentLimitPerFile": 10485760,
+			"attachmentNumLimit": 50,
+			"attribute": true,
+			"attributeLimit": 100,
+			"burndown": true,
+			"commentLimit": 0,
+			"componentLimit": 0,
+			"fileSharing": true,
+			"gantt": true,
+			"git": true,
+			"issueLimit": 0,
+			"licenceTypeId": 51,
+			"limitDate": "2006-01-02T15:04:05Z",
+			"nulabAccount": true,
+			"parentChildIssue": true,
+			"postIssueByMail": true,
+			"projectGroup": true,
+			"projectLimit": 0,
+			"pullRequestAttachmentLimitPerFile": 10485760,
+			"pullRequestAttachmentNumLimit": 50,
+			"remoteAddress": true,
+			"remoteAddressLimit": 100,
+			"startedOn": "2006-01-02T15:04:05Z",
+			"storageLimit": 1073741824000,
+			"subversion": true,
+			"subversionExternal": true,
+			"userLimit": 0,
+			"versionLimit": 0,
+			"wikiAttachment": true,
+			"wikiAttachmentLimitPerFile": 10485760,
+			"wikiAttachmentNumLimit": 50
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetLicence()
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &License{
+		Active:                            Bool(true),
+		AttachmentLimit:                   Int(0),
+		AttachmentLimitPerFile:            Int(10485760),
+		AttachmentNumLimit:                Int(50),
+		Attribute:                         Bool(true),
+		AttributeLimit:                    Int(100),
+		Burndown:                          Bool(true),
+		CommentLimit:                      Int(0),
+		ComponentLimit:                    Int(0),
+		FileSharing:                       Bool(true),
+		Gantt:                             Bool(true),
+		Git:                               Bool(true),
+		IssueLimit:                        Int(0),
+		LicenceTypeID:                     Int(51),
+		LimitDate:                         &Timestamp{referenceTime},
+		NulabAccount:                      Bool(true),
+		ParentChildIssue:                  Bool(true),
+		PostIssueByMail:                   Bool(true),
+		ProjectGroup:                      Bool(true),
+		ProjectLimit:                      Int(0),
+		PullRequestAttachmentLimitPerFile: Int(10485760),
+		PullRequestAttachmentNumLimit:     Int(50),
+		RemoteAddress:                     Bool(true),
+		RemoteAddressLimit:                Int(100),
+		StartedOn:                         &Timestamp{referenceTime},
+		StorageLimit:                      Int64(1073741824000),
+		Subversion:                        Bool(true),
+		SubversionExternal:                Bool(true),
+		UserLimit:                         Int(0),
+		VersionLimit:                      Int(0),
+		WikiAttachment:                    Bool(true),
+		WikiAttachmentLimitPerFile:        Int(10485760),
+		WikiAttachmentNumLimit:            Int(50),
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetSpaceLicenseFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/space/licence", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	if _, err := client.GetLicence(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
