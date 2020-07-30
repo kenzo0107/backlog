@@ -69,8 +69,8 @@ type User struct {
 	MailAddress *string  `json:"mailAddress,omitempty"`
 }
 
-// UserActivity : user's activity
-type UserActivity struct {
+// Activity : activity
+type Activity struct {
 	ID            *int            `json:"id,omitempty"` // User.ID
 	Project       *Project        `json:"project,omitempty"`
 	Type          *int            `json:"type,omitempty"`
@@ -117,12 +117,6 @@ type Change struct {
 type ResponseIssue struct {
 	Issue   *Issue     `json:"issue,omitempty"`
 	Updated *Timestamp `json:"updated,omitempty"`
-}
-
-// Priority : -
-type Priority struct {
-	ID   *int    `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
 }
 
 // GetUserMySelf returns get my user information
@@ -273,12 +267,12 @@ func (c *Client) GetUserIconContext(ctx context.Context, id int, writer io.Write
 }
 
 // GetUserActivities returns the list of a user's activities
-func (c *Client) GetUserActivities(id int, opts *GetUserActivityOptions) ([]*UserActivity, error) {
+func (c *Client) GetUserActivities(id int, opts *GetUserActivitiesOptions) ([]*Activity, error) {
 	return c.GetUserActivitiesContext(context.Background(), id, opts)
 }
 
 // GetUserActivitiesContext returns the list of a user's activities with context
-func (c *Client) GetUserActivitiesContext(ctx context.Context, id int, opts *GetUserActivityOptions) ([]*UserActivity, error) {
+func (c *Client) GetUserActivitiesContext(ctx context.Context, id int, opts *GetUserActivitiesOptions) ([]*Activity, error) {
 	u := fmt.Sprintf("/api/v2/users/%v/activities", id)
 
 	u, err := c.AddOptions(u, opts)
@@ -291,11 +285,11 @@ func (c *Client) GetUserActivitiesContext(ctx context.Context, id int, opts *Get
 		return nil, err
 	}
 
-	var userActivities []*UserActivity
-	if err := c.Do(ctx, req, &userActivities); err != nil {
+	var activities []*Activity
+	if err := c.Do(ctx, req, &activities); err != nil {
 		return nil, err
 	}
-	return userActivities, nil
+	return activities, nil
 }
 
 // GetUserStars returns the list of stared contents
@@ -343,11 +337,7 @@ func (c *Client) GetUserStarCountContext(ctx context.Context, id int, opts *GetU
 		return 0, err
 	}
 
-	type p struct {
-		Count int
-	}
 	r := new(p)
-
 	if err := c.Do(ctx, req, &r); err != nil {
 		return 0, err
 	}
@@ -371,8 +361,8 @@ type UpdateUserInput struct {
 	RoleType    RoleType
 }
 
-// GetUserActivityOptions specifies optional parameters to the GetUserActivities method.
-type GetUserActivityOptions struct {
+// GetUserActivitiesOptions specifies parameters to the GetUserActivities method.
+type GetUserActivitiesOptions struct {
 	ActivityTypeIDs []int `url:"activityTypeId[],omitempty"`
 	MinID           *int  `url:"minId,omitempty"`
 	MaxID           *int  `url:"maxId,omitempty"`
@@ -380,7 +370,7 @@ type GetUserActivityOptions struct {
 	Order           Order `url:"order,omitempty"`
 }
 
-// GetUserStarsOptions specifies optional parameters to the GetUserStars method.
+// GetUserStarsOptions specifies parameters to the GetUserStars method.
 type GetUserStarsOptions struct {
 	MinID *int  `url:"minId,omitempty"`
 	MaxID *int  `url:"maxId,omitempty"`
@@ -388,7 +378,7 @@ type GetUserStarsOptions struct {
 	Order Order `url:"order,omitempty"`
 }
 
-// GetUserStarCountOptions specifies optional parameters to the GetUserStarCount method.
+// GetUserStarCountOptions specifies parameters to the GetUserStarCount method.
 type GetUserStarCountOptions struct {
 	Since *string `url:"since,omitempty"`
 	Until *string `url:"until,omitempty"`
