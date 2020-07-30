@@ -193,8 +193,8 @@ func getTestUser() *User {
 	}
 }
 
-func getTestUserActivity() *UserActivity {
-	return &UserActivity{
+func getTestUserActivity() *Activity {
+	return &Activity{
 		ID: Int(1),
 		Project: &Project{
 			ID:                                Int(92),
@@ -539,7 +539,7 @@ func TestGetUserActivities(t *testing.T) {
 		}
 	})
 
-	input := &GetUserActivityOptions{
+	input := &GetUserActivitiesOptions{
 		ActivityTypeIDs: []int{1, 2, 3},
 		MinID:           Int(1),
 		MaxID:           Int(10),
@@ -552,7 +552,7 @@ func TestGetUserActivities(t *testing.T) {
 		return
 	}
 
-	want := []*UserActivity{getTestUserActivity()}
+	want := []*Activity{getTestUserActivity()}
 
 	if !reflect.DeepEqual(want, activities) {
 		t.Fatal(ErrIncorrectResponse)
@@ -567,7 +567,7 @@ func TestGetUserActivitiesFailed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	input := &GetUserActivityOptions{}
+	input := &GetUserActivitiesOptions{}
 	if _, err := client.GetUserActivities(1, input); err == nil {
 		t.Fatal("expected an error but got none")
 	}
