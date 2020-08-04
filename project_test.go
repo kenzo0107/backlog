@@ -584,8 +584,7 @@ func TestDeleteProjectUser(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
-		j := fmt.Sprintf("%s", testJSONUser)
-		if _, err := fmt.Fprint(w, j); err != nil {
+		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
 	})
