@@ -57,6 +57,11 @@ const testJSONWiki string = `{
 	"updated": "2006-01-02T15:04:05Z"
 }`
 
+var testJSONRecentlyViewedWiki string = fmt.Sprintf(`{
+    "page": %s,
+    "updated": "2006-01-02T15:04:05Z"
+}`, testJSONWiki)
+
 func getTestWikiCount() Page {
 	return Page{
 		Count: Int(1),
@@ -140,6 +145,54 @@ func getTestAddAttachmentToWiki() *Attachment {
 			MailAddress: String("eguchi@nulab.example"),
 		},
 		Created: &Timestamp{referenceTime},
+	}
+}
+
+func TestGetMyRecentlyViewedWikis(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONRecentlyViewedWiki)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetMyRecentlyViewedWikis(&GetMyRecentlyViewedWikisOptions{
+		Order:  Order(OrderAsc.String()),
+		Offset: Int(10),
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*RecentlyViewedWiki{
+		{
+			Page:    getTestWiki(),
+			Updated: &Timestamp{referenceTime},
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetMyRecentlyViewedWikisFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetMyRecentlyViewedWikis(&GetMyRecentlyViewedWikisOptions{
+		Order:  Order(OrderAsc.String()),
+		Offset: Int(10),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
 	}
 }
 
