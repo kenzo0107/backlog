@@ -64,6 +64,36 @@ type Page struct {
 	Count *int `json:"count,omitempty"`
 }
 
+// RecentlyViewedWiki : recently viewed wiki
+type RecentlyViewedWiki struct {
+	Page    *Wiki      `json:"page"`
+	Updated *Timestamp `json:"updated"`
+}
+
+// GetMyRecentlyViewedWikis returns the list of wikis I recently viewed
+func (c *Client) GetMyRecentlyViewedWikis(opts *GetMyRecentlyViewedWikisOptions) ([]*RecentlyViewedWiki, error) {
+	return c.GetMyRecentlyViewedWikisContext(context.Background(), opts)
+}
+
+// GetMyRecentlyViewedWikisContext returns the list of wikis I recently viewed with context
+func (c *Client) GetMyRecentlyViewedWikisContext(ctx context.Context, opts *GetMyRecentlyViewedWikisOptions) ([]*RecentlyViewedWiki, error) {
+	u, err := c.AddOptions("/api/v2/users/myself/recentlyViewedWikis", opts)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var recentlyViewedWikis []*RecentlyViewedWiki
+	if err := c.Do(ctx, req, &recentlyViewedWikis); err != nil {
+		return nil, err
+	}
+	return recentlyViewedWikis, nil
+}
+
 // GetWikis returns the list of wikis
 func (c *Client) GetWikis(opts *GetWikisOptions) ([]*Wiki, error) {
 	return c.GetWikisContext(context.Background(), opts)
@@ -263,18 +293,25 @@ func (c *Client) AddAttachmentToWikiContext(ctx context.Context, wikiID int, inp
 	return attachments, nil
 }
 
-// GetWikisOptions specifies optional parameters to the GetWikis method.
+// GetMyRecentlyViewedWikisOptions specifies parameters to the GetMyRecentlyViewedWikis method.
+type GetMyRecentlyViewedWikisOptions struct {
+	Order  Order `url:"order,omitempty"`
+	Offset *int  `url:"offset,omitempty"`
+	Count  *int  `url:"count,omitempty"`
+}
+
+// GetWikisOptions specifies parameters to the GetWikis method.
 type GetWikisOptions struct {
 	ProjectIDOrKey interface{} `url:"projectIdOrKey"`
 	Keyword        *string     `url:"keyword,omitempty"`
 }
 
-// GetWikiCountOptions specifies optional parameters to the GetWikiCount method.
+// GetWikiCountOptions specifies parameters to the GetWikiCount method.
 type GetWikiCountOptions struct {
 	ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
 }
 
-// GetWikiTagsOptions specifies optional parameters to the GetWikiTags method.
+// GetWikiTagsOptions specifies parameters to the GetWikiTags method.
 type GetWikiTagsOptions struct {
 	ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
 }
