@@ -2,6 +2,8 @@ package backlog
 
 import (
 	"context"
+	"fmt"
+	"io"
 )
 
 // Sort : sort
@@ -106,7 +108,7 @@ type Issue struct {
 	Stars          []*Star        `json:"stars,omitempty"`
 }
 
-// Milestone : -
+// Milestone : milestone
 type Milestone struct {
 	ID             *int    `json:"id,omitempty"`
 	ProjectID      *int    `json:"projectId,omitempty"`
@@ -115,6 +117,45 @@ type Milestone struct {
 	StartDate      *string `json:"startDate,omitempty"`
 	ReleaseDueDate *string `json:"releaseDueDate,omitempty"`
 	Archived       *bool   `json:"archived,omitempty"`
+}
+
+// IssueComment : issue comment
+type IssueComment struct {
+	ID            *int            `json:"id,omitempty"`
+	Content       *string         `json:"content,omitempty"`
+	ChangeLog     []*ChangeLog    `json:"changeLog,omitempty"`
+	CreatedUser   *User           `json:"createdUser,omitempty"`
+	Created       *Timestamp      `json:"created,omitempty"`
+	Updated       *Timestamp      `json:"updated,omitempty"`
+	Stars         []*Star         `json:"stars,omitempty"`
+	Notifications []*Notification `json:"notifications,omitempty"`
+}
+
+// ChangeLog : change log
+type ChangeLog struct {
+	AttachmentInfo   *AttachmentInfo   `json:"attachmentInfo,omitempty"`
+	AttributeInfo    *AttributeInfo    `json:"attributeInfo,omitempty"`
+	Field            *string           `json:"field,omitempty"`
+	NewValue         *string           `json:"newValue,omitempty"`
+	NotificationInfo *NotificationInfo `json:"notificationInfo,omitempty"`
+	OriginalValue    *string           `json:"originalValue,omitempty"`
+}
+
+// AttachmentInfo : attachment information
+type AttachmentInfo struct {
+	ID   *int    `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+// AttributeInfo : attribute information
+type AttributeInfo struct {
+	ID     *int `json:"id,omitempty"`
+	TypeID *int `json:"typeId,omitempty"`
+}
+
+// NotificationInfo : notification information
+type NotificationInfo struct {
+	Type *string `json:"type,omitempty"`
 }
 
 // GetIssues returns the list of issues
@@ -221,7 +262,7 @@ func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) {
 	return c.CreateIssueContext(context.Background(), input)
 }
 
-// CreateIssueContext creates a issue with Context
+// CreateIssueContext creates a issue with context
 func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput) (*Issue, error) {
 	u := "/api/v2/issues"
 
@@ -235,6 +276,362 @@ func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput
 		return nil, err
 	}
 	return issue, nil
+}
+
+// GetIssue gets a issue
+func (c *Client) GetIssue(issueIDOrKey string) (*Issue, error) {
+	return c.GetIssueContext(context.Background(), issueIDOrKey)
+}
+
+// GetIssueContext gets a issue with context
+func (c *Client) GetIssueContext(ctx context.Context, issueIDOrKey string) (*Issue, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	issue := new(Issue)
+	if err := c.Do(ctx, req, &issue); err != nil {
+		return nil, err
+	}
+	return issue, nil
+}
+
+// UpdateIssue updates a issue
+func (c *Client) UpdateIssue(issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) {
+	return c.UpdateIssueContext(context.Background(), issueIDOrKey, input)
+}
+
+// UpdateIssueContext updates a issue with context
+func (c *Client) UpdateIssueContext(ctx context.Context, issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+	req, err := c.NewRequest("PATCH", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	issue := new(Issue)
+	if err := c.Do(ctx, req, &issue); err != nil {
+		return nil, err
+	}
+	return issue, nil
+}
+
+// GetIssueComments get list of the issue comments
+func (c *Client) GetIssueComments(issueIDOrKey string, opts *GetIssueCommentsOptions) ([]*IssueComment, error) {
+	return c.GetIssueCommentsContext(context.Background(), issueIDOrKey, opts)
+}
+
+// GetIssueCommentsContext gets list of the issue comments with context
+func (c *Client) GetIssueCommentsContext(ctx context.Context, issueIDOrKey string, opts *GetIssueCommentsOptions) ([]*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := []*IssueComment{}
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// CreateIssueComment creates a issue comments
+func (c *Client) CreateIssueComment(issueIDOrKey string, input *CreateIssueCommentInput) (*IssueComment, error) {
+	return c.CreateIssueCommentContext(context.Background(), issueIDOrKey, input)
+}
+
+// CreateIssueCommentContext creates a issue comments with context
+func (c *Client) CreateIssueCommentContext(ctx context.Context, issueIDOrKey string, input *CreateIssueCommentInput) (*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments", issueIDOrKey)
+
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := new(IssueComment)
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// GetIssueCommentsCount gets count of issue comments
+func (c *Client) GetIssueCommentsCount(issueIDOrKey string) (int, error) {
+	return c.GetIssueCommentsCountContext(context.Background(), issueIDOrKey)
+}
+
+// GetIssueCommentsCountContext gets count of issue comments with context
+func (c *Client) GetIssueCommentsCountContext(ctx context.Context, issueIDOrKey string) (int, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/count", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	r := new(p)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return 0, err
+	}
+	return r.Count, nil
+}
+
+// GetIssueComment gets a issue comment
+func (c *Client) GetIssueComment(issueIDOrKey string, commentID int) (*IssueComment, error) {
+	return c.GetIssueCommentContext(context.Background(), issueIDOrKey, commentID)
+}
+
+// GetIssueCommentContext gets a issue comment with context
+func (c *Client) GetIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int) (*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := new(IssueComment)
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// DeleteIssueComment deletes a issue comment
+func (c *Client) DeleteIssueComment(issueIDOrKey string, commentID int) (*IssueComment, error) {
+	return c.DeleteIssueCommentContext(context.Background(), issueIDOrKey, commentID)
+}
+
+// DeleteIssueCommentContext deletes a issue comment with context
+func (c *Client) DeleteIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int) (*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := new(IssueComment)
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// UpdateIssueComment updates a issue comment
+func (c *Client) UpdateIssueComment(issueIDOrKey string, commentID int, input *UpdateIssueCommentInput) (*IssueComment, error) {
+	return c.UpdateIssueCommentContext(context.Background(), issueIDOrKey, commentID, input)
+}
+
+// UpdateIssueCommentContext updates a issue comment with context
+func (c *Client) UpdateIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int, input *UpdateIssueCommentInput) (*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+	req, err := c.NewRequest("PATCH", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := new(IssueComment)
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// GetIssueCommentsNotifications gets notifications in issue comments
+func (c *Client) GetIssueCommentsNotifications(issueIDOrKey string, commentID int) ([]*Notification, error) {
+	return c.GetIssueCommentsNotificationsContext(context.Background(), issueIDOrKey, commentID)
+}
+
+// GetIssueCommentsNotificationsContext gets a issue comment with context
+func (c *Client) GetIssueCommentsNotificationsContext(ctx context.Context, issueIDOrKey string, commentID int) ([]*Notification, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/%v/notifications", issueIDOrKey, commentID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	notifications := []*Notification{}
+	if err := c.Do(ctx, req, &notifications); err != nil {
+		return nil, err
+	}
+	return notifications, nil
+}
+
+// CreateIssueCommentsNotification creates a notification
+func (c *Client) CreateIssueCommentsNotification(issueIDOrKey string, commentID int, input *CreateIssueCommentsNotificationInput) (*IssueComment, error) {
+	return c.CreateIssueCommentsNotificationContext(context.Background(), issueIDOrKey, commentID, input)
+}
+
+// CreateIssueCommentsNotificationContext creates a notification with context
+func (c *Client) CreateIssueCommentsNotificationContext(ctx context.Context, issueIDOrKey string, commentID int, input *CreateIssueCommentsNotificationInput) (*IssueComment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/comments/%v/notifications", issueIDOrKey, commentID)
+
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	issueComment := new(IssueComment)
+	if err := c.Do(ctx, req, &issueComment); err != nil {
+		return nil, err
+	}
+	return issueComment, nil
+}
+
+// GetIssueAttachments gets issue attachments
+func (c *Client) GetIssueAttachments(issueIDOrKey string) ([]*Attachment, error) {
+	return c.GetIssueAttachmentsContext(context.Background(), issueIDOrKey)
+}
+
+// GetIssueAttachmentsContext gets issue attachments with context
+func (c *Client) GetIssueAttachmentsContext(ctx context.Context, issueIDOrKey string) ([]*Attachment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/attachments", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	attachments := []*Attachment{}
+	if err := c.Do(ctx, req, &attachments); err != nil {
+		return nil, err
+	}
+	return attachments, nil
+}
+
+// GetIssueAttachment downloads an issue attachment
+func (c *Client) GetIssueAttachment(issueIDOrKey string, attachmentID int, writer io.Writer) error {
+	return c.GetIssueAttachmentContext(context.Background(), issueIDOrKey, attachmentID, writer)
+}
+
+// GetIssueAttachmentContext downloads an issue attachment with context
+func (c *Client) GetIssueAttachmentContext(ctx context.Context, issueIDOrKey string, attachmentID int, writer io.Writer) error {
+	u := fmt.Sprintf("/api/v2/issues/%v/attachments/%v", issueIDOrKey, attachmentID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Do(ctx, req, writer); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteIssueAttachment deletes an issue attachment
+func (c *Client) DeleteIssueAttachment(issueIDOrKey string, attachmentID int) (*Attachment, error) {
+	return c.DeleteIssueAttachmentContext(context.Background(), issueIDOrKey, attachmentID)
+}
+
+// DeleteIssueAttachmentContext deletes an issue attachments with context
+func (c *Client) DeleteIssueAttachmentContext(ctx context.Context, issueIDOrKey string, attachmentID int) (*Attachment, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/attachments/%v", issueIDOrKey, attachmentID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	attachment := new(Attachment)
+	if err := c.Do(ctx, req, &attachment); err != nil {
+		return nil, err
+	}
+	return attachment, nil
+}
+
+// GetIssueParticipants gets participants of a issue
+func (c *Client) GetIssueParticipants(issueIDOrKey string) ([]*User, error) {
+	return c.GetIssueParticipantsContext(context.Background(), issueIDOrKey)
+}
+
+// GetIssueParticipantsContext gets participants of a issue with context
+func (c *Client) GetIssueParticipantsContext(ctx context.Context, issueIDOrKey string) ([]*User, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/participants", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*User{}
+	if err := c.Do(ctx, req, &users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+// GetIssueSharedFiles gets shared files of a issue
+func (c *Client) GetIssueSharedFiles(issueIDOrKey string) ([]*SharedFile, error) {
+	return c.GetIssueSharedFilesContext(context.Background(), issueIDOrKey)
+}
+
+// GetIssueSharedFilesContext gets shared files of a issue with context
+func (c *Client) GetIssueSharedFilesContext(ctx context.Context, issueIDOrKey string) ([]*SharedFile, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles", issueIDOrKey)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	sharedFiles := []*SharedFile{}
+	if err := c.Do(ctx, req, &sharedFiles); err != nil {
+		return nil, err
+	}
+	return sharedFiles, nil
+}
+
+// CreateIssueSharedFiles link a shared files to a issue
+func (c *Client) CreateIssueSharedFiles(issueIDOrKey string, input *CreateIssueSharedFilesInput) ([]*SharedFile, error) {
+	return c.CreateIssueSharedFilesContext(context.Background(), issueIDOrKey, input)
+}
+
+// CreateIssueSharedFilesContext link a shared files to a issue with context
+func (c *Client) CreateIssueSharedFilesContext(ctx context.Context, issueIDOrKey string, input *CreateIssueSharedFilesInput) ([]*SharedFile, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles", issueIDOrKey)
+
+	req, err := c.NewRequest("POST", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	sharedFiles := []*SharedFile{}
+	if err := c.Do(ctx, req, &sharedFiles); err != nil {
+		return nil, err
+	}
+	return sharedFiles, nil
+}
+
+// DeleteIssueSharedFile link a shared files to a issue
+func (c *Client) DeleteIssueSharedFile(issueIDOrKey string, sharedFileID int) (*SharedFile, error) {
+	return c.DeleteIssueSharedFileContext(context.Background(), issueIDOrKey, sharedFileID)
+}
+
+// DeleteIssueSharedFileContext link a shared files to a issue with context
+func (c *Client) DeleteIssueSharedFileContext(ctx context.Context, issueIDOrKey string, sharedFileID int) (*SharedFile, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles/%v", issueIDOrKey, sharedFileID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	sharedFile := new(SharedFile)
+	if err := c.Do(ctx, req, &sharedFile); err != nil {
+		return nil, err
+	}
+	return sharedFile, nil
 }
 
 // GetIssuesOptions specifies parameters to the GetIssues method.
@@ -326,4 +723,56 @@ type CreateIssueInput struct {
 	AssigneeID      *int    `json:"assigneeId,omitempty"`
 	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
 	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
+}
+
+// UpdateIssueInput specifies parameters to the UpdateIssue method.
+type UpdateIssueInput struct {
+	Summary         *string `json:"summary,omitempty"`
+	ParentIssueID   *int    `json:"parentIssueId,omitempty"`
+	Description     *string `json:"description,omitempty"`
+	StatusID        *int    `json:"statusId,omitempty"`
+	ResolutionID    *int    `json:"resolutionId,omitempty"`
+	StartDate       *string `json:"startDate,omitempty"`
+	DueDate         *string `json:"dueDate,omitempty"`
+	EstimatedHours  *int    `json:"estimatedHours,omitempty"`
+	ActualHours     *int    `json:"actualHours,omitempty"`
+	IssueTypeID     *int    `json:"issueTypeId,omitempty"`
+	CategoryIDs     []int   `json:"categoryId,omitempty"`
+	VersionIDs      []int   `json:"versionId,omitempty"`
+	MilestoneIDs    []int   `json:"milestoneId,omitempty"`
+	PriorityID      *int    `json:"priorityId,omitempty"`
+	AssigneeID      *int    `json:"assigneeId,omitempty"`
+	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
+	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
+	Comment         *string `json:"comment,omitempty"`
+}
+
+// GetIssueCommentsOptions specifies parameters to the GetIssueComments method.
+type GetIssueCommentsOptions struct {
+	MinID *int  `json:"minId,omitempty"`
+	MaxID *int  `json:"maxId,omitempty"`
+	Count *int  `json:"count,omitempty"`
+	Order Order `json:"order,omitempty"`
+}
+
+// CreateIssueCommentInput specifies parameters to the CreateIssueComment method.
+type CreateIssueCommentInput struct {
+	Content         *string `json:"content"`
+	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
+	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
+}
+
+// UpdateIssueCommentInput specifies parameters to the UpdateIssueComment method.
+type UpdateIssueCommentInput struct {
+	Content *string `json:"content,omitempty"`
+}
+
+// CreateIssueCommentsNotificationInput specifies parameters to the CreateIssueCommentsNotification method.
+type CreateIssueCommentsNotificationInput struct {
+	NotifiedUserIDs []int `json:"notifiedUserId,omitempty"`
+}
+
+// CreateIssueSharedFilesInput specifies parameters to the CreateIssueSharedFiles method.
+type CreateIssueSharedFilesInput struct {
+	FileIDs []int `json:"fileId,omitempty"`
 }

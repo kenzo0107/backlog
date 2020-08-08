@@ -456,7 +456,7 @@ func TestGetProjectIconFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("//projects/SRE/image", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/image", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
