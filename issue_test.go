@@ -1,7 +1,9 @@
 package backlog
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"reflect"
 	"testing"
@@ -11,7 +13,19 @@ import (
 	"github.com/kylelemons/godebug/pretty"
 )
 
-const testJSONIssue string = `{
+var testJSONSharedFile string = fmt.Sprintf(`{
+	"id": 454403,
+	"type": "file",
+	"dir": "/ユーザアイコン/",
+	"name": "01_サラリーマン.png",
+	"size": 2735,
+	"createdUser": %s,
+	"created": "2006-01-02T15:04:05Z",
+	"updatedUser": %s,
+	"updated": "2006-01-02T15:04:05Z"
+}`, testJSONUser, testJSONUser)
+
+var testJSONIssue string = fmt.Sprintf(`{
 	"id": 1,
 	"projectId": 1,
 	"issueKey": "BLG-1",
@@ -37,13 +51,7 @@ const testJSONIssue string = `{
 		"color": "#ed8077",
 		"displayOrder": 1000
 	},
-	"assignee": {
-		"id": 2,
-		"name": "eguchi",
-		"roleType": 2,
-		"lang": null,
-		"mailAddress": "eguchi@nulab.example"
-	},
+	"assignee": %s,
 	"category": [],
 	"versions": [],
 	"milestone": [
@@ -62,23 +70,9 @@ const testJSONIssue string = `{
 	"estimatedHours": null,
 	"actualHours": null,
 	"parentIssueId": null,
-	"createdUser": {
-		"id": 1,
-		"userId": "admin",
-		"name": "admin",
-		"roleType": 1,
-		"lang": "ja",
-		"mailAddress": "eguchi@nulab.example"
-	},
+	"createdUser": %s,
 	"created": "2006-01-02T15:04:05Z",
-	"updatedUser": {
-		"id": 1,
-		"userId": "admin",
-		"name": "admin",
-		"roleType": 1,
-		"lang": "ja",
-		"mailAddress": "eguchi@nulab.example"
-	},
+	"updatedUser": %s,
 	"updated": "2006-01-02T15:04:05Z",
 	"customFields": [],
 	"attachments": [
@@ -88,55 +82,49 @@ const testJSONIssue string = `{
 			"size": 85079
 		}
 	],
-	"sharedFiles": [
-		{
-			"id": 454403,
-			"type": "file",
-			"dir": "/ユーザアイコン/",
-			"name": "01_サラリーマン.png",
-			"size": 2735,
-			"createdUser": {
-				"id": 5686,
-				"userId": "takada",
-				"name": "takada",
-				"roleType": 2,
-				"lang": "ja",
-				"mailAddress": "takada@nulab.example"
-			},
-			"created": "2006-01-02T15:04:05Z",
-			"updatedUser": {
-				"id": 5686,
-				"userId": "takada",
-				"name": "takada",
-				"roleType": 2,
-				"lang": "ja",
-				"mailAddress": "takada@nulab.example"
-			},
-			"updated": "2006-01-02T15:04:05Z"
-		}
-	],
+	"sharedFiles": [%s],
 	"stars": [
 		{
 			"id": 10,
 			"comment": null,
 			"url": "https://xx.backlog.jp/view/BLG-1",
 			"title": "[BLG-1] first issue | 課題の表示 - Backlog",
-			"presenter": {
-				"id": 2,
-				"userId": "eguchi",
-				"name": "eguchi",
-				"roleType": 2,
-				"lang": "ja",
-				"mailAddress": "eguchi@nulab.example"
-			},
+			"presenter": %s,
 			"created": "2006-01-02T15:04:05Z"
 		}
 	]
-}`
+}`, testJSONUser, testJSONUser, testJSONUser, testJSONSharedFile, testJSONUser)
 
-func getTestIssuesWithID(id int) *Issue {
+var testJSONNotification string = fmt.Sprintf(`{
+	"id":22,
+	"alreadyRead":false,
+	"reason":2,
+	"user": %s,
+	"resourceAlreadyRead":false
+}`, testJSONUser)
+
+var testJSONIssueComment string = fmt.Sprintf(`{
+    "id": 6586,
+    "content": "テスト",
+    "changeLog": null,
+    "createdUser": %s,
+    "created": "2006-01-02T15:04:05Z",
+    "updated": "2006-01-02T15:04:05Z",
+    "stars": [],
+    "notifications": [%s]
+}`, testJSONUser, testJSONNotification)
+
+var testJSONAttachment string = fmt.Sprintf(`{
+	"id":8,
+	"name":"IMG0088.png",
+	"size":5563,
+	"createdUser": %v,
+	"created":"2006-01-02T15:04:05Z"
+}`, testJSONUser)
+
+func getTestIssue() *Issue {
 	return &Issue{
-		ID:        Int(id),
+		ID:        Int(1),
 		ProjectID: Int(1),
 		IssueKey:  String("BLG-1"),
 		KeyID:     Int(1),
@@ -161,13 +149,7 @@ func getTestIssuesWithID(id int) *Issue {
 			Color:        String("#ed8077"),
 			DisplayOrder: Int(1000),
 		},
-		Assignee: &User{
-			ID:          Int(2),
-			Name:        String("eguchi"),
-			RoleType:    RoleType(2),
-			Lang:        nil,
-			MailAddress: String("eguchi@nulab.example"),
-		},
+		Assignee: getTestUser(),
 		Category: []*Category{},
 		Versions: []*Version{},
 		Milestone: []*Milestone{
@@ -186,25 +168,11 @@ func getTestIssuesWithID(id int) *Issue {
 		EstimatedHours: nil,
 		ActualHours:    nil,
 		ParentIssueID:  nil,
-		CreatedUser: &User{
-			ID:          Int(1),
-			UserID:      String("admin"),
-			Name:        String("admin"),
-			RoleType:    1,
-			Lang:        String("ja"),
-			MailAddress: String("eguchi@nulab.example"),
-		},
-		Created: &Timestamp{referenceTime},
-		UpdatedUser: &User{
-			ID:          Int(1),
-			UserID:      String("admin"),
-			Name:        String("admin"),
-			RoleType:    RoleType(1),
-			Lang:        String("ja"),
-			MailAddress: String("eguchi@nulab.example"),
-		},
-		Updated:      &Timestamp{referenceTime},
-		CustomFields: []*CustomField{},
+		CreatedUser:    getTestUser(),
+		Created:        &Timestamp{referenceTime},
+		UpdatedUser:    getTestUser(),
+		Updated:        &Timestamp{referenceTime},
+		CustomFields:   []*CustomField{},
 		Attachments: []*Attachment{
 			{
 				ID:   Int(1),
@@ -212,50 +180,66 @@ func getTestIssuesWithID(id int) *Issue {
 				Size: Int(85079),
 			},
 		},
-		SharedFiles: []*SharedFile{
-			{
-				ID:   Int(454403),
-				Type: String("file"),
-				Dir:  String("/ユーザアイコン/"),
-				Name: String("01_サラリーマン.png"),
-				Size: Int(2735),
-				CreatedUser: &User{
-					ID:          Int(5686),
-					UserID:      String("takada"),
-					Name:        String("takada"),
-					RoleType:    2,
-					Lang:        String("ja"),
-					MailAddress: String("takada@nulab.example"),
-				},
-				Created: &Timestamp{referenceTime},
-				UpdatedUser: &User{
-					ID:          Int(5686),
-					UserID:      String("takada"),
-					Name:        String("takada"),
-					RoleType:    2,
-					Lang:        String("ja"),
-					MailAddress: String("takada@nulab.example"),
-				},
-				Updated: &Timestamp{referenceTime},
-			},
-		},
+		SharedFiles: []*SharedFile{getTestSharedFile()},
 		Stars: []*Star{
 			{
-				ID:      Int(10),
-				Comment: nil,
-				URL:     String("https://xx.backlog.jp/view/BLG-1"),
-				Title:   String("[BLG-1] first issue | 課題の表示 - Backlog"),
-				Presenter: &User{
-					ID:          Int(2),
-					UserID:      String("eguchi"),
-					Name:        String("eguchi"),
-					RoleType:    2,
-					Lang:        String("ja"),
-					MailAddress: String("eguchi@nulab.example"),
-				},
-				Created: &Timestamp{referenceTime},
+				ID:        Int(10),
+				Comment:   nil,
+				URL:       String("https://xx.backlog.jp/view/BLG-1"),
+				Title:     String("[BLG-1] first issue | 課題の表示 - Backlog"),
+				Presenter: getTestUser(),
+				Created:   &Timestamp{referenceTime},
 			},
 		},
+	}
+}
+
+func getTestIssueComment() *IssueComment {
+	return &IssueComment{
+		ID:          Int(6586),
+		Content:     String("テスト"),
+		ChangeLog:   nil,
+		CreatedUser: getTestUser(),
+		Created:     &Timestamp{referenceTime},
+		Updated:     &Timestamp{referenceTime},
+		Stars:       []*Star{},
+		Notifications: []*Notification{
+			getTestNotification(),
+		},
+	}
+}
+
+func getTestNotification() *Notification {
+	return &Notification{
+		ID:                  Int(22),
+		AlreadyRead:         Bool(false),
+		Reason:              Int(2),
+		User:                getTestUser(),
+		ResourceAlreadyRead: Bool(false),
+	}
+}
+
+func getTestAttachment() *Attachment {
+	return &Attachment{
+		ID:          Int(8),
+		Name:        String("IMG0088.png"),
+		Size:        Int(5563),
+		CreatedUser: getTestUser(),
+		Created:     &Timestamp{referenceTime},
+	}
+}
+
+func getTestSharedFile() *SharedFile {
+	return &SharedFile{
+		ID:          Int(454403),
+		Type:        String("file"),
+		Dir:         String("/ユーザアイコン/"),
+		Name:        String("01_サラリーマン.png"),
+		Size:        Int(2735),
+		CreatedUser: getTestUser(),
+		Created:     &Timestamp{referenceTime},
+		UpdatedUser: getTestUser(),
+		Updated:     &Timestamp{referenceTime},
 	}
 }
 
@@ -304,36 +288,7 @@ func TestGetIssues(t *testing.T) {
 		return
 	}
 
-	want := []*Issue{getTestIssuesWithID(1)}
-	if !reflect.DeepEqual(want, issues) {
-		t.Fatal(ErrIncorrectResponse)
-	}
-}
-
-func TestGetIssuesWithOrderAndCount(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
-		j := fmt.Sprintf("[%s]", testJSONIssue)
-		if _, err := fmt.Fprint(w, j); err != nil {
-			t.Fatal(err)
-		}
-	})
-
-	opts := &GetIssuesOptions{
-		Order: OrderAsc,
-		Count: Int(100),
-		Sort:  SortCategory,
-	}
-
-	issues, err := client.GetIssues(opts)
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	want := []*Issue{getTestIssuesWithID(1)}
+	want := []*Issue{getTestIssue()}
 	if !reflect.DeepEqual(want, issues) {
 		t.Fatal(ErrIncorrectResponse)
 	}
@@ -494,7 +449,7 @@ func TestGetUserMySelfRecentrlyViewedIssues(t *testing.T) {
 	}
 
 	want := Issues{
-		{getTestIssuesWithID(1)},
+		{getTestIssue()},
 	}
 
 	if !reflect.DeepEqual(want, issues) {
@@ -535,6 +490,907 @@ func TestGetUserMySelfRecentrlyViewedIssues4xxErrorFailed(t *testing.T) {
 
 	opts := &GetUserMySelfRecentrlyViewedIssuesOptions{}
 	if _, err := client.GetUserMySelfRecentrlyViewedIssues(opts); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCount(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"count":1}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	opts := &GetIssuesCountOptions{
+		Order:  OrderAsc,
+		Offset: Int(1),
+		Count:  Int(100),
+	}
+	expected, err := client.GetIssueCount(opts)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := 1
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetIssueCountFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueCount(&GetIssuesCountOptions{})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssue(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateIssue(&CreateIssueInput{
+		ProjectID:      Int(1),
+		Summary:        String("first issue"),
+		ParentIssueID:  nil,
+		Description:    String(""),
+		StartDate:      nil,
+		DueDate:        nil,
+		EstimatedHours: nil,
+		ActualHours:    nil,
+		IssueTypeID:    Int(2),
+		MilestoneIDs:   []int{30},
+		PriorityID:     Int(3),
+		AssigneeID:     Int(2),
+		AttachmentIDs:  []int{1},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssue()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestCreateIssueFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.CreateIssue(&CreateIssueInput{
+		ProjectID: Int(1),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssue(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssue("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssue()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetIssueFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssue("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssue("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateIssue(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.UpdateIssue("BLG-1", &UpdateIssueInput{
+		Summary: String("first issue"),
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssue()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestUpdateIssueFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.UpdateIssue("BLG-1", &UpdateIssueInput{
+		Summary: String("first issue"),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateIssueInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.UpdateIssue("%", &UpdateIssueInput{
+		Summary: String("first issue"),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueComments(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONIssueComment)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueComments("BLG-1", &GetIssueCommentsOptions{})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*IssueComment{getTestIssueComment()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetIssueCommentsFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueComments("BLG-1", &GetIssueCommentsOptions{})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentsInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueComments("%", &GetIssueCommentsOptions{})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueComment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &CreateIssueCommentInput{
+		Content: String("テスト"),
+	}
+	expected, err := client.CreateIssueComment("BLG-1", input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssueComment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestCreateIssueCommentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	input := &CreateIssueCommentInput{
+		Content: String("テスト"),
+	}
+	_, err := client.CreateIssueComment("BLG-1", input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueCommentInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	input := &CreateIssueCommentInput{
+		Content: String("テスト"),
+	}
+	_, err := client.CreateIssueComment("%", input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentsCount(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"count": 1}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueCommentsCount("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(1, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueCommentsCountFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueCommentsCount("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentsCountInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueCommentsCount("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueComment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueComment("BLG-1", 1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssueComment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueCommentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueComment("BLG-1", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueComment("%", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueComment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.DeleteIssueComment("BLG-1", 1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssueComment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestDeleteIssueCommentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.DeleteIssueComment("BLG-1", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueCommentInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.DeleteIssueComment("%", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateIssueComment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.UpdateIssueComment("BLG-1", 1, &UpdateIssueCommentInput{
+		Content: String("テスト"),
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssueComment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestUpdateIssueCommentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.UpdateIssueComment("BLG-1", 1, &UpdateIssueCommentInput{
+		Content: String("テスト"),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateIssueCommentInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.UpdateIssueComment("%", 1, &UpdateIssueCommentInput{
+		Content: String("テスト"),
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentsNotifications(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONNotification)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueCommentsNotifications("BLG-1", 1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*Notification{getTestNotification()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueCommentsNotificationsFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueCommentsNotifications("BLG-1", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueCommentsNotificationsInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueCommentsNotifications("%", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueCommentsNotification(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateIssueCommentsNotification("BLG-1", 1, &CreateIssueCommentsNotificationInput{
+		NotifiedUserIDs: []int{1},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssueComment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestCreateIssueCommentsNotificationFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.CreateIssueCommentsNotification("BLG-1", 1, &CreateIssueCommentsNotificationInput{
+		NotifiedUserIDs: []int{1},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueCommentsNotificationInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.CreateIssueCommentsNotification("%", 1, &CreateIssueCommentsNotificationInput{
+		NotifiedUserIDs: []int{1},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueAttachments(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONAttachment)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueAttachments("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*Attachment{getTestAttachment()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueAttachmentsFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueAttachments("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueAttachmentsInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueAttachments("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueAttachment(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	client.httpclient = &mockHTTPClient{}
+
+	err := client.GetIssueAttachment("SRE-1", 1, &bytes.Buffer{})
+	if err != nil {
+		log.Fatalf("Unexpected error: %s in test", err)
+	}
+}
+
+func TestGetIssueAttachmentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/SRE-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	if err := client.GetIssueAttachment("SRE-1", 1, &bytes.Buffer{}); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueAttachmentInvalidProjectKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	if err := client.GetIssueAttachment("%", 1, &bytes.Buffer{}); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueAttachment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONAttachment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.DeleteIssueAttachment("BLG-1", 1)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestAttachment()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestDeleteIssueAttachmentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.DeleteIssueAttachment("BLG-1", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueAttachmentInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.DeleteIssueAttachment("%", 1)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueParticipants(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONUser)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueParticipants("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*User{getTestUser()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueParticipantsFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueParticipants("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueParticipantsInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueParticipants("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueSharedFiles(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONSharedFile)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetIssueSharedFiles("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*SharedFile{getTestSharedFile()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetIssueSharedFilesFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetIssueSharedFiles("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetIssueSharedFilesInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.GetIssueSharedFiles("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueSharedFiles(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+		j := fmt.Sprintf(`[%s]`, testJSONSharedFile)
+		if _, err := fmt.Fprint(w, j); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateIssueSharedFiles("BLG-1", &CreateIssueSharedFilesInput{
+		FileIDs: []int{454403},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*SharedFile{getTestSharedFile()}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestCreateIssueSharedFilesFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.CreateIssueSharedFiles("BLG-1", &CreateIssueSharedFilesInput{
+		FileIDs: []int{454403},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestCreateIssueSharedFilesInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.CreateIssueSharedFiles("%", &CreateIssueSharedFilesInput{
+		FileIDs: []int{454403},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueSharedFile(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONSharedFile); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.DeleteIssueSharedFile("BLG-1", 454403)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestSharedFile()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestDeleteIssueSharedFileFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.DeleteIssueSharedFile("BLG-1", 454403)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueSharedFileInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.DeleteIssueSharedFile("%", 454403)
+	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

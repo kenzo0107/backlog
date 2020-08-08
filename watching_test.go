@@ -28,7 +28,7 @@ func getTestWatching() *Watching {
 		ResourceAlreadyRead: Bool(true),
 		Note:                String("This is a note for the watching issue."),
 		Type:                String("issue"),
-		Issue:               getTestIssuesWithID(1),
+		Issue:               getTestIssue(),
 		LastContentUpdated:  &Timestamp{referenceTime},
 		Created:             &Timestamp{referenceTime},
 		Updated:             &Timestamp{referenceTime},
