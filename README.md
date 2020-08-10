@@ -37,6 +37,24 @@ func main() {
 }
 ```
 
+### Download space icon
+
+```go
+func main() {
+	file, err := os.Create("icon.png")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	if err := c.GetSpaceIcon(file); err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+```
+
 ## Contributing
 
 You are more than welcome to contribute to this project. Fork and make a Pull Request, or create an Issue if you see any problem.
