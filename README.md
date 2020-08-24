@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-	api := backlog.New("YOUR API KEY", "YOUR BASE URL")
+	c := backlog.New("YOUR API KEY", "YOUR BASE URL")
 
 	user, err := c.GetUserMySelf()
 	if err != nil {
@@ -47,6 +47,8 @@ func main() {
 		return
 	}
 	defer file.Close()
+
+	c := backlog.New("YOUR API KEY", "YOUR BASE URL")
 
 	if err := c.GetSpaceIcon(file); err != nil {
 		fmt.Println(err)
