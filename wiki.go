@@ -293,6 +293,27 @@ func (c *Client) AddAttachmentToWikiContext(ctx context.Context, wikiID int, inp
 	return attachments, nil
 }
 
+// DeleteAttachmentInWiki deletes a attachment in a wiki
+func (c *Client) DeleteAttachmentInWiki(wikiID, attachmentID int) (*Attachment, error) {
+	return c.DeleteAttachmentInWikiContext(context.Background(), wikiID, attachmentID)
+}
+
+// DeleteAttachmentInWikiContext deletes a attachment in a wiki with context
+func (c *Client) DeleteAttachmentInWikiContext(ctx context.Context, wikiID, attachmentID int) (*Attachment, error) {
+	u := fmt.Sprintf("/api/v2/wikis/%v/attachments/%v", wikiID, attachmentID)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	attachment := new(Attachment)
+	if err := c.Do(ctx, req, &attachment); err != nil {
+		return nil, err
+	}
+	return attachment, nil
+}
+
 // GetMyRecentlyViewedWikisOptions specifies parameters to the GetMyRecentlyViewedWikis method.
 type GetMyRecentlyViewedWikisOptions struct {
 	Order  Order `url:"order,omitempty"`
