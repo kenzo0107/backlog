@@ -133,18 +133,11 @@ func getTestGetWikiAttachment() *Attachment {
 
 func getTestAddAttachmentToWiki() *Attachment {
 	return &Attachment{
-		ID:   Int(1),
-		Name: String("Duke.png"),
-		Size: Int(196186),
-		CreatedUser: &User{
-			ID:          Int(1),
-			UserID:      String("admin"),
-			Name:        String("admin"),
-			RoleType:    1,
-			Lang:        nil,
-			MailAddress: String("eguchi@nulab.example"),
-		},
-		Created: &Timestamp{referenceTime},
+		ID:          Int(1),
+		Name:        String("Duke.png"),
+		Size:        Int(196186),
+		CreatedUser: getTestUser(),
+		Created:     &Timestamp{referenceTime},
 	}
 }
 
@@ -569,24 +562,8 @@ func TestAddAttachmentToWiki(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, `
-		[
-			{
-				"id": 1,
-				"name": "Duke.png",
-				"size": 196186,
-				"createdUser": {
-					"id": 1,
-					"userId": "admin",
-					"name": "admin",
-					"roleType": 1,
-					"lang": null,
-					"mailAddress": "eguchi@nulab.example"
-				},
-				"created": "2006-01-02T15:04:05Z"
-			}
-		]
-		`); err != nil {
+		j := fmt.Sprintf(`[%s]`, testJSONAttachment)
+		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -618,6 +595,41 @@ func TestAddAttachmentToWikiFailed(t *testing.T) {
 		AttachmentIDs: []int{1},
 	}
 	if _, err := client.AddAttachmentToWiki(1, input); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteWikiAttachment(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1/attachments/8", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONAttachment); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.DeleteAttachmentInWiki(1, 8)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestAddAttachmentToWiki()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestDeleteAttachmentInWikiFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	if _, err := client.DeleteAttachmentInWiki(1, 1); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }

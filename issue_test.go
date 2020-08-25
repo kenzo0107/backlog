@@ -115,11 +115,11 @@ var testJSONIssueComment string = fmt.Sprintf(`{
 }`, testJSONUser, testJSONNotification)
 
 var testJSONAttachment string = fmt.Sprintf(`{
-	"id":8,
-	"name":"IMG0088.png",
-	"size":5563,
+	"id": 1,
+	"name": "Duke.png",
+	"size": 196186,
 	"createdUser": %v,
-	"created":"2006-01-02T15:04:05Z"
+	"created": "2006-01-02T15:04:05Z"
 }`, testJSONUser)
 
 func getTestIssue() *Issue {
@@ -221,9 +221,9 @@ func getTestNotification() *Notification {
 
 func getTestAttachment() *Attachment {
 	return &Attachment{
-		ID:          Int(8),
-		Name:        String("IMG0088.png"),
-		Size:        Int(5563),
+		ID:          Int(1),
+		Name:        String("Duke.png"),
+		Size:        Int(196186),
 		CreatedUser: getTestUser(),
 		Created:     &Timestamp{referenceTime},
 	}
