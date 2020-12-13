@@ -125,7 +125,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		return nil, fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
 	}
 
-	u, err := c.baseURL.Parse(urlStr)
+	u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +203,7 @@ func (c *Client) UploadMultipartFile(ctx context.Context, method, urlStr, fpath,
 		return fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
 	}
 
-	u, err := c.baseURL.Parse(urlStr)
+	u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
 	if err != nil {
 		return err
 	}
