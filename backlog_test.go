@@ -17,13 +17,14 @@ var (
 	ErrIncorrectResponse = errors.New("Response is incorrect")
 )
 
+// setup sets up a test HTTP server along with a backlog.Client that is
+// configured to talk to that test server. Tests should register handlers on
+// mux which provide mock responses for the API method being tested.
 func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown func()) {
 	return setupWithPath("")
 }
 
-// setup sets up a test HTTP server along with a backlog.Client that is
-// configured to talk to that test server. Tests should register handlers on
-// mux which provide mock responses for the API method being tested.
+// setupWithPath sets up a test HTTP server along with a backlog.Client with the path.
 func setupWithPath(path string) (client *Client, mux *http.ServeMux, serverURL string, teardown func()) {
 	// mux is the HTTP request multiplexer used with the test server.
 	mux = http.NewServeMux()
