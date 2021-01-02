@@ -11,7 +11,7 @@ type Sort string
 
 // IssueType is used in sort type
 const (
-	SortIssueType = Sort(iota)
+	SortIssueType = Sort(rune(iota))
 	SortCategory
 	SortVersion
 	SortMilestone
