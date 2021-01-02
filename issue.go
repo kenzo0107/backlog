@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 )
 
 // Sort : sort
@@ -79,33 +80,33 @@ func (k Sort) String() string {
 
 // Issue : -
 type Issue struct {
-	ID             *int           `json:"id,omitempty"`
-	ProjectID      *int           `json:"projectId,omitempty"`
-	IssueKey       *string        `json:"issueKey,omitempty"`
-	KeyID          *int           `json:"keyId,omitempty"`
-	IssueType      *IssueType     `json:"issueType,omitempty"`
-	Summary        *string        `json:"summary,omitempty"`
-	Description    *string        `json:"description,omitempty"`
-	Resolutions    *string        `json:"resolutions,omitempty"`
-	Priority       *Priority      `json:"priority,omitempty"`
-	Status         *Status        `json:"status,omitempty"`
-	Assignee       *User          `json:"assignee,omitempty"`
-	Category       []*Category    `json:"category,omitempty"`
-	Versions       []*Version     `json:"versions,omitempty"`
-	Milestone      []*Milestone   `json:"milestone,omitempty"`
-	StartDate      *string        `json:"startDate,omitempty"`
-	DueDate        *string        `json:"dueDate,omitempty"`
-	EstimatedHours *int           `json:"estimatedHours,omitempty"`
-	ActualHours    *int           `json:"actualHours,omitempty"`
-	ParentIssueID  *int           `json:"parentIssueId,omitempty"`
-	CreatedUser    *User          `json:"createdUser,omitempty"`
-	Created        *Timestamp     `json:"created,omitempty"`
-	UpdatedUser    *User          `json:"updatedUser,omitempty"`
-	Updated        *Timestamp     `json:"updated,omitempty"`
-	CustomFields   []*CustomField `json:"customFields,omitempty"`
-	Attachments    []*Attachment  `json:"attachments,omitempty"`
-	SharedFiles    []*SharedFile  `json:"sharedFiles,omitempty"`
-	Stars          []*Star        `json:"stars,omitempty"`
+	ID             *int                `json:"id,omitempty"`
+	ProjectID      *int                `json:"projectId,omitempty"`
+	IssueKey       *string             `json:"issueKey,omitempty"`
+	KeyID          *int                `json:"keyId,omitempty"`
+	IssueType      *IssueType          `json:"issueType,omitempty"`
+	Summary        *string             `json:"summary,omitempty"`
+	Description    *string             `json:"description,omitempty"`
+	Resolutions    *string             `json:"resolutions,omitempty"`
+	Priority       *Priority           `json:"priority,omitempty"`
+	Status         *Status             `json:"status,omitempty"`
+	Assignee       *User               `json:"assignee,omitempty"`
+	Category       []*Category         `json:"category,omitempty"`
+	Versions       []*Version          `json:"versions,omitempty"`
+	Milestone      []*Milestone        `json:"milestone,omitempty"`
+	StartDate      *string             `json:"startDate,omitempty"`
+	DueDate        *string             `json:"dueDate,omitempty"`
+	EstimatedHours *int                `json:"estimatedHours,omitempty"`
+	ActualHours    *int                `json:"actualHours,omitempty"`
+	ParentIssueID  *int                `json:"parentIssueId,omitempty"`
+	CreatedUser    *User               `json:"createdUser,omitempty"`
+	Created        *Timestamp          `json:"created,omitempty"`
+	UpdatedUser    *User               `json:"updatedUser,omitempty"`
+	Updated        *Timestamp          `json:"updated,omitempty"`
+	CustomFields   []*IssueCustomField `json:"customFields,omitempty"`
+	Attachments    []*Attachment       `json:"attachments,omitempty"`
+	SharedFiles    []*SharedFile       `json:"sharedFiles,omitempty"`
+	Stars          []*Star             `json:"stars,omitempty"`
 }
 
 // Milestone : milestone
@@ -156,6 +157,14 @@ type AttributeInfo struct {
 // NotificationInfo : notification information
 type NotificationInfo struct {
 	Type *string `json:"type,omitempty"`
+}
+
+// IssueCustomField : custom field in issue
+type IssueCustomField struct {
+	ID          *int        `json:"id,omitempty"`
+	FieldTypeID *int        `json:"fieldTypeId,omitempty"`
+	Name        *string     `json:"name,omitempty"`
+	Value       interface{} `json:"value,omitempty"`
 }
 
 // GetIssues returns the list of issues
@@ -257,6 +266,34 @@ func (c *Client) GetIssueCountContext(ctx context.Context, opts *GetIssuesCountO
 	return r.Count, nil
 }
 
+func createQueryStringsFromIssueCustomFileds(icf []*IssueCustomField) string {
+	if len(icf) == 0 {
+		return ""
+	}
+	q := url.Values{}
+	for _, cf := range icf {
+		if cf == nil {
+			continue
+		}
+
+		var vals []interface{}
+		if items, ok := cf.Value.([]*Item); ok {
+			for _, item := range items {
+				vals = append(vals, *item.ID)
+			}
+		} else {
+			vals = append(vals, cf.Value)
+		}
+
+		for _, val := range vals {
+			f := fmt.Sprintf("customField_%v", *cf.ID)
+			s := fmt.Sprint(val)
+			q.Add(f, s)
+		}
+	}
+	return q.Encode()
+}
+
 // CreateIssue creates a issue
 func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) {
 	return c.CreateIssueContext(context.Background(), input)
@@ -265,6 +302,10 @@ func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) {
 // CreateIssueContext creates a issue with context
 func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput) (*Issue, error) {
 	u := "/api/v2/issues"
+
+	if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" {
+		u += "?" + q
+	}
 
 	req, err := c.NewRequest("POST", u, input)
 	if err != nil {
@@ -307,6 +348,10 @@ func (c *Client) UpdateIssue(issueIDOrKey string, input *UpdateIssueInput) (*Iss
 // UpdateIssueContext updates a issue with context
 func (c *Client) UpdateIssueContext(ctx context.Context, issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) {
 	u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+	if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" {
+		u += "?" + q
+	}
 
 	req, err := c.NewRequest("PATCH", u, input)
 	if err != nil {
@@ -707,44 +752,46 @@ type GetIssuesCountOptions struct {
 
 // CreateIssueInput specifies parameters to the CreateIssue method.
 type CreateIssueInput struct {
-	ProjectID       *int    `json:"projectId"`
-	Summary         *string `json:"summary"`
-	ParentIssueID   *int    `json:"parentIssueId,omitempty"`
-	Description     *string `json:"description,omitempty"`
-	StartDate       *string `json:"startDate,omitempty"`
-	DueDate         *string `json:"dueDate,omitempty"`
-	EstimatedHours  *int    `json:"estimatedHours,omitempty"`
-	ActualHours     *int    `json:"actualHours,omitempty"`
-	IssueTypeID     *int    `json:"issueTypeId"`
-	CategoryIDs     []int   `json:"categoryId,omitempty"`
-	VersionIDs      []int   `json:"versionId,omitempty"`
-	MilestoneIDs    []int   `json:"milestoneId,omitempty"`
-	PriorityID      *int    `json:"priorityId"`
-	AssigneeID      *int    `json:"assigneeId,omitempty"`
-	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
-	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
+	ProjectID       *int                `json:"projectId"`
+	Summary         *string             `json:"summary"`
+	ParentIssueID   *int                `json:"parentIssueId,omitempty"`
+	Description     *string             `json:"description,omitempty"`
+	StartDate       *string             `json:"startDate,omitempty"`
+	DueDate         *string             `json:"dueDate,omitempty"`
+	EstimatedHours  *int                `json:"estimatedHours,omitempty"`
+	ActualHours     *int                `json:"actualHours,omitempty"`
+	IssueTypeID     *int                `json:"issueTypeId"`
+	CategoryIDs     []int               `json:"categoryId,omitempty"`
+	VersionIDs      []int               `json:"versionId,omitempty"`
+	MilestoneIDs    []int               `json:"milestoneId,omitempty"`
+	PriorityID      *int                `json:"priorityId"`
+	AssigneeID      *int                `json:"assigneeId,omitempty"`
+	NotifiedUserIDs []int               `json:"notifiedUserId,omitempty"`
+	AttachmentIDs   []int               `json:"attachmentId,omitempty"`
+	CustomFields    []*IssueCustomField `json:"-"`
 }
 
 // UpdateIssueInput specifies parameters to the UpdateIssue method.
 type UpdateIssueInput struct {
-	Summary         *string `json:"summary,omitempty"`
-	ParentIssueID   *int    `json:"parentIssueId,omitempty"`
-	Description     *string `json:"description,omitempty"`
-	StatusID        *int    `json:"statusId,omitempty"`
-	ResolutionID    *int    `json:"resolutionId,omitempty"`
-	StartDate       *string `json:"startDate,omitempty"`
-	DueDate         *string `json:"dueDate,omitempty"`
-	EstimatedHours  *int    `json:"estimatedHours,omitempty"`
-	ActualHours     *int    `json:"actualHours,omitempty"`
-	IssueTypeID     *int    `json:"issueTypeId,omitempty"`
-	CategoryIDs     []int   `json:"categoryId,omitempty"`
-	VersionIDs      []int   `json:"versionId,omitempty"`
-	MilestoneIDs    []int   `json:"milestoneId,omitempty"`
-	PriorityID      *int    `json:"priorityId,omitempty"`
-	AssigneeID      *int    `json:"assigneeId,omitempty"`
-	NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
-	AttachmentIDs   []int   `json:"attachmentId,omitempty"`
-	Comment         *string `json:"comment,omitempty"`
+	Summary         *string             `json:"summary,omitempty"`
+	ParentIssueID   *int                `json:"parentIssueId,omitempty"`
+	Description     *string             `json:"description,omitempty"`
+	StatusID        *int                `json:"statusId,omitempty"`
+	ResolutionID    *int                `json:"resolutionId,omitempty"`
+	StartDate       *string             `json:"startDate,omitempty"`
+	DueDate         *string             `json:"dueDate,omitempty"`
+	EstimatedHours  *int                `json:"estimatedHours,omitempty"`
+	ActualHours     *int                `json:"actualHours,omitempty"`
+	IssueTypeID     *int                `json:"issueTypeId,omitempty"`
+	CategoryIDs     []int               `json:"categoryId,omitempty"`
+	VersionIDs      []int               `json:"versionId,omitempty"`
+	MilestoneIDs    []int               `json:"milestoneId,omitempty"`
+	PriorityID      *int                `json:"priorityId,omitempty"`
+	AssigneeID      *int                `json:"assigneeId,omitempty"`
+	NotifiedUserIDs []int               `json:"notifiedUserId,omitempty"`
+	AttachmentIDs   []int               `json:"attachmentId,omitempty"`
+	Comment         *string             `json:"comment,omitempty"`
+	CustomFields    []*IssueCustomField `json:"-"`
 }
 
 // GetIssueCommentsOptions specifies parameters to the GetIssueComments method.

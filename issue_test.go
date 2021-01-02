@@ -74,7 +74,14 @@ var testJSONIssue string = fmt.Sprintf(`{
 	"created": "2006-01-02T15:04:05Z",
 	"updatedUser": %s,
 	"updated": "2006-01-02T15:04:05Z",
-	"customFields": [],
+	"customFields": [
+		{
+			"id": 111,
+			"fieldTypeId": 1,
+			"name": "custom string",
+			"value": "hoge"
+		}
+	],
 	"attachments": [
 		{
 			"id": 1,
@@ -172,7 +179,14 @@ func getTestIssue() *Issue {
 		Created:        &Timestamp{referenceTime},
 		UpdatedUser:    getTestUser(),
 		Updated:        &Timestamp{referenceTime},
-		CustomFields:   []*CustomField{},
+		CustomFields: []*IssueCustomField{
+			{
+				ID:          Int(111),
+				FieldTypeID: Int(1),
+				Name:        String("custom string"),
+				Value:       "hoge",
+			},
+		},
 		Attachments: []*Attachment{
 			{
 				ID:   Int(1),
@@ -559,6 +573,31 @@ func TestCreateIssue(t *testing.T) {
 		PriorityID:     Int(3),
 		AssigneeID:     Int(2),
 		AttachmentIDs:  []int{1},
+		CustomFields: []*IssueCustomField{
+			{
+				ID:          Int(111),
+				FieldTypeID: Int(1),
+				Name:        String("custom string"),
+				Value:       "hoge",
+			},
+			{
+				ID:          Int(222),
+				FieldTypeID: Int(6),
+				Name:        String("custom list"),
+				Value: []*Item{
+					{
+						ID:           Int(1),
+						Name:         String("item foo"),
+						DisplayOrder: Int(0),
+					},
+					{
+						ID:           Int(2),
+						Name:         String("item bar"),
+						DisplayOrder: Int(1),
+					},
+				},
+			},
+		},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
