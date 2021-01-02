@@ -11,7 +11,7 @@ type RoleType int
 
 // RoleType
 const (
-	RoleTypeAdministrator = RoleType(iota)
+	RoleTypeAdministrator = RoleType(rune(iota))
 	RoleTypeGeneralUser
 	RoleTypeReporter
 	RoleTypeViewer
@@ -44,7 +44,7 @@ type Order string
 
 // Order by asc, desc
 const (
-	OrderAsc = Order(iota)
+	OrderAsc = Order(rune(iota))
 	OrderDesc
 )
 
