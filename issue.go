@@ -272,12 +272,11 @@ func createQueryStringsFromIssueCustomFileds(icf []*IssueCustomField) string {
 	}
 	q := url.Values{}
 	for _, cf := range icf {
-		if cf == nil {
-			continue
-		}
-
 		var vals []interface{}
 		if items, ok := cf.Value.([]*Item); ok {
+			if len(items) == 0 {
+				vals = append(vals, "")
+			}
 			for _, item := range items {
 				vals = append(vals, *item.ID)
 			}
