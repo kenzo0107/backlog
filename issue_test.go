@@ -597,6 +597,12 @@ func TestCreateIssue(t *testing.T) {
 					},
 				},
 			},
+			{
+				ID:          Int(333),
+				FieldTypeID: Int(6),
+				Name:        String("custom list 2"),
+				Value:       []*Item{},
+			},
 		},
 	})
 	if err != nil {
@@ -684,6 +690,37 @@ func TestUpdateIssue(t *testing.T) {
 
 	expected, err := client.UpdateIssue("BLG-1", &UpdateIssueInput{
 		Summary: String("first issue"),
+		CustomFields: []*IssueCustomField{
+			{
+				ID:          Int(111),
+				FieldTypeID: Int(1),
+				Name:        String("custom string"),
+				Value:       "hoge",
+			},
+			{
+				ID:          Int(222),
+				FieldTypeID: Int(6),
+				Name:        String("custom list"),
+				Value: []*Item{
+					{
+						ID:           Int(1),
+						Name:         String("item foo"),
+						DisplayOrder: Int(0),
+					},
+					{
+						ID:           Int(2),
+						Name:         String("item bar"),
+						DisplayOrder: Int(1),
+					},
+				},
+			},
+			{
+				ID:          Int(333),
+				FieldTypeID: Int(6),
+				Name:        String("custom list 2"),
+				Value:       []*Item{},
+			},
+		},
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
