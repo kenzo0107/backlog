@@ -44,7 +44,7 @@ type Order string
 
 // Order by asc, desc
 const (
-	OrderAsc = Order(iota)
+	OrderAsc = Order(rune(iota))
 	OrderDesc
 )
 
