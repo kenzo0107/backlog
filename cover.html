@@ -1,0 +1,4079 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>backlog: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/kenzo0107/backlog/activity.go (87.5%)</option>
+				
+				<option value="file1">github.com/kenzo0107/backlog/backlog.go (78.3%)</option>
+				
+				<option value="file2">github.com/kenzo0107/backlog/category.go (100.0%)</option>
+				
+				<option value="file3">github.com/kenzo0107/backlog/customfield.go (100.0%)</option>
+				
+				<option value="file4">github.com/kenzo0107/backlog/file.go (100.0%)</option>
+				
+				<option value="file5">github.com/kenzo0107/backlog/issue.go (97.0%)</option>
+				
+				<option value="file6">github.com/kenzo0107/backlog/issue_type.go (100.0%)</option>
+				
+				<option value="file7">github.com/kenzo0107/backlog/logger.go (50.0%)</option>
+				
+				<option value="file8">github.com/kenzo0107/backlog/misc.go (79.2%)</option>
+				
+				<option value="file9">github.com/kenzo0107/backlog/priority.go (88.9%)</option>
+				
+				<option value="file10">github.com/kenzo0107/backlog/project.go (94.4%)</option>
+				
+				<option value="file11">github.com/kenzo0107/backlog/resolution.go (88.9%)</option>
+				
+				<option value="file12">github.com/kenzo0107/backlog/space.go (88.7%)</option>
+				
+				<option value="file13">github.com/kenzo0107/backlog/team.go (91.5%)</option>
+				
+				<option value="file14">github.com/kenzo0107/backlog/time.go (100.0%)</option>
+				
+				<option value="file15">github.com/kenzo0107/backlog/user.go (87.8%)</option>
+				
+				<option value="file16">github.com/kenzo0107/backlog/version.go (100.0%)</option>
+				
+				<option value="file17">github.com/kenzo0107/backlog/watching.go (87.7%)</option>
+				
+				<option value="file18">github.com/kenzo0107/backlog/webhook.go (88.9%)</option>
+				
+				<option value="file19">github.com/kenzo0107/backlog/wiki.go (86.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Activity : activity
+type Activity struct {
+        ID            *int            `json:"id,omitempty"` // User.ID
+        Project       *Project        `json:"project,omitempty"`
+        Type          *int            `json:"type,omitempty"`
+        Content       *Content        `json:"content,omitempty"`
+        Notifications []*Notification `json:"notifications,omitempty"`
+        CreatedUser   *User           `json:"createdUser,omitempty"`
+        Created       *Timestamp      `json:"created,omitempty"`
+}
+
+// GetUserActivities returns the list of a user's activities
+func (c *Client) GetUserActivities(id int, opts *GetUserActivitiesOptions) ([]*Activity, error) <span class="cov8" title="1">{
+        return c.GetUserActivitiesContext(context.Background(), id, opts)
+}</span>
+
+// GetUserActivitiesContext returns the list of a user's activities with context
+func (c *Client) GetUserActivitiesContext(ctx context.Context, id int, opts *GetUserActivitiesOptions) ([]*Activity, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/activities", id)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var activities []*Activity
+        if err := c.Do(ctx, req, &amp;activities); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return activities, nil</span>
+}
+
+// GetProjectActivities returns the list of a project's activities
+func (c *Client) GetProjectActivities(projectIDOrKey interface{}, opts *GetProjectActivitiesOptions) ([]*Activity, error) <span class="cov8" title="1">{
+        return c.GetProjectActivitiesContext(context.Background(), projectIDOrKey, opts)
+}</span>
+
+// GetProjectActivitiesContext returns the list of a project's activities with context
+func (c *Client) GetProjectActivitiesContext(ctx context.Context, projectIDOrKey interface{}, opts *GetProjectActivitiesOptions) ([]*Activity, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/activities", projectIDOrKey)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var activities []*Activity
+        if err := c.Do(ctx, req, &amp;activities); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return activities, nil</span>
+}
+
+// GetUserActivitiesOptions specifies parameters to the GetUserActivities method.
+type GetUserActivitiesOptions struct {
+        ActivityTypeIDs []int `url:"activityTypeId[],omitempty"`
+        MinID           *int  `url:"minId,omitempty"`
+        MaxID           *int  `url:"maxId,omitempty"`
+        Count           *int  `url:"count,omitempty"`
+        Order           Order `url:"order,omitempty"`
+}
+
+// GetProjectActivitiesOptions specifies parameters to the GetProjectActivities method.
+type GetProjectActivitiesOptions struct {
+        ActivityTypeIDs []int `url:"activityTypeId[],omitempty"`
+        MinID           *int  `url:"minId,omitempty"`
+        MaxID           *int  `url:"maxId,omitempty"`
+        Count           *int  `url:"count,omitempty"`
+        Order           Order `url:"order,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package backlog
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "log"
+        "mime/multipart"
+        "net/http"
+        "net/url"
+        "os"
+        "path/filepath"
+        "reflect"
+        "strings"
+
+        "github.com/google/go-querystring/query"
+        "github.com/pkg/errors"
+)
+
+// httpClient defines the minimal interface needed for an http.Client to be implemented.
+type httpClient interface {
+        Do(*http.Request) (*http.Response, error)
+}
+
+// Client : backlog client
+type Client struct {
+        apiKey     string
+        endpoint   string
+        baseURL    *url.URL
+        debug      bool
+        log        ilogger
+        httpclient httpClient
+}
+
+// Option defines an option for a Client
+type Option func(*Client)
+
+// OptionHTTPClient - provide a custom http client to the backlog client.
+func OptionHTTPClient(client httpClient) func(*Client) <span class="cov8" title="1">{
+        return func(c *Client) </span><span class="cov8" title="1">{
+                c.httpclient = client
+        }</span>
+}
+
+// OptionDebug enable debugging for the client
+func OptionDebug(b bool) func(*Client) <span class="cov8" title="1">{
+        return func(c *Client) </span><span class="cov8" title="1">{
+                c.debug = b
+        }</span>
+}
+
+// OptionLog set logging for client.
+func OptionLog(l logger) func(*Client) <span class="cov8" title="1">{
+        return func(c *Client) </span><span class="cov8" title="1">{
+                c.log = internalLog{logger: l}
+        }</span>
+}
+
+// New builds a backlog client from the provided token, baseURL and options
+func New(apiKey, endpoint string, options ...Option) *Client <span class="cov8" title="1">{
+        baseURL, _ := url.Parse(endpoint)
+        s := &amp;Client{
+                apiKey:     apiKey,
+                endpoint:   endpoint,
+                baseURL:    baseURL,
+                httpclient: &amp;http.Client{},
+                log:        log.New(os.Stderr, "kenzo0107/backlog", log.LstdFlags|log.Lshortfile),
+        }
+
+        for _, opt := range options </span><span class="cov8" title="1">{
+                opt(s)
+        }</span>
+
+        <span class="cov8" title="1">return s</span>
+}
+
+// Debugf print a formatted debug line.
+func (c *Client) Debugf(format string, v ...interface{}) <span class="cov8" title="1">{
+        if c.debug </span><span class="cov8" title="1">{
+                if err := c.log.Output(2, fmt.Sprintf(format, v...)); err != nil </span><span class="cov0" title="0">{
+                        c.Debugln(err)
+                }</span>
+        }
+}
+
+// Debugln print a debug line.
+func (c *Client) Debugln(v ...interface{}) <span class="cov8" title="1">{
+        if c.debug </span><span class="cov8" title="1">{
+                if err := c.log.Output(2, fmt.Sprintln(v...)); err != nil </span><span class="cov0" title="0">{
+                        c.Debugln(err)
+                }</span>
+        }
+}
+
+// Debug returns if debug is enabled.
+func (c *Client) Debug() bool <span class="cov8" title="1">{
+        return c.debug
+}</span>
+
+// Bool is a helper routine that allocates a new bool value
+// to store v and returns a pointer to it.
+func Bool(v bool) *bool <span class="cov8" title="1">{ return &amp;v }</span>
+
+// Int is a helper routine that allocates a new int value
+// to store v and returns a pointer to it.
+func Int(v int) *int <span class="cov8" title="1">{ return &amp;v }</span>
+
+// String is a helper routine that allocates a new string value
+// to store v and returns a pointer to it.
+func String(v string) *string <span class="cov8" title="1">{ return &amp;v }</span>
+
+// Int64 is a helper routine that allocates a new int64 value
+// to store v and returns a pointer to it.
+func Int64(v int64) *int64 <span class="cov8" title="1">{ return &amp;v }</span>
+
+// NewRequest creates an API request. A relative URL can be provided in urlStr,
+// in which case it is resolved relative to the BaseURL of the Client.
+// Relative URLs should always be specified without a preceding slash. If
+// specified, the value pointed to by body is JSON encoded and included as the
+// request body.
+func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) <span class="cov8" title="1">{
+        if strings.HasSuffix(c.baseURL.Path, "/") </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
+        }</span>
+
+        <span class="cov8" title="1">u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        // add 'apiKey' to the url path
+        <span class="cov8" title="1">q := u.Query()
+        q.Set("apiKey", c.apiKey)
+        u.RawQuery = q.Encode()
+
+        var buf io.ReadWriter
+        if body != nil </span><span class="cov8" title="1">{
+                buf = &amp;bytes.Buffer{}
+                enc := json.NewEncoder(buf)
+                enc.SetEscapeHTML(false)
+                if er := enc.Encode(body); er != nil </span><span class="cov0" title="0">{
+                        return nil, er
+                }</span>
+        }
+
+        <span class="cov8" title="1">req, err := http.NewRequest(method, u.String(), buf)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if body != nil </span><span class="cov8" title="1">{
+                req.Header.Set("Content-Type", "application/json")
+        }</span>
+        <span class="cov8" title="1">return req, nil</span>
+}
+
+// UploadMultipartFile uploads multipart file
+func (c *Client) UploadMultipartFile(ctx context.Context, method, urlStr, fpath, field string, v interface{}) (err error) <span class="cov8" title="1">{
+        fullpath, err := filepath.Abs(fpath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">file, err := os.Open(filepath.Clean(fullpath))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
+                if er := file.Close(); er != nil </span><span class="cov0" title="0">{
+                        err = er
+                }</span>
+        }()
+
+        <span class="cov8" title="1">pr, pw := io.Pipe()
+        mw := multipart.NewWriter(pw)
+        errc := make(chan error)
+        go func() </span><span class="cov8" title="1">{
+                defer func() </span><span class="cov8" title="1">{
+                        if er := pw.Close(); er != nil </span><span class="cov0" title="0">{
+                                errc &lt;- er
+                        }</span>
+                }()
+                <span class="cov8" title="1">ioWriter, er := mw.CreateFormFile(field, filepath.Base(fpath))
+                if er != nil </span><span class="cov0" title="0">{
+                        errc &lt;- er
+                        return
+                }</span>
+                <span class="cov8" title="1">_, errcp := io.Copy(ioWriter, file)
+                if errcp != nil </span><span class="cov0" title="0">{
+                        errc &lt;- errcp
+                        return
+                }</span>
+                <span class="cov8" title="1">if errcl := mw.Close(); errcl != nil </span><span class="cov0" title="0">{
+                        errc &lt;- errcl
+                        return
+                }</span>
+        }()
+
+        <span class="cov8" title="1">if strings.HasSuffix(c.baseURL.Path, "/") </span><span class="cov0" title="0">{
+                return fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
+        }</span>
+
+        <span class="cov8" title="1">u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // add 'apiKey' to the url path
+        <span class="cov8" title="1">q := u.Query()
+        q.Set("apiKey", c.apiKey)
+        u.RawQuery = q.Encode()
+
+        req, err := http.NewRequest(method, u.String(), pr)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">req.Header.Set("Content-Type", mw.FormDataContentType())
+        if err := c.Do(ctx, req, &amp;v); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Do sends an API request and returns the API response. The API response is
+// JSON decoded and stored in the value pointed to by v, or returned as an
+// error if an API error has occurred. If v implements the io.Writer
+// interface, the raw response body will be written to v, without attempting to
+// first decode it. If rate limit is exceeded and reset time is in the future,
+// Do returns *RateLimitError immediately without making a network API call.
+//
+// The provided ctx must be non-nil, if it is nil an error is returned. If it is canceled or times out,
+// ctx.Err() will be returned.
+func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) error <span class="cov8" title="1">{
+        if ctx == nil </span><span class="cov0" title="0">{
+                return errors.New("context must be non-nil")
+        }</span>
+
+        <span class="cov8" title="1">req = req.WithContext(ctx)
+
+        resp, err := c.httpclient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                // If we got an error, and the context has been canceled,
+                // the context's error is probably more useful.
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        return ctx.Err()</span>
+                default:<span class="cov0" title="0"></span>
+                }
+
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov8" title="1">defer func() </span><span class="cov8" title="1">{
+                if er := resp.Body.Close(); er != nil </span><span class="cov0" title="0">{
+                        err = er
+                }</span>
+        }()
+
+        <span class="cov8" title="1">err = checkStatusCode(resp, c)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if v != nil </span><span class="cov8" title="1">{
+                if w, ok := v.(io.Writer); ok </span><span class="cov8" title="1">{
+                        if _, er := io.Copy(w, resp.Body); er != nil </span><span class="cov0" title="0">{
+                                return er
+                        }</span>
+                } else<span class="cov8" title="1"> {
+                        decErr := json.NewDecoder(resp.Body).Decode(v)
+                        if decErr == io.EOF </span><span class="cov8" title="1">{
+                                decErr = nil // ignore EOF errors caused by empty response body
+                        }</span>
+                        <span class="cov8" title="1">if decErr != nil </span><span class="cov8" title="1">{
+                                err = decErr
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return err</span>
+}
+
+// AddOptions adds the parameters in opt as URL query parameters to s. opt
+// must be a struct whose fields may contain "url" tags.
+func (c *Client) AddOptions(s string, opts interface{}) (string, error) <span class="cov8" title="1">{
+        v := reflect.ValueOf(opts)
+        if v.Kind() == reflect.Ptr &amp;&amp; v.IsNil() </span><span class="cov0" title="0">{
+                return s, nil
+        }</span>
+
+        <span class="cov8" title="1">u, err := url.Parse(s)
+        if err != nil </span><span class="cov8" title="1">{
+                return s, err
+        }</span>
+
+        <span class="cov8" title="1">qs, err := query.Values(opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return s, err
+        }</span>
+
+        <span class="cov8" title="1">u.RawQuery = qs.Encode()
+
+        return u.String(), nil</span>
+}
+
+type p struct {
+        Count int
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Category : category
+type Category struct {
+        ID           *int    `json:"id,omitempty"`
+        Name         *string `json:"name,omitempty"`
+        DisplayOrder *int    `json:"displayOrder,omitempty"`
+}
+
+// GetCategories returns the list of categories
+func (c *Client) GetCategories(projectIDOrKey interface{}) ([]*Category, error) <span class="cov8" title="1">{
+        return c.GetCategoriesContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetCategoriesContext returns the list of categories with context
+func (c *Client) GetCategoriesContext(ctx context.Context, projectIDOrKey interface{}) ([]*Category, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/categories", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">categories := []*Category{}
+        if err := c.Do(ctx, req, &amp;categories); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return categories, nil</span>
+}
+
+// CreateCategory creates a category
+func (c *Client) CreateCategory(projectIDOrKey interface{}, input *CreateCategoryInput) (*Category, error) <span class="cov8" title="1">{
+        return c.CreateCategoryContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// CreateCategoryContext creates a category with Context
+func (c *Client) CreateCategoryContext(ctx context.Context, projectIDOrKey interface{}, input *CreateCategoryInput) (*Category, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/categories", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">category := new(Category)
+        if err := c.Do(ctx, req, &amp;category); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return category, nil</span>
+}
+
+// UpdateCategory updates a category
+func (c *Client) UpdateCategory(projectIDOrKey interface{}, categoryID int, input *UpdateCategoryInput) (*Category, error) <span class="cov8" title="1">{
+        return c.UpdateCategoryContext(context.Background(), projectIDOrKey, categoryID, input)
+}</span>
+
+// UpdateCategoryContext updates a category with Context
+func (c *Client) UpdateCategoryContext(ctx context.Context, projectIDOrKey interface{}, categoryID int, input *UpdateCategoryInput) (*Category, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/categories/%v", projectIDOrKey, categoryID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">category := new(Category)
+        if err := c.Do(ctx, req, &amp;category); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return category, nil</span>
+}
+
+// DeleteCategory deletes a category
+func (c *Client) DeleteCategory(projectIDOrKey interface{}, categoryID int) (*Category, error) <span class="cov8" title="1">{
+        return c.DeleteCategoryContext(context.Background(), projectIDOrKey, categoryID)
+}</span>
+
+// DeleteCategoryContext deletes a category with Context
+func (c *Client) DeleteCategoryContext(ctx context.Context, projectIDOrKey interface{}, categoryID int) (*Category, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/categories/%v", projectIDOrKey, categoryID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">category := new(Category)
+        if err := c.Do(ctx, req, &amp;category); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return category, nil</span>
+}
+
+// CreateCategoryInput specifies parameters to the CreateCategory method.
+type CreateCategoryInput struct {
+        Name *string `json:"name"`
+}
+
+// UpdateCategoryInput specifies parameters to the UpdateCategory method.
+type UpdateCategoryInput struct {
+        Name *string `json:"name"`
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// CustomField : custom field
+type CustomField struct {
+        ID                   *int    `json:"id,omitempty"`
+        TypeID               *int    `json:"typeId,omitempty"`
+        Name                 *string `json:"name,omitempty"`
+        Description          *string `json:"description,omitempty"`
+        Required             *bool   `json:"required,omitempty"`
+        ApplicableIssueTypes []int   `json:"applicableIssueTypes,omitempty"`
+        AllowAddItem         *bool   `json:"allowAddItem,omitempty"`
+        Items                []*Item `json:"items,omitempty"`
+}
+
+// Item : item
+type Item struct {
+        ID           *int    `json:"id,omitempty"`
+        Name         *string `json:"name,omitempty"`
+        DisplayOrder *int    `json:"displayOrder,omitempty"`
+}
+
+// GetCustomFields returns the list of custom fields
+func (c *Client) GetCustomFields(projectIDOrKey interface{}) ([]*CustomField, error) <span class="cov8" title="1">{
+        return c.GetCustomFieldsContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetCustomFieldsContext returns the list of custom fields with context
+func (c *Client) GetCustomFieldsContext(ctx context.Context, projectIDOrKey interface{}) ([]*CustomField, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/customFields", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var customFields []*CustomField
+        if err := c.Do(ctx, req, &amp;customFields); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return customFields, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package backlog
+
+import (
+        "context"
+)
+
+// FileUploadResponse : response of uploading file
+type FileUploadResponse struct {
+        ID   *int    `json:"id,omitempty"`
+        Name *string `json:"name,omitempty"`
+        Size *int    `json:"size,omitempty"`
+}
+
+// UploadFile uploads a file
+func (c *Client) UploadFile(fpath string) (*FileUploadResponse, error) <span class="cov8" title="1">{
+        return c.UploadFileContext(context.Background(), fpath)
+}</span>
+
+// UploadFileContext uploads a file and setting a custom context
+func (c *Client) UploadFileContext(ctx context.Context, fpath string) (*FileUploadResponse, error) <span class="cov8" title="1">{
+        u := "/api/v2/space/attachment"
+
+        fileUploadResponse := new(FileUploadResponse)
+        if err := c.UploadMultipartFile(ctx, "POST", u, fpath, "file", &amp;fileUploadResponse); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return fileUploadResponse, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+        "io"
+        "net/url"
+)
+
+// Sort : sort
+type Sort string
+
+// IssueType is used in sort type
+const (
+        SortIssueType = Sort(rune(iota))
+        SortCategory
+        SortVersion
+        SortMilestone
+        SortSummary
+        SortStatus
+        SortPriority
+        SortAttachment
+        SortSharedFile
+        SortCreated
+        SortCreatedUser
+        SortUpdated
+        SortUpdatedUser
+        SortAssignee
+        SortStartDate
+        SortDueDate
+        SortEstimatedHours
+        SortActualHours
+        SortChildIssue
+)
+
+func (k Sort) String() string <span class="cov8" title="1">{
+        switch k </span>{
+        case SortIssueType:<span class="cov8" title="1">
+                return "issueType"</span>
+        case SortCategory:<span class="cov8" title="1">
+                return "category"</span>
+        case SortVersion:<span class="cov8" title="1">
+                return "version"</span>
+        case SortMilestone:<span class="cov8" title="1">
+                return "milestone"</span>
+        case SortSummary:<span class="cov8" title="1">
+                return "summary"</span>
+        case SortStatus:<span class="cov8" title="1">
+                return "status"</span>
+        case SortPriority:<span class="cov8" title="1">
+                return "priority"</span>
+        case SortAttachment:<span class="cov8" title="1">
+                return "attachment"</span>
+        case SortSharedFile:<span class="cov8" title="1">
+                return "sharedFile"</span>
+        case SortCreated:<span class="cov8" title="1">
+                return "created"</span>
+        case SortCreatedUser:<span class="cov8" title="1">
+                return "createdUser"</span>
+        case SortUpdated:<span class="cov8" title="1">
+                return "updated"</span>
+        case SortUpdatedUser:<span class="cov8" title="1">
+                return "updatedUser"</span>
+        case SortAssignee:<span class="cov8" title="1">
+                return "assignee"</span>
+        case SortStartDate:<span class="cov8" title="1">
+                return "startDate"</span>
+        case SortDueDate:<span class="cov8" title="1">
+                return "dueDate"</span>
+        case SortEstimatedHours:<span class="cov8" title="1">
+                return "estimatedHours"</span>
+        case SortActualHours:<span class="cov8" title="1">
+                return "actualHours"</span>
+        case SortChildIssue:<span class="cov8" title="1">
+                return "childIssue"</span>
+        default:<span class="cov8" title="1">
+                return ""</span>
+        }
+}
+
+// Issue : -
+type Issue struct {
+        ID             *int                `json:"id,omitempty"`
+        ProjectID      *int                `json:"projectId,omitempty"`
+        IssueKey       *string             `json:"issueKey,omitempty"`
+        KeyID          *int                `json:"keyId,omitempty"`
+        IssueType      *IssueType          `json:"issueType,omitempty"`
+        Summary        *string             `json:"summary,omitempty"`
+        Description    *string             `json:"description,omitempty"`
+        Resolutions    *string             `json:"resolutions,omitempty"`
+        Priority       *Priority           `json:"priority,omitempty"`
+        Status         *Status             `json:"status,omitempty"`
+        Assignee       *User               `json:"assignee,omitempty"`
+        Category       []*Category         `json:"category,omitempty"`
+        Versions       []*Version          `json:"versions,omitempty"`
+        Milestone      []*Milestone        `json:"milestone,omitempty"`
+        StartDate      *string             `json:"startDate,omitempty"`
+        DueDate        *string             `json:"dueDate,omitempty"`
+        EstimatedHours *int                `json:"estimatedHours,omitempty"`
+        ActualHours    *int                `json:"actualHours,omitempty"`
+        ParentIssueID  *int                `json:"parentIssueId,omitempty"`
+        CreatedUser    *User               `json:"createdUser,omitempty"`
+        Created        *Timestamp          `json:"created,omitempty"`
+        UpdatedUser    *User               `json:"updatedUser,omitempty"`
+        Updated        *Timestamp          `json:"updated,omitempty"`
+        CustomFields   []*IssueCustomField `json:"customFields,omitempty"`
+        Attachments    []*Attachment       `json:"attachments,omitempty"`
+        SharedFiles    []*SharedFile       `json:"sharedFiles,omitempty"`
+        Stars          []*Star             `json:"stars,omitempty"`
+}
+
+// Milestone : milestone
+type Milestone struct {
+        ID             *int    `json:"id,omitempty"`
+        ProjectID      *int    `json:"projectId,omitempty"`
+        Name           *string `json:"name,omitempty"`
+        Description    *string `json:"description,omitempty"`
+        StartDate      *string `json:"startDate,omitempty"`
+        ReleaseDueDate *string `json:"releaseDueDate,omitempty"`
+        Archived       *bool   `json:"archived,omitempty"`
+}
+
+// IssueComment : issue comment
+type IssueComment struct {
+        ID            *int            `json:"id,omitempty"`
+        Content       *string         `json:"content,omitempty"`
+        ChangeLog     []*ChangeLog    `json:"changeLog,omitempty"`
+        CreatedUser   *User           `json:"createdUser,omitempty"`
+        Created       *Timestamp      `json:"created,omitempty"`
+        Updated       *Timestamp      `json:"updated,omitempty"`
+        Stars         []*Star         `json:"stars,omitempty"`
+        Notifications []*Notification `json:"notifications,omitempty"`
+}
+
+// ChangeLog : change log
+type ChangeLog struct {
+        AttachmentInfo   *AttachmentInfo   `json:"attachmentInfo,omitempty"`
+        AttributeInfo    *AttributeInfo    `json:"attributeInfo,omitempty"`
+        Field            *string           `json:"field,omitempty"`
+        NewValue         *string           `json:"newValue,omitempty"`
+        NotificationInfo *NotificationInfo `json:"notificationInfo,omitempty"`
+        OriginalValue    *string           `json:"originalValue,omitempty"`
+}
+
+// AttachmentInfo : attachment information
+type AttachmentInfo struct {
+        ID   *int    `json:"id,omitempty"`
+        Name *string `json:"name,omitempty"`
+}
+
+// AttributeInfo : attribute information
+type AttributeInfo struct {
+        ID     *int `json:"id,omitempty"`
+        TypeID *int `json:"typeId,omitempty"`
+}
+
+// NotificationInfo : notification information
+type NotificationInfo struct {
+        Type *string `json:"type,omitempty"`
+}
+
+// IssueCustomField : custom field in issue
+type IssueCustomField struct {
+        ID          *int        `json:"id,omitempty"`
+        FieldTypeID *int        `json:"fieldTypeId,omitempty"`
+        Name        *string     `json:"name,omitempty"`
+        Value       interface{} `json:"value,omitempty"`
+}
+
+// GetIssues returns the list of issues
+func (c *Client) GetIssues(opts *GetIssuesOptions) ([]*Issue, error) <span class="cov8" title="1">{
+        return c.GetIssuesContext(context.Background(), opts)
+}</span>
+
+// GetIssuesContext returns the list of issues with context
+func (c *Client) GetIssuesContext(ctx context.Context, opts *GetIssuesOptions) ([]*Issue, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/issues", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issues := []*Issue{}
+        if err := c.Do(ctx, req, &amp;issues); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issues, nil</span>
+}
+
+// Issues : list of issue
+type Issues []*struct {
+        Issue *Issue `json:"issue"`
+}
+
+// GetUserMySelfRecentrlyViewedIssues returns the list of issues a user view recently
+// This api returns a json below:
+// [
+//                 {
+//         "issue":{
+//                                 "id":1111111,
+//                                 ...
+//                         }
+//                 },
+//                 {
+//         "issue":{
+//                                 "id":2222222,
+//                                 ...
+//                         }
+//                 }
+//                 ...
+// ]
+func (c *Client) GetUserMySelfRecentrlyViewedIssues(opts *GetUserMySelfRecentrlyViewedIssuesOptions) (Issues, error) <span class="cov8" title="1">{
+        return c.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), opts)
+}</span>
+
+// GetUserMySelfRecentrlyViewedIssuesContext returns the list of issues a user view recently with context
+func (c *Client) GetUserMySelfRecentrlyViewedIssuesContext(ctx context.Context, opts *GetUserMySelfRecentrlyViewedIssuesOptions) (Issues, error) <span class="cov8" title="1">{
+        u := "/api/v2/users/myself/recentlyViewedIssues"
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var issues Issues
+        if err := c.Do(ctx, req, &amp;issues); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return issues, nil</span>
+}
+
+// GetIssueCount returns the count of issues
+func (c *Client) GetIssueCount(opts *GetIssuesCountOptions) (int, error) <span class="cov8" title="1">{
+        return c.GetIssueCountContext(context.Background(), opts)
+}</span>
+
+// GetIssueCountContext returns the count of issues with context
+func (c *Client) GetIssueCountContext(ctx context.Context, opts *GetIssuesCountOptions) (int, error) <span class="cov8" title="1">{
+        u := "/api/v2/issues/count"
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">r := new(p)
+        if err := c.Do(ctx, req, &amp;r); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return r.Count, nil</span>
+}
+
+func createQueryStringsFromIssueCustomFileds(icf []*IssueCustomField) string <span class="cov8" title="1">{
+        if len(icf) == 0 </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">q := url.Values{}
+        for _, cf := range icf </span><span class="cov8" title="1">{
+                var vals []interface{}
+                if items, ok := cf.Value.([]*Item); ok </span><span class="cov8" title="1">{
+                        if len(items) == 0 </span><span class="cov8" title="1">{
+                                vals = append(vals, "")
+                        }</span>
+                        <span class="cov8" title="1">for _, item := range items </span><span class="cov8" title="1">{
+                                vals = append(vals, *item.ID)
+                        }</span>
+                } else<span class="cov8" title="1"> {
+                        vals = append(vals, cf.Value)
+                }</span>
+
+                <span class="cov8" title="1">for _, val := range vals </span><span class="cov8" title="1">{
+                        f := fmt.Sprintf("customField_%v", *cf.ID)
+                        s := fmt.Sprint(val)
+                        q.Add(f, s)
+                }</span>
+        }
+        <span class="cov8" title="1">return q.Encode()</span>
+}
+
+// CreateIssue creates a issue
+func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) <span class="cov8" title="1">{
+        return c.CreateIssueContext(context.Background(), input)
+}</span>
+
+// CreateIssueContext creates a issue with context
+func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput) (*Issue, error) <span class="cov8" title="1">{
+        u := "/api/v2/issues"
+
+        if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" </span><span class="cov8" title="1">{
+                u += "?" + q
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issue := new(Issue)
+        if err := c.Do(ctx, req, &amp;issue); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issue, nil</span>
+}
+
+// GetIssue gets a issue
+func (c *Client) GetIssue(issueIDOrKey string) (*Issue, error) <span class="cov8" title="1">{
+        return c.GetIssueContext(context.Background(), issueIDOrKey)
+}</span>
+
+// GetIssueContext gets a issue with context
+func (c *Client) GetIssueContext(ctx context.Context, issueIDOrKey string) (*Issue, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issue := new(Issue)
+        if err := c.Do(ctx, req, &amp;issue); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issue, nil</span>
+}
+
+// UpdateIssue updates a issue
+func (c *Client) UpdateIssue(issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) <span class="cov8" title="1">{
+        return c.UpdateIssueContext(context.Background(), issueIDOrKey, input)
+}</span>
+
+// UpdateIssueContext updates a issue with context
+func (c *Client) UpdateIssueContext(ctx context.Context, issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+        if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" </span><span class="cov8" title="1">{
+                u += "?" + q
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issue := new(Issue)
+        if err := c.Do(ctx, req, &amp;issue); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issue, nil</span>
+}
+
+// GetIssueComments get list of the issue comments
+func (c *Client) GetIssueComments(issueIDOrKey string, opts *GetIssueCommentsOptions) ([]*IssueComment, error) <span class="cov8" title="1">{
+        return c.GetIssueCommentsContext(context.Background(), issueIDOrKey, opts)
+}</span>
+
+// GetIssueCommentsContext gets list of the issue comments with context
+func (c *Client) GetIssueCommentsContext(ctx context.Context, issueIDOrKey string, opts *GetIssueCommentsOptions) ([]*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, opts)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := []*IssueComment{}
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// CreateIssueComment creates a issue comments
+func (c *Client) CreateIssueComment(issueIDOrKey string, input *CreateIssueCommentInput) (*IssueComment, error) <span class="cov8" title="1">{
+        return c.CreateIssueCommentContext(context.Background(), issueIDOrKey, input)
+}</span>
+
+// CreateIssueCommentContext creates a issue comments with context
+func (c *Client) CreateIssueCommentContext(ctx context.Context, issueIDOrKey string, input *CreateIssueCommentInput) (*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments", issueIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := new(IssueComment)
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// GetIssueCommentsCount gets count of issue comments
+func (c *Client) GetIssueCommentsCount(issueIDOrKey string) (int, error) <span class="cov8" title="1">{
+        return c.GetIssueCommentsCountContext(context.Background(), issueIDOrKey)
+}</span>
+
+// GetIssueCommentsCountContext gets count of issue comments with context
+func (c *Client) GetIssueCommentsCountContext(ctx context.Context, issueIDOrKey string) (int, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/count", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">r := new(p)
+        if err := c.Do(ctx, req, &amp;r); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+        <span class="cov8" title="1">return r.Count, nil</span>
+}
+
+// GetIssueComment gets a issue comment
+func (c *Client) GetIssueComment(issueIDOrKey string, commentID int) (*IssueComment, error) <span class="cov8" title="1">{
+        return c.GetIssueCommentContext(context.Background(), issueIDOrKey, commentID)
+}</span>
+
+// GetIssueCommentContext gets a issue comment with context
+func (c *Client) GetIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int) (*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := new(IssueComment)
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// DeleteIssueComment deletes a issue comment
+func (c *Client) DeleteIssueComment(issueIDOrKey string, commentID int) (*IssueComment, error) <span class="cov8" title="1">{
+        return c.DeleteIssueCommentContext(context.Background(), issueIDOrKey, commentID)
+}</span>
+
+// DeleteIssueCommentContext deletes a issue comment with context
+func (c *Client) DeleteIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int) (*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := new(IssueComment)
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// UpdateIssueComment updates a issue comment
+func (c *Client) UpdateIssueComment(issueIDOrKey string, commentID int, input *UpdateIssueCommentInput) (*IssueComment, error) <span class="cov8" title="1">{
+        return c.UpdateIssueCommentContext(context.Background(), issueIDOrKey, commentID, input)
+}</span>
+
+// UpdateIssueCommentContext updates a issue comment with context
+func (c *Client) UpdateIssueCommentContext(ctx context.Context, issueIDOrKey string, commentID int, input *UpdateIssueCommentInput) (*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/%v", issueIDOrKey, commentID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := new(IssueComment)
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// GetIssueCommentsNotifications gets notifications in issue comments
+func (c *Client) GetIssueCommentsNotifications(issueIDOrKey string, commentID int) ([]*Notification, error) <span class="cov8" title="1">{
+        return c.GetIssueCommentsNotificationsContext(context.Background(), issueIDOrKey, commentID)
+}</span>
+
+// GetIssueCommentsNotificationsContext gets a issue comment with context
+func (c *Client) GetIssueCommentsNotificationsContext(ctx context.Context, issueIDOrKey string, commentID int) ([]*Notification, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/%v/notifications", issueIDOrKey, commentID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">notifications := []*Notification{}
+        if err := c.Do(ctx, req, &amp;notifications); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return notifications, nil</span>
+}
+
+// CreateIssueCommentsNotification creates a notification
+func (c *Client) CreateIssueCommentsNotification(issueIDOrKey string, commentID int, input *CreateIssueCommentsNotificationInput) (*IssueComment, error) <span class="cov8" title="1">{
+        return c.CreateIssueCommentsNotificationContext(context.Background(), issueIDOrKey, commentID, input)
+}</span>
+
+// CreateIssueCommentsNotificationContext creates a notification with context
+func (c *Client) CreateIssueCommentsNotificationContext(ctx context.Context, issueIDOrKey string, commentID int, input *CreateIssueCommentsNotificationInput) (*IssueComment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/comments/%v/notifications", issueIDOrKey, commentID)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueComment := new(IssueComment)
+        if err := c.Do(ctx, req, &amp;issueComment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueComment, nil</span>
+}
+
+// GetIssueAttachments gets issue attachments
+func (c *Client) GetIssueAttachments(issueIDOrKey string) ([]*Attachment, error) <span class="cov8" title="1">{
+        return c.GetIssueAttachmentsContext(context.Background(), issueIDOrKey)
+}</span>
+
+// GetIssueAttachmentsContext gets issue attachments with context
+func (c *Client) GetIssueAttachmentsContext(ctx context.Context, issueIDOrKey string) ([]*Attachment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/attachments", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">attachments := []*Attachment{}
+        if err := c.Do(ctx, req, &amp;attachments); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return attachments, nil</span>
+}
+
+// GetIssueAttachment downloads an issue attachment
+func (c *Client) GetIssueAttachment(issueIDOrKey string, attachmentID int, writer io.Writer) error <span class="cov8" title="1">{
+        return c.GetIssueAttachmentContext(context.Background(), issueIDOrKey, attachmentID, writer)
+}</span>
+
+// GetIssueAttachmentContext downloads an issue attachment with context
+func (c *Client) GetIssueAttachmentContext(ctx context.Context, issueIDOrKey string, attachmentID int, writer io.Writer) error <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/attachments/%v", issueIDOrKey, attachmentID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, writer); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// DeleteIssueAttachment deletes an issue attachment
+func (c *Client) DeleteIssueAttachment(issueIDOrKey string, attachmentID int) (*Attachment, error) <span class="cov8" title="1">{
+        return c.DeleteIssueAttachmentContext(context.Background(), issueIDOrKey, attachmentID)
+}</span>
+
+// DeleteIssueAttachmentContext deletes an issue attachments with context
+func (c *Client) DeleteIssueAttachmentContext(ctx context.Context, issueIDOrKey string, attachmentID int) (*Attachment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/attachments/%v", issueIDOrKey, attachmentID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">attachment := new(Attachment)
+        if err := c.Do(ctx, req, &amp;attachment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return attachment, nil</span>
+}
+
+// GetIssueParticipants gets participants of a issue
+func (c *Client) GetIssueParticipants(issueIDOrKey string) ([]*User, error) <span class="cov8" title="1">{
+        return c.GetIssueParticipantsContext(context.Background(), issueIDOrKey)
+}</span>
+
+// GetIssueParticipantsContext gets participants of a issue with context
+func (c *Client) GetIssueParticipantsContext(ctx context.Context, issueIDOrKey string) ([]*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/participants", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">users := []*User{}
+        if err := c.Do(ctx, req, &amp;users); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return users, nil</span>
+}
+
+// GetIssueSharedFiles gets shared files of a issue
+func (c *Client) GetIssueSharedFiles(issueIDOrKey string) ([]*SharedFile, error) <span class="cov8" title="1">{
+        return c.GetIssueSharedFilesContext(context.Background(), issueIDOrKey)
+}</span>
+
+// GetIssueSharedFilesContext gets shared files of a issue with context
+func (c *Client) GetIssueSharedFilesContext(ctx context.Context, issueIDOrKey string) ([]*SharedFile, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles", issueIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">sharedFiles := []*SharedFile{}
+        if err := c.Do(ctx, req, &amp;sharedFiles); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return sharedFiles, nil</span>
+}
+
+// CreateIssueSharedFiles link a shared files to a issue
+func (c *Client) CreateIssueSharedFiles(issueIDOrKey string, input *CreateIssueSharedFilesInput) ([]*SharedFile, error) <span class="cov8" title="1">{
+        return c.CreateIssueSharedFilesContext(context.Background(), issueIDOrKey, input)
+}</span>
+
+// CreateIssueSharedFilesContext link a shared files to a issue with context
+func (c *Client) CreateIssueSharedFilesContext(ctx context.Context, issueIDOrKey string, input *CreateIssueSharedFilesInput) ([]*SharedFile, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles", issueIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">sharedFiles := []*SharedFile{}
+        if err := c.Do(ctx, req, &amp;sharedFiles); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return sharedFiles, nil</span>
+}
+
+// DeleteIssueSharedFile link a shared files to a issue
+func (c *Client) DeleteIssueSharedFile(issueIDOrKey string, sharedFileID int) (*SharedFile, error) <span class="cov8" title="1">{
+        return c.DeleteIssueSharedFileContext(context.Background(), issueIDOrKey, sharedFileID)
+}</span>
+
+// DeleteIssueSharedFileContext link a shared files to a issue with context
+func (c *Client) DeleteIssueSharedFileContext(ctx context.Context, issueIDOrKey string, sharedFileID int) (*SharedFile, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/issues/%v/sharedFiles/%v", issueIDOrKey, sharedFileID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">sharedFile := new(SharedFile)
+        if err := c.Do(ctx, req, &amp;sharedFile); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return sharedFile, nil</span>
+}
+
+// GetIssuesOptions specifies parameters to the GetIssues method.
+type GetIssuesOptions struct {
+        ProjectIDs     []int   `url:"projectId[],omitempty"`
+        IssueTypeIDs   []int   `url:"issueTypeId[],omitempty"`
+        CategoryIDs    []int   `url:"categoryId[],omitempty"`
+        VersionIDs     []int   `url:"versionId[],omitempty"`
+        MilestoneIDs   []int   `url:"milestoneId[],omitempty"`
+        StatusIDs      []int   `url:"statusId[],omitempty"`
+        PriorityIDs    []int   `url:"priorityId[],omitempty"`
+        AssigneeIDs    []int   `url:"assigneeId[],omitempty"`
+        CreatedUserIDs []int   `url:"createdUserId[],omitempty"`
+        ResolutionIDs  []int   `url:"resolutionId[],omitempty"`
+        ParentChild    *int    `url:"parentChild,omitempty"`
+        Attachment     *bool   `url:"attachment,omitempty"`
+        SharedFile     *bool   `url:"sharedFile,omitempty"`
+        Sort           Sort    `url:"sort,omitempty"`
+        Order          Order   `url:"order,omitempty"`
+        Offset         *int    `url:"offset,omitempty"`
+        Count          *int    `url:"count,omitempty"`
+        CreatedSince   *string `url:"createdSince,omitempty"`
+        CreatedUntil   *string `url:"createdUntil,omitempty"`
+        UpdatedSince   *string `url:"updatedSince,omitempty"`
+        UpdatedUntil   *string `url:"updatedUntil,omitempty"`
+        StartDateSince *string `url:"startDateSince,omitempty"`
+        StartDateUntil *string `url:"startDateUntil,omitempty"`
+        DueDateSince   *string `url:"dueDateSince,omitempty"`
+        DueDateUntil   *string `url:"dueDateUntil,omitempty"`
+        IDs            []int   `url:"id[],omitempty"`
+        ParentIssueIDs []int   `url:"parentIssueId[],omitempty"`
+        Keyword        *string `url:"keyword,omitempty"`
+}
+
+// GetUserMySelfRecentrlyViewedIssuesOptions specifies parameters to the GetUserMySelfRecentrlyViewedIssues method.
+type GetUserMySelfRecentrlyViewedIssuesOptions struct {
+        Order  Order `url:"order,omitempty"`
+        Offset *int  `url:"offset,omitempty"`
+        Count  *int  `url:"count,omitempty"`
+}
+
+// GetIssuesCountOptions specifies parameters to the GetIssueCount method.
+type GetIssuesCountOptions struct {
+        ProjectIDs     []int   `url:"projectId[],omitempty"`
+        IssueTypeIDs   []int   `url:"issueTypeId[],omitempty"`
+        CategoryIDs    []int   `url:"categoryId[],omitempty"`
+        VersionIDs     []int   `url:"versionId[],omitempty"`
+        MilestoneIDs   []int   `url:"milestoneId[],omitempty"`
+        StatusIDs      []int   `url:"statusId[],omitempty"`
+        PriorityIDs    []int   `url:"priorityId[],omitempty"`
+        AssigneeIDs    []int   `url:"assigneeId[],omitempty"`
+        CreatedUserIDs []int   `url:"createdUserId[],omitempty"`
+        ResolutionIDs  []int   `url:"resolutionId[],omitempty"`
+        ParentChild    *int    `url:"parentChild,omitempty"`
+        Attachment     *bool   `url:"attachment,omitempty"`
+        SharedFile     *bool   `url:"sharedFile,omitempty"`
+        Sort           Sort    `url:"sort,omitempty"`
+        Order          Order   `url:"order,omitempty"`
+        Offset         *int    `url:"offset,omitempty"`
+        Count          *int    `url:"count,omitempty"`
+        CreatedSince   *string `url:"createdSince,omitempty"`
+        CreatedUntil   *string `url:"createdUntil,omitempty"`
+        UpdatedSince   *string `url:"updatedSince,omitempty"`
+        UpdatedUntil   *string `url:"updatedUntil,omitempty"`
+        StartDateSince *string `url:"startDateSince,omitempty"`
+        StartDateUntil *string `url:"startDateUntil,omitempty"`
+        DueDateSince   *string `url:"dueDateSince,omitempty"`
+        DueDateUntil   *string `url:"dueDateUntil,omitempty"`
+        IDs            []int   `url:"id[],omitempty"`
+        ParentIssueIDs []int   `url:"parentIssueId[],omitempty"`
+        Keyword        *string `url:"keyword,omitempty"`
+}
+
+// CreateIssueInput specifies parameters to the CreateIssue method.
+type CreateIssueInput struct {
+        ProjectID       *int                `json:"projectId"`
+        Summary         *string             `json:"summary"`
+        ParentIssueID   *int                `json:"parentIssueId,omitempty"`
+        Description     *string             `json:"description,omitempty"`
+        StartDate       *string             `json:"startDate,omitempty"`
+        DueDate         *string             `json:"dueDate,omitempty"`
+        EstimatedHours  *int                `json:"estimatedHours,omitempty"`
+        ActualHours     *int                `json:"actualHours,omitempty"`
+        IssueTypeID     *int                `json:"issueTypeId"`
+        CategoryIDs     []int               `json:"categoryId,omitempty"`
+        VersionIDs      []int               `json:"versionId,omitempty"`
+        MilestoneIDs    []int               `json:"milestoneId,omitempty"`
+        PriorityID      *int                `json:"priorityId"`
+        AssigneeID      *int                `json:"assigneeId,omitempty"`
+        NotifiedUserIDs []int               `json:"notifiedUserId,omitempty"`
+        AttachmentIDs   []int               `json:"attachmentId,omitempty"`
+        CustomFields    []*IssueCustomField `json:"-"`
+}
+
+// UpdateIssueInput specifies parameters to the UpdateIssue method.
+type UpdateIssueInput struct {
+        Summary         *string             `json:"summary,omitempty"`
+        ParentIssueID   *int                `json:"parentIssueId,omitempty"`
+        Description     *string             `json:"description,omitempty"`
+        StatusID        *int                `json:"statusId,omitempty"`
+        ResolutionID    *int                `json:"resolutionId,omitempty"`
+        StartDate       *string             `json:"startDate,omitempty"`
+        DueDate         *string             `json:"dueDate,omitempty"`
+        EstimatedHours  *int                `json:"estimatedHours,omitempty"`
+        ActualHours     *int                `json:"actualHours,omitempty"`
+        IssueTypeID     *int                `json:"issueTypeId,omitempty"`
+        CategoryIDs     []int               `json:"categoryId,omitempty"`
+        VersionIDs      []int               `json:"versionId,omitempty"`
+        MilestoneIDs    []int               `json:"milestoneId,omitempty"`
+        PriorityID      *int                `json:"priorityId,omitempty"`
+        AssigneeID      *int                `json:"assigneeId,omitempty"`
+        NotifiedUserIDs []int               `json:"notifiedUserId,omitempty"`
+        AttachmentIDs   []int               `json:"attachmentId,omitempty"`
+        Comment         *string             `json:"comment,omitempty"`
+        CustomFields    []*IssueCustomField `json:"-"`
+}
+
+// GetIssueCommentsOptions specifies parameters to the GetIssueComments method.
+type GetIssueCommentsOptions struct {
+        MinID *int  `json:"minId,omitempty"`
+        MaxID *int  `json:"maxId,omitempty"`
+        Count *int  `json:"count,omitempty"`
+        Order Order `json:"order,omitempty"`
+}
+
+// CreateIssueCommentInput specifies parameters to the CreateIssueComment method.
+type CreateIssueCommentInput struct {
+        Content         *string `json:"content"`
+        NotifiedUserIDs []int   `json:"notifiedUserId,omitempty"`
+        AttachmentIDs   []int   `json:"attachmentId,omitempty"`
+}
+
+// UpdateIssueCommentInput specifies parameters to the UpdateIssueComment method.
+type UpdateIssueCommentInput struct {
+        Content *string `json:"content,omitempty"`
+}
+
+// CreateIssueCommentsNotificationInput specifies parameters to the CreateIssueCommentsNotification method.
+type CreateIssueCommentsNotificationInput struct {
+        NotifiedUserIDs []int `json:"notifiedUserId,omitempty"`
+}
+
+// CreateIssueSharedFilesInput specifies parameters to the CreateIssueSharedFiles method.
+type CreateIssueSharedFilesInput struct {
+        FileIDs []int `json:"fileId,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// IssueType : issue type
+type IssueType struct {
+        ID                  *int    `json:"id,omitempty"`
+        ProjectID           *int    `json:"projectId,omitempty"`
+        Name                *string `json:"name,omitempty"`
+        Color               *string `json:"color,omitempty"`
+        DisplayOrder        *int    `json:"displayOrder,omitempty"`
+        TemplateSummary     *string `json:"templateSummary,omitempty"`
+        TemplateDescription *string `json:"templateDescription,omitempty"`
+}
+
+// GetIssueTypes returns the list of categories
+func (c *Client) GetIssueTypes(projectIDOrKey interface{}) ([]*IssueType, error) <span class="cov8" title="1">{
+        return c.GetIssueTypesContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetIssueTypesContext returns the list of categories with context
+func (c *Client) GetIssueTypesContext(ctx context.Context, projectIDOrKey interface{}) ([]*IssueType, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/issueTypes", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueTypes := []*IssueType{}
+        if err := c.Do(ctx, req, &amp;issueTypes); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueTypes, nil</span>
+}
+
+// CreateIssueType creates an issue type
+func (c *Client) CreateIssueType(projectIDOrKey interface{}, input *CreateIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        return c.CreateIssueTypeContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// CreateIssueTypeContext creates an issue type with Context
+func (c *Client) CreateIssueTypeContext(ctx context.Context, projectIDOrKey interface{}, input *CreateIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/issueTypes", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueType := new(IssueType)
+        if err := c.Do(ctx, req, &amp;issueType); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueType, nil</span>
+}
+
+// UpdateIssueType updates an issue type
+func (c *Client) UpdateIssueType(projectIDOrKey interface{}, issueTypeID int, input *UpdateIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        return c.UpdateIssueTypeContext(context.Background(), projectIDOrKey, issueTypeID, input)
+}</span>
+
+// UpdateIssueTypeContext updates an issue type with Context
+func (c *Client) UpdateIssueTypeContext(ctx context.Context, projectIDOrKey interface{}, issueTypeID int, input *UpdateIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/issueTypes/%v", projectIDOrKey, issueTypeID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueType := new(IssueType)
+        if err := c.Do(ctx, req, &amp;issueType); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueType, nil</span>
+}
+
+// DeleteIssueType deletes an issue type
+func (c *Client) DeleteIssueType(projectIDOrKey interface{}, issueTypeID int, input *DeleteIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        return c.DeleteIssueTypeContext(context.Background(), projectIDOrKey, issueTypeID, input)
+}</span>
+
+// DeleteIssueTypeContext deletes an issue type with Context
+func (c *Client) DeleteIssueTypeContext(ctx context.Context, projectIDOrKey interface{}, issueTypeID int, input *DeleteIssueTypeInput) (*IssueType, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/issueTypes/%v", projectIDOrKey, issueTypeID)
+
+        req, err := c.NewRequest("DELETE", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">issueType := new(IssueType)
+        if err := c.Do(ctx, req, &amp;issueType); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return issueType, nil</span>
+}
+
+// CreateIssueTypeInput specifies parameters to the CreateIssueType method.
+type CreateIssueTypeInput struct {
+        Name                *string `json:"name"`
+        Color               *string `json:"color"`
+        TemplateSummary     *string `json:"templateSummary,omitempty"`
+        TemplateDescription *string `json:"templateDescription,omitempty"`
+}
+
+// UpdateIssueTypeInput specifies parameters to the UpdateIssueType method.
+type UpdateIssueTypeInput struct {
+        Name                *string `json:"name,omitempty"`
+        Color               *string `json:"color,omitempty"`
+        TemplateSummary     *string `json:"templateSummary,omitempty"`
+        TemplateDescription *string `json:"templateDescription,omitempty"`
+}
+
+// DeleteIssueTypeInput specifies parameters to the DeleteIssueType method.
+type DeleteIssueTypeInput struct {
+        SubstituteIssueTypeID *int `json:"substituteIssueTypeId,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package backlog
+
+import (
+        "fmt"
+        "log"
+)
+
+var logFatal = log.Fatal
+
+type logger interface {
+        Output(int, string) error
+}
+
+// ilogger represents the internal logging api we use.
+type ilogger interface {
+        logger
+        Print(...interface{})
+        Printf(string, ...interface{})
+        Println(...interface{})
+}
+
+type debug interface {
+        Debug() bool
+
+        // Debugf print a formatted debug line.
+        Debugf(format string, v ...interface{})
+        // Debugln print a debug line.
+        Debugln(v ...interface{})
+}
+
+// internalLog implements the additional methods used by our internal logging.
+type internalLog struct {
+        logger
+}
+
+// Println replicates the behaviour of the standard logger.
+func (t internalLog) Println(v ...interface{}) <span class="cov8" title="1">{
+        if err := t.Output(2, fmt.Sprintln(v...)); err != nil </span><span class="cov0" title="0">{
+                logFatal(err)
+        }</span>
+}
+
+// Printf replicates the behaviour of the standard logger.
+func (t internalLog) Printf(format string, v ...interface{}) <span class="cov8" title="1">{
+        if err := t.Output(2, fmt.Sprintf(format, v...)); err != nil </span><span class="cov0" title="0">{
+                logFatal(err)
+        }</span>
+}
+
+// Print replicates the behaviour of the standard logger.
+func (t internalLog) Print(v ...interface{}) <span class="cov8" title="1">{
+        if err := t.Output(2, fmt.Sprint(v...)); err != nil </span><span class="cov0" title="0">{
+                logFatal(err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package backlog
+
+import (
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "net/http/httputil"
+        "strings"
+
+        "github.com/pkg/errors"
+)
+
+// ErrorResponse is backlog error response
+type ErrorResponse struct {
+        Errors []*Error `json:"errors"`
+}
+
+// Error is backlog error
+type Error struct {
+        Message  *string `json:"message,omitempty"`
+        Code     *int    `json:"code,omitempty"`
+        MoreInfo *string `json:"moreInfo,omitempty"`
+}
+
+// Errs : error
+func (t ErrorResponse) Errs() error <span class="cov8" title="1">{
+        s := []string{}
+        for _, err := range t.Errors </span><span class="cov8" title="1">{
+                s = append(s, fmt.Sprintf("code:%d message:%s moreInfo:%s", *err.Code, *err.Message, *err.MoreInfo))
+        }</span>
+
+        <span class="cov8" title="1">if len(s) == 0 </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">return errors.New(strings.Join(s, ", "))</span>
+}
+
+// StatusCodeError represents an http response error.
+// type httpStatusCode interface { HTTPStatusCode() int } to handle it.
+type statusCodeError struct {
+        Code   int
+        Status string
+}
+
+func (t statusCodeError) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("backlog server error: %s", t.Status)
+}</span>
+
+func (t statusCodeError) HTTPStatusCode() int <span class="cov0" title="0">{
+        return t.Code
+}</span>
+
+func checkStatusCode(resp *http.Response, d debug) error <span class="cov8" title="1">{
+        // return no error if response returns status code 2xx
+        if resp.StatusCode/100 == 2 </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">if err := logResponse(resp, d); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">errorResponse := new(ErrorResponse)
+        if err := newJSONParser(errorResponse)(resp); err == nil </span><span class="cov8" title="1">{
+                return errorResponse.Errs()
+        }</span>
+
+        <span class="cov8" title="1">return statusCodeError{Code: resp.StatusCode, Status: resp.Status}</span>
+}
+
+type responseParser func(*http.Response) error
+
+func newJSONParser(dst interface{}) responseParser <span class="cov8" title="1">{
+        return func(resp *http.Response) error </span><span class="cov8" title="1">{
+                return json.NewDecoder(resp.Body).Decode(dst)
+        }</span>
+}
+
+func logResponse(resp *http.Response, d debug) error <span class="cov8" title="1">{
+        if d.Debug() </span><span class="cov8" title="1">{
+                text, err := httputil.DumpResponse(resp, true)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">d.Debugln(string(text))</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package backlog
+
+import "context"
+
+// Priority : priority
+type Priority struct {
+        ID   *int    `json:"id,omitempty"`
+        Name *string `json:"name,omitempty"`
+}
+
+// GetPriorities returns the list of priorities
+func (c *Client) GetPriorities() ([]*Priority, error) <span class="cov8" title="1">{
+        return c.GetPrioritiesContext(context.Background())
+}</span>
+
+// GetPrioritiesContext returns the list of priorities with context
+func (c *Client) GetPrioritiesContext(ctx context.Context) ([]*Priority, error) <span class="cov8" title="1">{
+        u := "/api/v2/priorities"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var priorities []*Priority
+        if err := c.Do(ctx, req, &amp;priorities); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return priorities, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+// Project : project
+type Project struct {
+        ID                                *int    `json:"id,omitempty"`
+        ProjectKey                        *string `json:"projectKey,omitempty"`
+        Name                              *string `json:"name,omitempty"`
+        ChartEnabled                      *bool   `json:"chartEnabled,omitempty"`
+        SubtaskingEnabled                 *bool   `json:"subtaskingEnabled,omitempty"`
+        ProjectLeaderCanEditProjectLeader *bool   `json:"projectLeaderCanEditProjectLeader,omitempty"`
+        TextFormattingRule                *string `json:"textFormattingRule,omitempty"`
+        Archived                          *bool   `json:"archived,omitempty"`
+        DisplayOrder                      *int    `json:"displayOrder,omitempty"`
+}
+
+// Status : the status of project
+type Status struct {
+        ID           *int    `json:"id,omitempty"`
+        ProjectID    *int    `json:"projectId,omitempty"`
+        Name         *string `json:"name,omitempty"`
+        Color        *string `json:"color,omitempty"`
+        DisplayOrder *int    `json:"displayOrder,omitempty"`
+}
+
+// ProjectDiskUsage : disk usage of project
+type ProjectDiskUsage struct {
+        ProjectID  *int `json:"projectId,omitempty"`
+        Issue      *int `json:"issue,omitempty"`
+        Wiki       *int `json:"wiki,omitempty"`
+        File       *int `json:"file,omitempty"`
+        Subversion *int `json:"subversion,omitempty"`
+        Git        *int `json:"git,omitempty"`
+        GitLFS     *int `json:"gitLFS,omitempty"`
+}
+
+// RecentlyViewedProject : recently viewed project
+type RecentlyViewedProject struct {
+        Project *Project   `json:"project"`
+        Updated *Timestamp `json:"updated"`
+}
+
+// GetMyRecentlyViewedProjects returns the list of projects I recently viewed
+func (c *Client) GetMyRecentlyViewedProjects(opts *GetMyRecentlyViewedProjectsOptions) ([]*RecentlyViewedProject, error) <span class="cov8" title="1">{
+        return c.GetMyRecentlyViewedProjectsContext(context.Background(), opts)
+}</span>
+
+// GetMyRecentlyViewedProjectsContext returns the list of projects I recently viewed with context
+func (c *Client) GetMyRecentlyViewedProjectsContext(ctx context.Context, opts *GetMyRecentlyViewedProjectsOptions) ([]*RecentlyViewedProject, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/users/myself/recentlyViewedProjects", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var recentlyViewedProjects []*RecentlyViewedProject
+        if err := c.Do(ctx, req, &amp;recentlyViewedProjects); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return recentlyViewedProjects, nil</span>
+}
+
+// GetProjects returns the list of projects
+func (c *Client) GetProjects(opts *GetProjectsOptions) ([]*Project, error) <span class="cov8" title="1">{
+        return c.GetProjectsContext(context.Background(), opts)
+}</span>
+
+// GetProjectsContext returns the list of projects
+func (c *Client) GetProjectsContext(ctx context.Context, opts *GetProjectsOptions) ([]*Project, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/projects", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">projects := []*Project{}
+        if err := c.Do(ctx, req, &amp;projects); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return projects, nil</span>
+}
+
+// GetProject returns a project
+func (c *Client) GetProject(projectIDOrKey interface{}) (*Project, error) <span class="cov8" title="1">{
+        return c.GetProjectContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetProjectContext returns a project with context
+func (c *Client) GetProjectContext(ctx context.Context, projectIDOrKey interface{}) (*Project, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">project := new(Project)
+        if err := c.Do(ctx, req, &amp;project); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return project, nil</span>
+}
+
+// GetStatuses returns the statuses of a project
+func (c *Client) GetStatuses(projectIDOrKey interface{}) ([]*Status, error) <span class="cov8" title="1">{
+        return c.GetStatusesContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetStatusesContext returns the statuses of a project with context
+func (c *Client) GetStatusesContext(ctx context.Context, projectIDOrKey interface{}) ([]*Status, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/statuses", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">statuses := []*Status{}
+        if err := c.Do(ctx, req, &amp;statuses); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return statuses, nil</span>
+}
+
+// CreateProject creates a project
+func (c *Client) CreateProject(input *CreateProjectInput) (*Project, error) <span class="cov8" title="1">{
+        return c.CreateProjectContext(context.Background(), input)
+}</span>
+
+// CreateProjectContext creates a project with Context
+func (c *Client) CreateProjectContext(ctx context.Context, input *CreateProjectInput) (*Project, error) <span class="cov8" title="1">{
+        u := "/api/v2/projects"
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">project := new(Project)
+        if err := c.Do(ctx, req, &amp;project); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return project, nil</span>
+}
+
+// UpdateProject updates a project
+func (c *Client) UpdateProject(id int, input *UpdateProjectInput) (*Project, error) <span class="cov8" title="1">{
+        return c.UpdateProjectContext(context.Background(), id, input)
+}</span>
+
+// UpdateProjectContext updates a project with Context
+func (c *Client) UpdateProjectContext(ctx context.Context, id int, input *UpdateProjectInput) (*Project, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v", id)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">project := new(Project)
+        if err := c.Do(ctx, req, &amp;project); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return project, nil</span>
+}
+
+// DeleteProject deletes a project
+func (c *Client) DeleteProject(projectIDOrKey interface{}) (*Project, error) <span class="cov8" title="1">{
+        return c.DeleteProjectContext(context.Background(), projectIDOrKey)
+}</span>
+
+// DeleteProjectContext deletes a project with Context
+func (c *Client) DeleteProjectContext(ctx context.Context, projectIDOrKey interface{}) (*Project, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v", projectIDOrKey)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">project := new(Project)
+        if err := c.Do(ctx, req, &amp;project); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return project, nil</span>
+}
+
+// GetProjectIcon downloads project icon
+func (c *Client) GetProjectIcon(projectIDOrKey interface{}, writer io.Writer) error <span class="cov8" title="1">{
+        return c.GetProjectIconContext(context.Background(), projectIDOrKey, writer)
+}</span>
+
+// GetProjectIconContext downloads project icon with context
+func (c *Client) GetProjectIconContext(ctx context.Context, projectIDOrKey interface{}, writer io.Writer) error <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/image", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, writer); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// AddProjectUser adds a user to a project
+func (c *Client) AddProjectUser(projectIDOrKey interface{}, input *AddProjectUserInput) (*User, error) <span class="cov8" title="1">{
+        return c.AddProjectUserContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// AddProjectUserContext adds a user to a project with context
+func (c *Client) AddProjectUserContext(ctx context.Context, projectIDOrKey interface{}, input *AddProjectUserInput) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/users", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var user *User
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// GetProjectUsers returns the list of users in a project
+func (c *Client) GetProjectUsers(projectIDOrKey interface{}, opts *GetProjectUsersOptions) ([]*User, error) <span class="cov8" title="1">{
+        return c.GetProjectUsersContext(context.Background(), projectIDOrKey, opts)
+}</span>
+
+// GetProjectUsersContext returns the list of users in a project with context
+func (c *Client) GetProjectUsersContext(ctx context.Context, projectIDOrKey interface{}, opts *GetProjectUsersOptions) ([]*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/users", projectIDOrKey)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var users []*User
+        if err := c.Do(ctx, req, &amp;users); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return users, nil</span>
+}
+
+// DeleteProjectUser deletes a user in a project
+func (c *Client) DeleteProjectUser(projectIDOrKey interface{}, input *DeleteProjectUserInput) (*User, error) <span class="cov8" title="1">{
+        return c.DeleteProjectUserContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// DeleteProjectUserContext deletes a user in a project with Context
+func (c *Client) DeleteProjectUserContext(ctx context.Context, projectIDOrKey interface{}, input *DeleteProjectUserInput) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/users", projectIDOrKey)
+
+        req, err := c.NewRequest("DELETE", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// AddProjectAdministrator adds an administrator in a project
+func (c *Client) AddProjectAdministrator(projectIDOrKey interface{}, input *AddProjectAdministratorInput) (*User, error) <span class="cov8" title="1">{
+        return c.AddProjectAdministratorContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// AddProjectAdministratorContext adds an administrator in a project with context
+func (c *Client) AddProjectAdministratorContext(ctx context.Context, projectIDOrKey interface{}, input *AddProjectAdministratorInput) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/administrators", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// GetProjectAdministrators returns the list of administrators in a project
+func (c *Client) GetProjectAdministrators(projectIDOrKey interface{}) ([]*User, error) <span class="cov8" title="1">{
+        return c.GetProjectAdministratorsContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetProjectAdministratorsContext returns the list of administrators in a project with context
+func (c *Client) GetProjectAdministratorsContext(ctx context.Context, projectIDOrKey interface{}) ([]*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/administrators", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var users []*User
+        if err := c.Do(ctx, req, &amp;users); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return users, nil</span>
+}
+
+// DeleteProjectAdministrator deletes a administrator in a project
+func (c *Client) DeleteProjectAdministrator(projectIDOrKey interface{}, input *DeleteProjectAdministratorInput) (*User, error) <span class="cov8" title="1">{
+        return c.DeleteProjectAdministratorContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// DeleteProjectAdministratorContext deletes a administrator in a project with Context
+func (c *Client) DeleteProjectAdministratorContext(ctx context.Context, projectIDOrKey interface{}, input *DeleteProjectAdministratorInput) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/administrators", projectIDOrKey)
+
+        req, err := c.NewRequest("DELETE", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// CreateStatus creates a status
+func (c *Client) CreateStatus(projectIDOrKey interface{}, input *CreateStatusInput) (*Status, error) <span class="cov8" title="1">{
+        return c.CreateStatusContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// CreateStatusContext creates a status
+func (c *Client) CreateStatusContext(ctx context.Context, projectIDOrKey interface{}, input *CreateStatusInput) (*Status, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/statuses", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">status := new(Status)
+        if err := c.Do(ctx, req, &amp;status); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return status, nil</span>
+}
+
+// UpdateStatus updates a status
+func (c *Client) UpdateStatus(projectIDOrKey interface{}, statusID int, input *UpdateStatusInput) (*Status, error) <span class="cov8" title="1">{
+        return c.UpdateStatusContext(context.Background(), projectIDOrKey, statusID, input)
+}</span>
+
+// UpdateStatusContext updates a status
+func (c *Client) UpdateStatusContext(ctx context.Context, projectIDOrKey interface{}, statusID int, input *UpdateStatusInput) (*Status, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/statuses/%v", projectIDOrKey, statusID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">status := new(Status)
+        if err := c.Do(ctx, req, &amp;status); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return status, nil</span>
+}
+
+// DeleteStatus deletes a status
+func (c *Client) DeleteStatus(projectIDOrKey interface{}, statusID int, input *DeleteStatusInput) (*Status, error) <span class="cov8" title="1">{
+        return c.DeleteStatusContext(context.Background(), projectIDOrKey, statusID, input)
+}</span>
+
+// DeleteStatusContext deletes a status
+func (c *Client) DeleteStatusContext(ctx context.Context, projectIDOrKey interface{}, statusID int, input *DeleteStatusInput) (*Status, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/statuses/%v", projectIDOrKey, statusID)
+
+        req, err := c.NewRequest("DELETE", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">status := new(Status)
+        if err := c.Do(ctx, req, &amp;status); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return status, nil</span>
+}
+
+// SortStatuses sorts the list of statuses
+func (c *Client) SortStatuses(projectIDOrKey interface{}, input *SortStatusesInput) ([]*Status, error) <span class="cov8" title="1">{
+        return c.SortStatusesContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// SortStatusesContext sorts the list of statuses with context
+func (c *Client) SortStatusesContext(ctx context.Context, projectIDOrKey interface{}, input *SortStatusesInput) ([]*Status, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/statuses/updateDisplayOrder", projectIDOrKey)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">statuses := []*Status{}
+        if err := c.Do(ctx, req, &amp;statuses); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return statuses, nil</span>
+}
+
+// GetProjectDiskUsage returns disk usage of a project
+func (c *Client) GetProjectDiskUsage(projectIDOrKey interface{}) (*ProjectDiskUsage, error) <span class="cov8" title="1">{
+        return c.GetProjectDiskUsageContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetProjectDiskUsageContext returns the list of administrators in a project with context
+func (c *Client) GetProjectDiskUsageContext(ctx context.Context, projectIDOrKey interface{}) (*ProjectDiskUsage, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/diskUsage", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">projectDiskUsage := new(ProjectDiskUsage)
+        if err := c.Do(ctx, req, &amp;projectDiskUsage); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return projectDiskUsage, nil</span>
+}
+
+// GetMyRecentlyViewedProjectsOptions specifies parameters to the GetMyRecentlyViewedProject method.
+type GetMyRecentlyViewedProjectsOptions struct {
+        Order  Order `url:"order,omitempty"`
+        Offset *int  `url:"offset,omitempty"`
+        Count  *int  `url:"count,omitempty"`
+}
+
+// GetProjectsOptions contains all the parameters necessary (including the optional ones) for a GetProjects() request.
+type GetProjectsOptions struct {
+        Archived *bool `url:"archived"`
+        All      *bool `url:"all"`
+}
+
+// CreateProjectInput contains all the parameters necessary (including the optional ones) for a CreateProject() request.
+type CreateProjectInput struct {
+        Name                              *string `json:"name"`
+        Key                               *string `json:"key"`
+        ChartEnabled                      *bool   `json:"chartEnabled"`
+        ProjectLeaderCanEditProjectLeader *bool   `json:"projectLeaderCanEditProjectLeader,omitempty"`
+        SubtaskingEnabled                 *bool   `json:"subtaskingEnabled"`
+        TextFormattingRule                *string `json:"textFormattingRule"`
+}
+
+// UpdateProjectInput contains all the parameters necessary (including the optional ones) for a UpdateProject() request.
+type UpdateProjectInput struct {
+        Name                              *string `json:"name,omitempty"`
+        Key                               *string `json:"key,omitempty"`
+        ChartEnabled                      *bool   `json:"chartEnabled,omitempty"`
+        SubtaskingEnabled                 *bool   `json:"subtaskingEnabled,omitempty"`
+        ProjectLeaderCanEditProjectLeader *bool   `json:"projectLeaderCanEditProjectLeader,omitempty"`
+        TextFormattingRule                *string `json:"textFormattingRule,omitempty"`
+        Archived                          *bool   `json:"archived,omitempty"`
+}
+
+// AddProjectUserInput specifies parameters to the AddProjectUser method.
+type AddProjectUserInput struct {
+        UserID *int `json:"userId"`
+}
+
+// GetProjectUsersOptions specifies parameters to the GetProjectUsers method.
+type GetProjectUsersOptions struct {
+        ExcludeGroupMembers *bool `url:"excludeGroupMembers,omitempty"`
+}
+
+// DeleteProjectUserInput specifies parameters to the DeleteProjectUser method.
+type DeleteProjectUserInput struct {
+        UserID *int `json:"userId"`
+}
+
+// AddProjectAdministratorInput specifies parameters to the AddProjectAdministrator method.
+type AddProjectAdministratorInput struct {
+        UserID *int `json:"userId"`
+}
+
+// DeleteProjectAdministratorInput specifies parameters to the DeleteProjectAdministrator method.
+type DeleteProjectAdministratorInput struct {
+        UserID *int `json:"userId"`
+}
+
+// CreateStatusInput specifies parameters to the CreateStatus method.
+type CreateStatusInput struct {
+        Name  *string `json:"name"`
+        Color *string `json:"color"`
+}
+
+// UpdateStatusInput specifies parameters to the UpdateStatus method.
+type UpdateStatusInput struct {
+        Name  *string `json:"name,omitempty"`
+        Color *string `json:"color,omitempty"`
+}
+
+// DeleteStatusInput specifies parameters to the DeleteStatus method.
+type DeleteStatusInput struct {
+        SubstituteStatusID *int `json:"substituteStatusId"`
+}
+
+// SortStatusesInput specifies parameters to the SortStatuses method.
+type SortStatusesInput struct {
+        StatusIDs []int `json:"statusId,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package backlog
+
+import "context"
+
+// Resolution : resolutions
+type Resolution struct {
+        ID   *int    `json:"id,omitempty"`
+        Name *string `json:"name,omitempty"`
+}
+
+// GetResolutions returns the list of resolutions
+func (c *Client) GetResolutions() ([]*Resolution, error) <span class="cov8" title="1">{
+        return c.GetResolutionsContext(context.Background())
+}</span>
+
+// GetResolutionsContext returns the list of resolutions with context
+func (c *Client) GetResolutionsContext(ctx context.Context) ([]*Resolution, error) <span class="cov8" title="1">{
+        u := "/api/v2/resolutions"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var resolutions []*Resolution
+        if err := c.Do(ctx, req, &amp;resolutions); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return resolutions, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package backlog
+
+import (
+        "context"
+        "io"
+)
+
+// Space : backlog space
+type Space struct {
+        SpaceKey           *string    `json:"spaceKey,omitempty"`
+        Name               *string    `json:"name,omitempty"`
+        OwnerID            *int       `json:"ownerId,omitempty"`
+        Lang               *string    `json:"lang,omitempty"`
+        Timezone           *string    `json:"timezone,omitempty"`
+        ReportSendTime     *string    `json:"reportSendTime,omitempty"`
+        TextFormattingRule *string    `json:"textFormattingRule,omitempty"`
+        Created            *Timestamp `json:"created,omitempty"`
+        Updated            *Timestamp `json:"updated,omitempty"`
+}
+
+// SpaceNotification : backlog space notification
+type SpaceNotification struct {
+        Content *string    `json:"content,omitempty"`
+        Updated *Timestamp `json:"updated,omitempty"`
+}
+
+// SpaceDiskUsage : disk usage of space
+type SpaceDiskUsage struct {
+        Capacity   *int                    `json:"capacity,omitempty"`
+        Issue      *int                    `json:"issue,omitempty"`
+        Wiki       *int                    `json:"wiki,omitempty"`
+        File       *int                    `json:"file,omitempty"`
+        Subversion *int                    `json:"subversion,omitempty"`
+        Git        *int                    `json:"git,omitempty"`
+        GitLFS     *int                    `json:"gitLFS,omitempty"`
+        Details    []*SpaceDiskUsageDetail `json:"details,omitempty"`
+}
+
+// SpaceDiskUsageDetail : the detail of disk usage of a space
+type SpaceDiskUsageDetail struct {
+        ProjectID  *int `json:"projectId,omitempty"`
+        Issue      *int `json:"issue,omitempty"`
+        Wiki       *int `json:"wiki,omitempty"`
+        File       *int `json:"file,omitempty"`
+        Subversion *int `json:"subversion,omitempty"`
+        Git        *int `json:"git,omitempty"`
+        GitLFS     *int `json:"gitLFS,omitempty"`
+}
+
+// License : license
+type License struct {
+        Active                            *bool      `json:"active,omitempty"`
+        AttachmentLimit                   *int       `json:"attachmentLimit,omitempty"`
+        AttachmentLimitPerFile            *int       `json:"attachmentLimitPerFile,omitempty"`
+        AttachmentNumLimit                *int       `json:"attachmentNumLimit,omitempty"`
+        Attribute                         *bool      `json:"attribute,omitempty"`
+        AttributeLimit                    *int       `json:"attributeLimit,omitempty"`
+        Burndown                          *bool      `json:"burndown,omitempty"`
+        CommentLimit                      *int       `json:"commentLimit,omitempty"`
+        ComponentLimit                    *int       `json:"componentLimit,omitempty"`
+        FileSharing                       *bool      `json:"fileSharing,omitempty"`
+        Gantt                             *bool      `json:"gantt,omitempty"`
+        Git                               *bool      `json:"git,omitempty"`
+        IssueLimit                        *int       `json:"issueLimit,omitempty"`
+        LicenceTypeID                     *int       `json:"licenceTypeId,omitempty"`
+        LimitDate                         *Timestamp `json:"limitDate,omitempty"`
+        NulabAccount                      *bool      `json:"nulabAccount,omitempty"`
+        ParentChildIssue                  *bool      `json:"parentChildIssue,omitempty"`
+        PostIssueByMail                   *bool      `json:"postIssueByMail,omitempty"`
+        ProjectGroup                      *bool      `json:"projectGroup,omitempty"`
+        ProjectLimit                      *int       `json:"projectLimit,omitempty"`
+        PullRequestAttachmentLimitPerFile *int       `json:"pullRequestAttachmentLimitPerFile,omitempty"`
+        PullRequestAttachmentNumLimit     *int       `json:"pullRequestAttachmentNumLimit,omitempty"`
+        RemoteAddress                     *bool      `json:"remoteAddress,omitempty"`
+        RemoteAddressLimit                *int       `json:"remoteAddressLimit,omitempty"`
+        StartedOn                         *Timestamp `json:"startedOn,omitempty"`
+        StorageLimit                      *int64     `json:"storageLimit,omitempty"`
+        Subversion                        *bool      `json:"subversion,omitempty"`
+        SubversionExternal                *bool      `json:"subversionExternal,omitempty"`
+        UserLimit                         *int       `json:"userLimit,omitempty"`
+        VersionLimit                      *int       `json:"versionLimit,omitempty"`
+        WikiAttachment                    *bool      `json:"wikiAttachment,omitempty"`
+        WikiAttachmentLimitPerFile        *int       `json:"wikiAttachmentLimitPerFile,omitempty"`
+        WikiAttachmentNumLimit            *int       `json:"wikiAttachmentNumLimit,omitempty"`
+}
+
+// GetSpace returns backlog space
+func (c *Client) GetSpace() (*Space, error) <span class="cov8" title="1">{
+        return c.GetSpaceContext(context.Background())
+}</span>
+
+// GetSpaceContext returns backlog space with context
+func (c *Client) GetSpaceContext(ctx context.Context) (*Space, error) <span class="cov8" title="1">{
+        u := "/api/v2/space"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">space := new(Space)
+        if err := c.Do(ctx, req, &amp;space); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return space, nil</span>
+}
+
+// GetSpaceIcon downloads space icon
+func (c *Client) GetSpaceIcon(writer io.Writer) error <span class="cov8" title="1">{
+        return c.GetSpaceIconContext(context.Background(), writer)
+}</span>
+
+// GetSpaceIconContext downloads space icon with context
+func (c *Client) GetSpaceIconContext(ctx context.Context, writer io.Writer) error <span class="cov8" title="1">{
+        u := "/api/v2/space/image"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, writer); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetSpaceNotification returns a space notification
+func (c *Client) GetSpaceNotification() (*SpaceNotification, error) <span class="cov8" title="1">{
+        return c.GetSpaceNotificationContext(context.Background())
+}</span>
+
+// GetSpaceNotificationContext returns a space notification with context
+func (c *Client) GetSpaceNotificationContext(ctx context.Context) (*SpaceNotification, error) <span class="cov8" title="1">{
+        u := "/api/v2/space/notification"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">spaceNotification := new(SpaceNotification)
+        if err := c.Do(ctx, req, &amp;spaceNotification); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return spaceNotification, nil</span>
+}
+
+// UpdateSpaceNotification updates a space notification
+func (c *Client) UpdateSpaceNotification(input *UpdateSpaceNotificationInput) (*SpaceNotification, error) <span class="cov8" title="1">{
+        return c.UpdateSpaceNotificationContext(context.Background(), input)
+}</span>
+
+// UpdateSpaceNotificationContext updates a space notification with context
+func (c *Client) UpdateSpaceNotificationContext(ctx context.Context, input *UpdateSpaceNotificationInput) (*SpaceNotification, error) <span class="cov8" title="1">{
+        u := "/api/v2/space/notification"
+
+        req, err := c.NewRequest("PUT", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">spaceNotification := new(SpaceNotification)
+        if err := c.Do(ctx, req, &amp;spaceNotification); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return spaceNotification, nil</span>
+}
+
+// GetSpaceDiskUsage returns the disk usage of a space
+func (c *Client) GetSpaceDiskUsage() (*SpaceDiskUsage, error) <span class="cov8" title="1">{
+        return c.GetSpaceDiskUsageContext(context.Background())
+}</span>
+
+// GetSpaceDiskUsageContext returns the disk usage of a space with context
+func (c *Client) GetSpaceDiskUsageContext(ctx context.Context) (*SpaceDiskUsage, error) <span class="cov8" title="1">{
+        u := "/api/v2/space/diskUsage"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">diskUsage := new(SpaceDiskUsage)
+        if err := c.Do(ctx, req, &amp;diskUsage); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return diskUsage, nil</span>
+}
+
+// GetLicence returns the license information
+func (c *Client) GetLicence() (*License, error) <span class="cov8" title="1">{
+        return c.GetLicenceContext(context.Background())
+}</span>
+
+// GetLicenceContext returns the license information with context
+func (c *Client) GetLicenceContext(ctx context.Context) (*License, error) <span class="cov8" title="1">{
+        u := "/api/v2/space/licence"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">license := new(License)
+        if err := c.Do(ctx, req, &amp;license); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return license, nil</span>
+}
+
+// UpdateSpaceNotificationInput contains all the parameters necessary (including the optional ones) for a UpdateSpaceNotification() request.
+type UpdateSpaceNotificationInput struct {
+        Content *string `json:"content"`
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+// Team : team
+type Team struct {
+        ID           *int       `json:"id,omitempty"`
+        Name         *string    `json:"name,omitempty"`
+        Members      []*User    `json:"members,omitempty"`
+        DisplayOrder *int       `json:"displayOrder,omitempty"`
+        CreatedUser  *User      `json:"createdUser,omitempty"`
+        Created      *Timestamp `json:"created,omitempty"`
+        UpdatedUser  *User      `json:"updatedUser,omitempty"`
+        Updated      *Timestamp `json:"updated,omitempty"`
+}
+
+// GetTeams returns the list of teams
+func (c *Client) GetTeams(opts *GetTeamsOptions) ([]*Team, error) <span class="cov8" title="1">{
+        return c.GetTeamsContext(context.Background(), opts)
+}</span>
+
+// GetTeamsContext returns the list of teams with context
+func (c *Client) GetTeamsContext(ctx context.Context, opts *GetTeamsOptions) ([]*Team, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/teams", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var teams []*Team
+        if err := c.Do(ctx, req, &amp;teams); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return teams, nil</span>
+}
+
+// CreateTeam creates a team
+// a space backlog.com cannot use this API
+func (c *Client) CreateTeam(input *CreateTeamInput) (*Team, error) <span class="cov8" title="1">{
+        return c.CreateTeamContext(context.Background(), input)
+}</span>
+
+// CreateTeamContext creates a team with Context
+// a space backlog.com cannot use this API
+func (c *Client) CreateTeamContext(ctx context.Context, input *CreateTeamInput) (*Team, error) <span class="cov8" title="1">{
+        u := "/api/v2/teams"
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">team := new(Team)
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// GetTeam returns a teams
+func (c *Client) GetTeam(teamID int) (*Team, error) <span class="cov8" title="1">{
+        return c.GetTeamContext(context.Background(), teamID)
+}</span>
+
+// GetTeamContext returns a team with context
+func (c *Client) GetTeamContext(ctx context.Context, teamID int) (*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/teams/%v", teamID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var team *Team
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// UpdateTeam updates a team
+func (c *Client) UpdateTeam(teamID int, input *UpdateTeamInput) (*Team, error) <span class="cov8" title="1">{
+        return c.UpdateTeamContext(context.Background(), teamID, input)
+}</span>
+
+// UpdateTeamContext updates a team with Context
+func (c *Client) UpdateTeamContext(ctx context.Context, teamID int, input *UpdateTeamInput) (*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/teams/%v", teamID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">team := new(Team)
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// DeleteTeam deletes a team
+func (c *Client) DeleteTeam(teamID int) (*Team, error) <span class="cov8" title="1">{
+        return c.DeleteTeamContext(context.Background(), teamID)
+}</span>
+
+// DeleteTeamContext deletes a team with Context
+func (c *Client) DeleteTeamContext(ctx context.Context, teamID int) (*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/teams/%v", teamID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">team := new(Team)
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// GetTeamIcon downloads team icon
+func (c *Client) GetTeamIcon(teamID int, writer io.Writer) error <span class="cov8" title="1">{
+        return c.GetTeamIconContext(context.Background(), teamID, writer)
+}</span>
+
+// GetTeamIconContext downloads team icon with context
+func (c *Client) GetTeamIconContext(ctx context.Context, teamID int, writer io.Writer) error <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/teams/%v/icon", teamID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, writer); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetProjectTeams returns the list of teams in a project
+func (c *Client) GetProjectTeams(projectIDOrKey interface{}) ([]*Team, error) <span class="cov8" title="1">{
+        return c.GetProjectTeamsContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetProjectTeamsContext returns the list of teams in a project with context
+func (c *Client) GetProjectTeamsContext(ctx context.Context, projectIDOrKey interface{}) ([]*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/teams", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var teams []*Team
+        if err := c.Do(ctx, req, &amp;teams); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return teams, nil</span>
+}
+
+// AddProjectTeam adds a team to a project
+func (c *Client) AddProjectTeam(projectIDOrKey interface{}, input *AddProjectTeamInput) (*Team, error) <span class="cov8" title="1">{
+        return c.AddProjectTeamContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// AddProjectTeamContext adds a team to a project with context
+func (c *Client) AddProjectTeamContext(ctx context.Context, projectIDOrKey interface{}, input *AddProjectTeamInput) (*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/teams", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">team := new(Team)
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// DeleteProjectTeam deletes a team to a project
+func (c *Client) DeleteProjectTeam(projectIDOrKey interface{}, input *DeleteProjectTeamInput) (*Team, error) <span class="cov8" title="1">{
+        return c.DeleteProjectTeamContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// DeleteProjectTeamContext deletes a team to a project with context
+func (c *Client) DeleteProjectTeamContext(ctx context.Context, projectIDOrKey interface{}, input *DeleteProjectTeamInput) (*Team, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/teams", projectIDOrKey)
+
+        req, err := c.NewRequest("DELETE", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">team := new(Team)
+        if err := c.Do(ctx, req, &amp;team); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return team, nil</span>
+}
+
+// GetTeamsOptions specifies parameters to the GetTeams method.
+type GetTeamsOptions struct {
+        Order  Order `url:"order,omitempty"`
+        Offset *int  `url:"offset,omitempty"`
+        Count  *int  `url:"count,omitempty"`
+}
+
+// CreateTeamInput specifies parameters to the CreateTeam method.
+type CreateTeamInput struct {
+        Name    *string `json:"name"`
+        Members []int   `json:"members,omitempty"`
+}
+
+// UpdateTeamInput specifies parameters to the UpdateTeam method.
+type UpdateTeamInput struct {
+        Name    *string `json:"name"`
+        Members []int   `json:"members,omitempty"`
+}
+
+// AddProjectTeamInput specifies parameters to the AddProjectTeam method.
+type AddProjectTeamInput struct {
+        TeamID *int `json:"teamId"`
+}
+
+// DeleteProjectTeamInput specifies parameters to the DeleteProjectTeam method.
+type DeleteProjectTeamInput struct {
+        TeamID *int `json:"teamId"`
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package backlog
+
+import (
+        "time"
+)
+
+// Timestamp represents a time that can be unmarshalled from a JSON string
+// formatted as either an RFC3339 or Unix timestamp. This is necessary for some
+// fields since the GitHub API is inconsistent in how it represents times. All
+// exported methods of time.Time can be called on Timestamp.
+type Timestamp struct {
+        time.Time
+}
+
+func (t Timestamp) String() string <span class="cov8" title="1">{
+        return t.Time.String()
+}</span>
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// Time is expected in RFC3339 or Unix format.
+func (t *Timestamp) UnmarshalJSON(data []byte) (err error) <span class="cov8" title="1">{
+        t.Time, err = time.Parse(`"`+time.RFC3339+`"`, string(data))
+        return
+}</span>
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+// RoleType : role type
+type RoleType int
+
+// RoleType
+const (
+        RoleTypeAdministrator = RoleType(iota)
+        RoleTypeGeneralUser
+        RoleTypeReporter
+        RoleTypeViewer
+        RoleTypeGuestReporter
+        RoleTypeGuestViewer
+)
+
+// Int converts const RoleType* into int
+func (k RoleType) Int() int <span class="cov8" title="1">{
+        switch k </span>{
+        case RoleTypeAdministrator:<span class="cov8" title="1">
+                return 1</span>
+        case RoleTypeGeneralUser:<span class="cov8" title="1">
+                return 2</span>
+        case RoleTypeReporter:<span class="cov8" title="1">
+                return 3</span>
+        case RoleTypeViewer:<span class="cov8" title="1">
+                return 4</span>
+        case RoleTypeGuestReporter:<span class="cov8" title="1">
+                return 5</span>
+        case RoleTypeGuestViewer:<span class="cov8" title="1">
+                return 6</span>
+        default:<span class="cov8" title="1">
+                return 0</span>
+        }
+}
+
+// Order : asc or desc
+type Order string
+
+// Order by asc, desc
+const (
+        OrderAsc = Order(rune(iota))
+        OrderDesc
+)
+
+func (k Order) String() string <span class="cov8" title="1">{
+        switch k </span>{
+        case OrderAsc:<span class="cov8" title="1">
+                return "asc"</span>
+        case OrderDesc:<span class="cov8" title="1">
+                return "desc"</span>
+        default:<span class="cov8" title="1">
+                return ""</span>
+        }
+}
+
+// User : backlog user
+type User struct {
+        ID          *int     `json:"id,omitempty"`
+        UserID      *string  `json:"userId,omitempty"`
+        Name        *string  `json:"name,omitempty"`
+        RoleType    RoleType `json:"roleType"`
+        Lang        *string  `json:"lang,omitempty"`
+        MailAddress *string  `json:"mailAddress,omitempty"`
+}
+
+// Notification : -
+type Notification struct {
+        ID                  *int  `json:"id,omitempty"`
+        AlreadyRead         *bool `json:"alreadyRead,omitempty"`
+        Reason              *int  `json:"reason,omitempty"`
+        User                *User `json:"user,omitempty"`
+        ResourceAlreadyRead *bool `json:"resourceAlreadyRead,omitempty"`
+}
+
+// Content : -
+type Content struct {
+        ID          *int      `json:"id,omitempty"`
+        KeyID       *int      `json:"key_id,omitempty"`
+        Summary     *string   `json:"summary,omitempty"`
+        Description *string   `json:"description,omitempty"`
+        Comment     *Comment  `json:"comment,omitempty"`
+        Changes     []*Change `json:"changes,omitempty"`
+}
+
+// Comment : -
+type Comment struct {
+        ID      *int    `json:"id,omitempty"`
+        Content *string `json:"content,omitempty"`
+}
+
+// Change : -
+type Change struct {
+        Field    *string `json:"field,omitempty"`
+        NewValue *string `json:"new_value,omitempty"`
+        OldValue *string `json:"old_value,omitempty"`
+        Type     *string `json:"type,omitempty"`
+}
+
+// ResponseIssue : response of issue api
+type ResponseIssue struct {
+        Issue   *Issue     `json:"issue,omitempty"`
+        Updated *Timestamp `json:"updated,omitempty"`
+}
+
+// GetUserMySelf returns get my user information
+func (c *Client) GetUserMySelf() (*User, error) <span class="cov8" title="1">{
+        return c.GetUserMySelfContext(context.Background())
+}</span>
+
+// GetUserMySelfContext will retrieve the complete my user information by id with a custom context
+func (c *Client) GetUserMySelfContext(ctx context.Context) (*User, error) <span class="cov8" title="1">{
+        u := "/api/v2/users/myself"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// GetUser returns a user by id
+func (c *Client) GetUser(id int) (*User, error) <span class="cov8" title="1">{
+        return c.GetUserContext(context.Background(), id)
+}</span>
+
+// GetUserContext will retrieve the complete user information by id with a custom context
+func (c *Client) GetUserContext(ctx context.Context, id int) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v", id)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// GetUsers returns the list of users
+func (c *Client) GetUsers() ([]*User, error) <span class="cov8" title="1">{
+        return c.GetUsersContext(context.Background())
+}</span>
+
+// GetUsersContext returns the list of users
+func (c *Client) GetUsersContext(ctx context.Context) ([]*User, error) <span class="cov8" title="1">{
+        u := "/api/v2/users"
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var users []*User
+        if err := c.Do(ctx, req, &amp;users); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return users, nil</span>
+}
+
+// CreateUser creates a user
+func (c *Client) CreateUser(input *CreateUserInput) (*User, error) <span class="cov8" title="1">{
+        return c.CreateUserContext(context.Background(), input)
+}</span>
+
+// CreateUserContext creates a user with Context
+func (c *Client) CreateUserContext(ctx context.Context, input *CreateUserInput) (*User, error) <span class="cov8" title="1">{
+        u := "/api/v2/users"
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// UpdateUser updates a user
+func (c *Client) UpdateUser(id int, input *UpdateUserInput) (*User, error) <span class="cov8" title="1">{
+        return c.UpdateUserContext(context.Background(), id, input)
+}</span>
+
+// UpdateUserContext updates a user with Context
+func (c *Client) UpdateUserContext(ctx context.Context, id int, input *UpdateUserInput) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v", id)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// DeleteUser deletes a user
+func (c *Client) DeleteUser(id int) (*User, error) <span class="cov8" title="1">{
+        return c.DeleteUserContext(context.Background(), id)
+}</span>
+
+// DeleteUserContext deletes a user with Context
+func (c *Client) DeleteUserContext(ctx context.Context, id int) (*User, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v", id)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">user := new(User)
+        if err := c.Do(ctx, req, &amp;user); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// GetUserIcon downloads user icon
+func (c *Client) GetUserIcon(id int, writer io.Writer) error <span class="cov8" title="1">{
+        return c.GetUserIconContext(context.Background(), id, writer)
+}</span>
+
+// GetUserIconContext downloads user icon with context
+func (c *Client) GetUserIconContext(ctx context.Context, id int, writer io.Writer) error <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/icon", id)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, writer); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetUserStars returns the list of stared contents
+func (c *Client) GetUserStars(id int, opts *GetUserStarsOptions) ([]*Star, error) <span class="cov8" title="1">{
+        return c.GetUserStarsContext(context.Background(), id, opts)
+}</span>
+
+// GetUserStarsContext returns the list of a user's activities with context
+func (c *Client) GetUserStarsContext(ctx context.Context, id int, opts *GetUserStarsOptions) ([]*Star, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/stars", id)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var stars []*Star
+        if err := c.Do(ctx, req, &amp;stars); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return stars, nil</span>
+}
+
+// GetUserStarCount returns the count of stars
+func (c *Client) GetUserStarCount(id int, opts *GetUserStarCountOptions) (int, error) <span class="cov8" title="1">{
+        return c.GetUserStarCountContext(context.Background(), id, opts)
+}</span>
+
+// GetUserStarCountContext returns the count of stars with context
+func (c *Client) GetUserStarCountContext(ctx context.Context, id int, opts *GetUserStarCountOptions) (int, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/stars/count", id)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">r := new(p)
+        if err := c.Do(ctx, req, &amp;r); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+        <span class="cov8" title="1">return r.Count, nil</span>
+}
+
+// CreateUserInput contains all the parameters necessary (including the optional ones) for a CreateUser() request.
+type CreateUserInput struct {
+        UserID      *string
+        Password    *string
+        Name        *string
+        MailAddress *string
+        RoleType    RoleType
+}
+
+// UpdateUserInput contains all the parameters necessary (including the optional ones) for a UpdateUser() request.
+type UpdateUserInput struct {
+        Password    *string
+        Name        *string
+        MailAddress *string
+        RoleType    RoleType
+}
+
+// GetUserStarsOptions specifies parameters to the GetUserStars method.
+type GetUserStarsOptions struct {
+        MinID *int  `url:"minId,omitempty"`
+        MaxID *int  `url:"maxId,omitempty"`
+        Count *int  `url:"count,omitempty"`
+        Order Order `url:"order,omitempty"`
+}
+
+// GetUserStarCountOptions specifies parameters to the GetUserStarCount method.
+type GetUserStarCountOptions struct {
+        Since *string `url:"since,omitempty"`
+        Until *string `url:"until,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Version : milestone
+type Version struct {
+        ID             *int    `json:"id,omitempty"`
+        ProjectID      *int    `json:"projectId,omitempty"`
+        Name           *string `json:"name,omitempty"`
+        Description    *string `json:"description,omitempty"`
+        StartDate      *string `json:"startDate,omitempty"`      // yyyy-MM-dd
+        ReleaseDueDate *string `json:"releaseDueDate,omitempty"` // yyyy-MM-dd
+        Archived       *bool   `json:"archived,omitempty"`
+        DisplayOrder   *int    `json:"displayOrder,omitempty"`
+}
+
+// GetVersions returns the list of versions in a project
+func (c *Client) GetVersions(projectIDOrKey interface{}) ([]*Version, error) <span class="cov8" title="1">{
+        return c.GetVersionsContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetVersionsContext returns a version of a project with context
+func (c *Client) GetVersionsContext(ctx context.Context, projectIDOrKey interface{}) ([]*Version, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/versions", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var versions []*Version
+        if err := c.Do(ctx, req, &amp;versions); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return versions, nil</span>
+}
+
+// CreateVersion creates a versions (milestone) of a project
+func (c *Client) CreateVersion(projectIDOrKey interface{}, input *CreateVersionInput) (*Version, error) <span class="cov8" title="1">{
+        return c.CreateVersionContext(context.Background(), projectIDOrKey, input)
+}</span>
+
+// CreateVersionContext creates a versions (milestone) of a project with Context
+func (c *Client) CreateVersionContext(ctx context.Context, projectIDOrKey interface{}, input *CreateVersionInput) (*Version, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/versions", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">version := new(Version)
+        if err := c.Do(ctx, req, &amp;version); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return version, nil</span>
+}
+
+// UpdateVersion updates a versions (milestone) of a project
+func (c *Client) UpdateVersion(projectIDOrKey interface{}, versionID int, input *UpdateVersionInput) (*Version, error) <span class="cov8" title="1">{
+        return c.UpdateVersionContext(context.Background(), projectIDOrKey, versionID, input)
+}</span>
+
+// UpdateVersionContext updates a versions (milestone) of a project with Context
+func (c *Client) UpdateVersionContext(ctx context.Context, projectIDOrKey interface{}, versionID int, input *UpdateVersionInput) (*Version, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/versions/%v", projectIDOrKey, versionID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">version := new(Version)
+        if err := c.Do(ctx, req, &amp;version); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return version, nil</span>
+}
+
+// DeleteVersion deletes a versions (milestone) of a project
+func (c *Client) DeleteVersion(projectIDOrKey interface{}, versionID int) (*Version, error) <span class="cov8" title="1">{
+        return c.DeleteVersionContext(context.Background(), projectIDOrKey, versionID)
+}</span>
+
+// DeleteVersionContext deletes a versions (milestone) of a project with Context
+func (c *Client) DeleteVersionContext(ctx context.Context, projectIDOrKey interface{}, versionID int) (*Version, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/versions/%v", projectIDOrKey, versionID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">version := new(Version)
+        if err := c.Do(ctx, req, &amp;version); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return version, nil</span>
+}
+
+// CreateVersionInput specifies parameters to the CreateVersion method.
+type CreateVersionInput struct {
+        Name           *string `json:"name"`
+        Description    *string `json:"description,omitempty"`
+        StartDate      *string `json:"startDate,omitempty"`
+        ReleaseDueDate *string `json:"releaseDueDate,omitempty"`
+}
+
+// UpdateVersionInput specifies parameters to the UpdateVersion method.
+type UpdateVersionInput struct {
+        Name           *string `json:"name"`
+        Description    *string `json:"description,omitempty"`
+        StartDate      *string `json:"startDate,omitempty"`
+        ReleaseDueDate *string `json:"releaseDueDate,omitempty"`
+        Archived       *bool   `json:"archived,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Watching : -
+type Watching struct {
+        ID                  *int       `json:"id,omitempty"`
+        ResourceAlreadyRead *bool      `json:"resourceAlreadyRead,omitempty"`
+        Note                *string    `json:"note,omitempty"`
+        Type                *string    `json:"type,omitempty"`
+        Issue               *Issue     `json:"issue,omitempty"`
+        LastContentUpdated  *Timestamp `json:"lastContentUpdated,omitempty"`
+        Created             *Timestamp `json:"created,omitempty"`
+        Updated             *Timestamp `json:"updated,omitempty"`
+}
+
+// GetUserWatchings returns the list of user's watchings
+func (c *Client) GetUserWatchings(userID int) ([]*Watching, error) <span class="cov8" title="1">{
+        return c.GetUserWatchingsContext(context.Background(), userID)
+}</span>
+
+// GetUserWatchingsContext returns the list of user's watchings with context
+func (c *Client) GetUserWatchingsContext(ctx context.Context, userID int) ([]*Watching, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/watchings", userID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var watchings []*Watching
+        if err := c.Do(ctx, req, &amp;watchings); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return watchings, nil</span>
+}
+
+// GetUserWatchingsCount returns the count of user's watchings
+func (c *Client) GetUserWatchingsCount(userID int, opts *GetUserWatchingsCountOptions) (int, error) <span class="cov8" title="1">{
+        return c.GetUserWatchingsCountContext(context.Background(), userID, opts)
+}</span>
+
+// GetUserWatchingsCountContext returns the count of user's watchings with context
+func (c *Client) GetUserWatchingsCountContext(ctx context.Context, userID int, opts *GetUserWatchingsCountOptions) (int, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/users/%v/watchings/count", userID)
+
+        u, err := c.AddOptions(u, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">r := new(p)
+        if err := c.Do(ctx, req, &amp;r); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+        <span class="cov8" title="1">return r.Count, nil</span>
+}
+
+// GetWatching returns a watching
+func (c *Client) GetWatching(watchingID int) (*Watching, error) <span class="cov8" title="1">{
+        return c.GetWatchingContext(context.Background(), watchingID)
+}</span>
+
+// GetWatchingContext returns a watching with context
+func (c *Client) GetWatchingContext(ctx context.Context, watchingID int) (*Watching, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/watchings/%v", watchingID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">watching := new(Watching)
+        if err := c.Do(ctx, req, &amp;watching); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return watching, nil</span>
+}
+
+// CreateWatching creates a watching
+func (c *Client) CreateWatching(input *CreateWatchingInput) (*Watching, error) <span class="cov8" title="1">{
+        return c.CreateWatchingContext(context.Background(), input)
+}</span>
+
+// CreateWatchingContext creates a watching with Context
+func (c *Client) CreateWatchingContext(ctx context.Context, input *CreateWatchingInput) (*Watching, error) <span class="cov8" title="1">{
+        u := "/api/v2/watchings"
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">watching := new(Watching)
+        if err := c.Do(ctx, req, &amp;watching); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return watching, nil</span>
+}
+
+// UpdateWatching updates a watching
+func (c *Client) UpdateWatching(watchingID int, input *UpdateWatchingInput) (*Watching, error) <span class="cov8" title="1">{
+        return c.UpdateWatchingContext(context.Background(), watchingID, input)
+}</span>
+
+// UpdateWatchingContext updates a watching with Context
+func (c *Client) UpdateWatchingContext(ctx context.Context, watchingID int, input *UpdateWatchingInput) (*Watching, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/watchings/%v", watchingID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">watching := new(Watching)
+        if err := c.Do(ctx, req, &amp;watching); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return watching, nil</span>
+}
+
+// DeleteWatching deletes a watching
+func (c *Client) DeleteWatching(watchingID int) (*Watching, error) <span class="cov8" title="1">{
+        return c.DeleteWatchingContext(context.Background(), watchingID)
+}</span>
+
+// DeleteWatchingContext deletes a watching with Context
+func (c *Client) DeleteWatchingContext(ctx context.Context, watchingID int) (*Watching, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/watchings/%v", watchingID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">watching := new(Watching)
+        if err := c.Do(ctx, req, &amp;watching); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return watching, nil</span>
+}
+
+// MarkAsReadWatching marks a watching as read
+func (c *Client) MarkAsReadWatching(watchingID int) error <span class="cov8" title="1">{
+        return c.MarkAsReadWatchingContext(context.Background(), watchingID)
+}</span>
+
+// MarkAsReadWatchingContext marks a watching as read with Context
+func (c *Client) MarkAsReadWatchingContext(ctx context.Context, watchingID int) error <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/watchings/%v/markAsRead", watchingID)
+
+        req, err := c.NewRequest("POST", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := c.Do(ctx, req, nil); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetUserWatchingsOptions specifies parameters to the GetUserWatchings method.
+type GetUserWatchingsOptions struct {
+        Order               *Order  `url:"order,omitempty"`
+        Sort                *string `url:"sort,omitempty"`
+        Count               *int    `url:"count,omitempty"`
+        Offset              *int    `url:"offset,omitempty"`
+        ResourceAlreadyRead *bool   `url:"resourceAlreadyRead,omitempty"`
+        IssueIDs            []int   `url:"issueId[],omitempty"`
+}
+
+// GetUserWatchingsCountOptions specifies parameters to the GetUserWatchingsCount method.
+type GetUserWatchingsCountOptions struct {
+        ResourceAlreadyRead *bool `url:"resourceAlreadyRead,omitempty"`
+        AlreadyRead         *bool `url:"alreadyRead,omitempty"`
+}
+
+// CreateWatchingInput specifies parameters to the CreateWatching method.
+type CreateWatchingInput struct {
+        IssueIDOrKey *string `json:"issueIdOrKey"`
+        Note         *string `json:"note,omitempty"`
+}
+
+// UpdateWatchingInput specifies parameters to the UpdateWatching method.
+type UpdateWatchingInput struct {
+        Note *string `json:"note,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Webhook : -
+type Webhook struct {
+        ID              *int       `json:"id,omitempty"`
+        Name            *string    `json:"name,omitempty"`
+        Description     *string    `json:"description,omitempty"`
+        HookURL         *string    `json:"hookUrl,omitempty"`
+        AllEvent        *bool      `json:"allEvent,omitempty"`
+        ActivityTypeIds []int      `json:"activityTypeIds,omitempty"`
+        CreatedUser     *User      `json:"createdUser,omitempty"`
+        Created         *Timestamp `json:"created,omitempty"`
+        UpdatedUser     *User      `json:"updatedUser,omitempty"`
+        Updated         *Timestamp `json:"updated,omitempty"`
+}
+
+// GetWebhook returns the list of webhooks
+func (c *Client) GetWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) <span class="cov8" title="1">{
+        return c.GetWebhookContext(context.Background(), projectIDOrKey, webhookID)
+}</span>
+
+// GetWebhookContext returns the list of webhooks with context
+func (c *Client) GetWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">webhook := new(Webhook)
+        if err := c.Do(ctx, req, &amp;webhook); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return webhook, nil</span>
+}
+
+// GetWebhooks returns the list of webhooks
+func (c *Client) GetWebhooks(projectIDOrKey interface{}) ([]*Webhook, error) <span class="cov8" title="1">{
+        return c.GetWebhooksContext(context.Background(), projectIDOrKey)
+}</span>
+
+// GetWebhooksContext returns the list of webhooks with context
+func (c *Client) GetWebhooksContext(ctx context.Context, projectIDOrKey interface{}) ([]*Webhook, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/webhooks", projectIDOrKey)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">webhooks := []*Webhook{}
+        if err := c.Do(ctx, req, &amp;webhooks); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return webhooks, nil</span>
+}
+
+// CreateWebhook adds a webhook
+func (c *Client) CreateWebhook(projectIDOrKey interface{}, webhook *CreateWebhookInput) (*Webhook, error) <span class="cov8" title="1">{
+        return c.CreateWebhookContext(context.Background(), projectIDOrKey, webhook)
+}</span>
+
+// CreateWebhookContext adds a webhook with context
+func (c *Client) CreateWebhookContext(ctx context.Context, projectIDOrKey interface{}, input *CreateWebhookInput) (*Webhook, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/webhooks", projectIDOrKey)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">webhook := new(Webhook)
+        if err := c.Do(ctx, req, &amp;webhook); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return webhook, nil</span>
+}
+
+// UpdateWebhook updates a webhook
+func (c *Client) UpdateWebhook(projectIDOrKey interface{}, webhookID int, input *UpdateWebhookInput) (*Webhook, error) <span class="cov8" title="1">{
+        return c.UpdateWebhookContext(context.Background(), projectIDOrKey, webhookID, input)
+}</span>
+
+// UpdateWebhookContext updates a webhook with context
+func (c *Client) UpdateWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int, input *UpdateWebhookInput) (*Webhook, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">webhook := new(Webhook)
+        if err := c.Do(ctx, req, &amp;webhook); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return webhook, nil</span>
+}
+
+// DeleteWebhook deletes a webhook
+func (c *Client) DeleteWebhook(projectIDOrKey interface{}, webhookID int) (*Webhook, error) <span class="cov8" title="1">{
+        return c.DeleteWebhookContext(context.Background(), projectIDOrKey, webhookID)
+}</span>
+
+// DeleteWebhookContext updates a webhook with context
+func (c *Client) DeleteWebhookContext(ctx context.Context, projectIDOrKey interface{}, webhookID int) (*Webhook, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/projects/%v/webhooks/%v", projectIDOrKey, webhookID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">webhook := new(Webhook)
+        if err := c.Do(ctx, req, &amp;webhook); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return webhook, nil</span>
+}
+
+// CreateWebhookInput contains all the parameters necessary (including the optional ones) for a CreateWebhook() request.
+type CreateWebhookInput struct {
+        Name            *string `json:"name"`
+        Description     *string `json:"description,omitempty"`
+        HookURL         *string `json:"hookUrl"`
+        AllEvent        *bool   `json:"allEvent,omitempty"`
+        ActivityTypeIDs []int   `json:"activityTypeIds,omitempty"`
+}
+
+// UpdateWebhookInput contains all the parameters necessary (including the optional ones) for a UpdateWebhook() request.
+type UpdateWebhookInput struct {
+        Name            *string `json:"name,omitempty"`
+        Description     *string `json:"description,omitempty"`
+        HookURL         *string `json:"hookUrl,omitempty"`
+        AllEvent        *bool   `json:"allEvent,omitempty"`
+        ActivityTypeIDs []int   `json:"activityTypeIds,omitempty"`
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package backlog
+
+import (
+        "context"
+        "fmt"
+)
+
+// Wiki : wiki
+type Wiki struct {
+        ID          *int          `json:"id,omitempty"`
+        ProjectID   *int          `json:"projectId,omitempty"`
+        Name        *string       `json:"name,omitempty"`
+        Content     *string       `json:"content,omitempty"`
+        Tags        []*Tag        `json:"tags,omitempty"`
+        Attachments []*Attachment `json:"attachments,omitempty"`
+        SharedFiles []*SharedFile `json:"sharedFiles,omitempty"`
+        Stars       []*Star       `json:"stars,omitempty"`
+        CreatedUser *User         `json:"createdUser,omitempty"`
+        Created     *Timestamp    `json:"created,omitempty"`
+        UpdatedUser *User         `json:"updatedUser,omitempty"`
+        Updated     *Timestamp    `json:"updated,omitempty"`
+}
+
+// Tag : tag
+type Tag struct {
+        ID   *int    `json:"id,omitempty"`
+        Name *string `json:"name,omitempty"`
+}
+
+// Attachment : attachment of wiki
+type Attachment struct {
+        ID          *int       `json:"id,omitempty"`
+        Name        *string    `json:"name,omitempty"`
+        Size        *int       `json:"size,omitempty"`
+        CreatedUser *User      `json:"createdUser,omitempty"`
+        Created     *Timestamp `json:"created,omitempty"`
+}
+
+// SharedFile : shared file of wiki
+type SharedFile struct {
+        ID          *int       `json:"id,omitempty"`
+        Type        *string    `json:"type,omitempty"`
+        Dir         *string    `json:"dir,omitempty"`
+        Name        *string    `json:"name,omitempty"`
+        Size        *int       `json:"size,omitempty"`
+        CreatedUser *User      `json:"createdUser,omitempty"`
+        Created     *Timestamp `json:"created,omitempty"`
+        UpdatedUser *User      `json:"updatedUser,omitempty"`
+        Updated     *Timestamp `json:"updated,omitempty"`
+}
+
+// Star : star of wiki
+type Star struct {
+        ID        *int       `json:"id,omitempty"`
+        Comment   *string    `json:"comment,omitempty"`
+        URL       *string    `json:"url,omitempty"`
+        Title     *string    `json:"title,omitempty"`
+        Presenter *User      `json:"presenter,omitempty"`
+        Created   *Timestamp `json:"created,omitempty"`
+}
+
+// Page : wiki page information
+type Page struct {
+        Count *int `json:"count,omitempty"`
+}
+
+// RecentlyViewedWiki : recently viewed wiki
+type RecentlyViewedWiki struct {
+        Page    *Wiki      `json:"page"`
+        Updated *Timestamp `json:"updated"`
+}
+
+// GetMyRecentlyViewedWikis returns the list of wikis I recently viewed
+func (c *Client) GetMyRecentlyViewedWikis(opts *GetMyRecentlyViewedWikisOptions) ([]*RecentlyViewedWiki, error) <span class="cov8" title="1">{
+        return c.GetMyRecentlyViewedWikisContext(context.Background(), opts)
+}</span>
+
+// GetMyRecentlyViewedWikisContext returns the list of wikis I recently viewed with context
+func (c *Client) GetMyRecentlyViewedWikisContext(ctx context.Context, opts *GetMyRecentlyViewedWikisOptions) ([]*RecentlyViewedWiki, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/users/myself/recentlyViewedWikis", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var recentlyViewedWikis []*RecentlyViewedWiki
+        if err := c.Do(ctx, req, &amp;recentlyViewedWikis); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return recentlyViewedWikis, nil</span>
+}
+
+// GetWikis returns the list of wikis
+func (c *Client) GetWikis(opts *GetWikisOptions) ([]*Wiki, error) <span class="cov8" title="1">{
+        return c.GetWikisContext(context.Background(), opts)
+}</span>
+
+// GetWikisContext returns the list of wikis
+func (c *Client) GetWikisContext(ctx context.Context, opts *GetWikisOptions) ([]*Wiki, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/wikis", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">wikis := []*Wiki{}
+        if err := c.Do(ctx, req, &amp;wikis); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return wikis, nil</span>
+}
+
+// GetWikiCount returns the number of wikis
+func (c *Client) GetWikiCount(opts *GetWikiCountOptions) (int, error) <span class="cov8" title="1">{
+        return c.GetWikiCountContext(context.Background(), opts)
+}</span>
+
+// GetWikiCountContext returns the number of wikis
+func (c *Client) GetWikiCountContext(ctx context.Context, opts *GetWikiCountOptions) (int, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/wikis/count", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">page := new(Page)
+        if err := c.Do(ctx, req, &amp;page); err != nil </span><span class="cov8" title="1">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return *page.Count, nil</span>
+}
+
+// GetWikiTags returns the tags of wikis
+func (c *Client) GetWikiTags(opts *GetWikiTagsOptions) ([]*Tag, error) <span class="cov8" title="1">{
+        return c.GetWikiTagsContext(context.Background(), opts)
+}</span>
+
+// GetWikiTagsContext returns the tags of wikis
+func (c *Client) GetWikiTagsContext(ctx context.Context, opts *GetWikiTagsOptions) ([]*Tag, error) <span class="cov8" title="1">{
+        u, err := c.AddOptions("/api/v2/wikis/tags", opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">tags := []*Tag{}
+        if err := c.Do(ctx, req, &amp;tags); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return tags, nil</span>
+}
+
+// GetWiki returns wiki by id
+func (c *Client) GetWiki(wikiID int) (*Wiki, error) <span class="cov8" title="1">{
+        return c.GetWikiContext(context.Background(), wikiID)
+}</span>
+
+// GetWikiContext returns wiki by id
+func (c *Client) GetWikiContext(ctx context.Context, wikiID int) (*Wiki, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">wiki := new(Wiki)
+        if err := c.Do(ctx, req, &amp;wiki); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return wiki, nil</span>
+}
+
+// CreateWiki creates a wiki
+func (c *Client) CreateWiki(input *CreateWikiInput) (*Wiki, error) <span class="cov8" title="1">{
+        return c.CreateWikiContext(context.Background(), input)
+}</span>
+
+// CreateWikiContext creates a wiki with Context
+func (c *Client) CreateWikiContext(ctx context.Context, input *CreateWikiInput) (*Wiki, error) <span class="cov8" title="1">{
+        u := "/api/v2/wikis"
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">wiki := new(Wiki)
+        if err := c.Do(ctx, req, &amp;wiki); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return wiki, nil</span>
+}
+
+// UpdateWiki updates a wiki
+func (c *Client) UpdateWiki(wikiID int, input *UpdateWikiInput) (*Wiki, error) <span class="cov8" title="1">{
+        return c.UpdateWikiContext(context.Background(), wikiID, input)
+}</span>
+
+// UpdateWikiContext updates a wiki with Context
+func (c *Client) UpdateWikiContext(ctx context.Context, wikiID int, input *UpdateWikiInput) (*Wiki, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
+
+        req, err := c.NewRequest("PATCH", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">wiki := new(Wiki)
+        if err := c.Do(ctx, req, &amp;wiki); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return wiki, nil</span>
+}
+
+// DeleteWiki deletes a wiki
+func (c *Client) DeleteWiki(wikiID int) (*Wiki, error) <span class="cov8" title="1">{
+        return c.DeleteWikiContext(context.Background(), wikiID)
+}</span>
+
+// DeleteWikiContext deletes a wiki with Context
+func (c *Client) DeleteWikiContext(ctx context.Context, wikiID int) (*Wiki, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v", wikiID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">wiki := new(Wiki)
+        if err := c.Do(ctx, req, &amp;wiki); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return wiki, nil</span>
+}
+
+// GetWikiAttachments returns attachements of a wiki
+func (c *Client) GetWikiAttachments(wikiID int) ([]*Attachment, error) <span class="cov8" title="1">{
+        return c.GetWikiAttachmentsContext(context.Background(), wikiID)
+}</span>
+
+// GetWikiAttachmentsContext returns attachements of a wiki with context
+func (c *Client) GetWikiAttachmentsContext(ctx context.Context, wikiID int) ([]*Attachment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v/attachments", wikiID)
+
+        req, err := c.NewRequest("GET", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">attachments := []*Attachment{}
+        if err := c.Do(ctx, req, &amp;attachments); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return attachments, nil</span>
+}
+
+// AddAttachmentToWiki adds attachments to a wiki
+func (c *Client) AddAttachmentToWiki(wikiID int, input *AddAttachmentToWikiInput) ([]*Attachment, error) <span class="cov8" title="1">{
+        return c.AddAttachmentToWikiContext(context.Background(), wikiID, input)
+}</span>
+
+// AddAttachmentToWikiContext adds attachments to a wiki with context
+func (c *Client) AddAttachmentToWikiContext(ctx context.Context, wikiID int, input *AddAttachmentToWikiInput) ([]*Attachment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v/attachments", wikiID)
+
+        req, err := c.NewRequest("POST", u, input)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">attachments := []*Attachment{}
+        if err := c.Do(ctx, req, &amp;attachments); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return attachments, nil</span>
+}
+
+// DeleteAttachmentInWiki deletes a attachment in a wiki
+func (c *Client) DeleteAttachmentInWiki(wikiID, attachmentID int) (*Attachment, error) <span class="cov8" title="1">{
+        return c.DeleteAttachmentInWikiContext(context.Background(), wikiID, attachmentID)
+}</span>
+
+// DeleteAttachmentInWikiContext deletes a attachment in a wiki with context
+func (c *Client) DeleteAttachmentInWikiContext(ctx context.Context, wikiID, attachmentID int) (*Attachment, error) <span class="cov8" title="1">{
+        u := fmt.Sprintf("/api/v2/wikis/%v/attachments/%v", wikiID, attachmentID)
+
+        req, err := c.NewRequest("DELETE", u, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">attachment := new(Attachment)
+        if err := c.Do(ctx, req, &amp;attachment); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return attachment, nil</span>
+}
+
+// GetMyRecentlyViewedWikisOptions specifies parameters to the GetMyRecentlyViewedWikis method.
+type GetMyRecentlyViewedWikisOptions struct {
+        Order  Order `url:"order,omitempty"`
+        Offset *int  `url:"offset,omitempty"`
+        Count  *int  `url:"count,omitempty"`
+}
+
+// GetWikisOptions specifies parameters to the GetWikis method.
+type GetWikisOptions struct {
+        ProjectIDOrKey interface{} `url:"projectIdOrKey"`
+        Keyword        *string     `url:"keyword,omitempty"`
+}
+
+// GetWikiCountOptions specifies parameters to the GetWikiCount method.
+type GetWikiCountOptions struct {
+        ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
+}
+
+// GetWikiTagsOptions specifies parameters to the GetWikiTags method.
+type GetWikiTagsOptions struct {
+        ProjectIDOrKey interface{} `url:"projectIdOrKey,omitempty"`
+}
+
+// CreateWikiInput contains all the parameters necessary (including the optional ones) for a CreateWiki() request.
+type CreateWikiInput struct {
+        ProjectID  *int    `json:"projectId"`
+        Name       *string `json:"name"`
+        Content    *string `json:"content"`
+        MailNotify *bool   `json:"mailNotify,omitempty"`
+}
+
+// UpdateWikiInput contains all the parameters necessary (including the optional ones) for a UpdateWiki() request.
+type UpdateWikiInput struct {
+        Name       *string `json:"name"`
+        Content    *string `json:"content"`
+        MailNotify *bool   `json:"mailNotify,omitempty"`
+}
+
+// AddAttachmentToWikiInput contains all the parameters necessary (including the optional ones) for a AddAttachmentToWiki() request.
+type AddAttachmentToWikiInput struct {
+        AttachmentIDs []int `json:"attachmentId"`
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
