@@ -39,7 +39,10 @@ var testJSONIssue string = fmt.Sprintf(`{
 	},
 	"summary": "first issue",
 	"description": "",
-	"resolutions": "",
+	"resolution": {
+		"id": 0,
+		"name": "対応済み"
+	},
 	"priority": {
 		"id": 3,
 		"name": "中"
@@ -144,7 +147,10 @@ func getTestIssue() *Issue {
 		},
 		Summary:     String("first issue"),
 		Description: String(""),
-		Resolutions: String(""),
+		Resolution: &Resolution{
+			ID:   Int(0),
+			Name: String("対応済み"),
+		},
 		Priority: &Priority{
 			ID:   Int(3),
 			Name: String("中"),
