@@ -5,14 +5,7 @@ deps:
 
 ## Install library for development
 devel-deps: deps
-	GO111MODULE=off go get \
-		golang.org/x/lint/golint \
-		honnef.co/go/tools/staticcheck \
-		github.com/kisielk/errcheck \
-		golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow \
-		github.com/securego/gosec/cmd/gosec \
-		github.com/motemen/gobump/cmd/gobump \
-		github.com/Songmu/make2help/cmd/make2help
+	GO111MODULE=off go get github.com/Songmu/make2help/cmd/make2help
 .PHONY: devel-deps
 
 fmt:
@@ -41,12 +34,7 @@ cov:
 
 ## Lint
 lint:
-	go vet ./...
-	staticcheck ./...
-	errcheck ./...
-	gosec -quiet ./...
-	golint -set_exit_status ./...
-	shadow ./...
+	golangci-lint run --tests
 .PHONY: lint
 
 # Execute this command before you creates a pull request

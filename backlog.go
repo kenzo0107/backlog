@@ -122,7 +122,7 @@ func Int64(v int64) *int64 { return &v }
 // request body.
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
 	if strings.HasSuffix(c.baseURL.Path, "/") {
-		return nil, fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
+		return nil, fmt.Errorf("baseURL must not have a trailing slash, but %q does", c.baseURL)
 	}
 
 	u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
@@ -200,7 +200,7 @@ func (c *Client) UploadMultipartFile(ctx context.Context, method, urlStr, fpath,
 	}()
 
 	if strings.HasSuffix(c.baseURL.Path, "/") {
-		return fmt.Errorf("BaseURL must not have a trailing slash, but %q does", c.baseURL)
+		return fmt.Errorf("baseURL must not have a trailing slash, but %q does", c.baseURL)
 	}
 
 	u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)

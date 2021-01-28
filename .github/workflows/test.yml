@@ -1,5 +1,14 @@
-name: Test
-on: [push]
+name: test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
 jobs:
   test:
     strategy:

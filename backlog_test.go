@@ -14,7 +14,7 @@ import (
 const baseURLPath string = "/api/v2"
 
 var (
-	ErrIncorrectResponse = errors.New("Response is incorrect")
+	ErrIncorrectResponse = errors.New("response is incorrect")
 )
 
 // setup sets up a test HTTP server along with a backlog.Client that is
