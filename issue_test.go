@@ -695,7 +695,8 @@ func TestUpdateIssue(t *testing.T) {
 	})
 
 	expected, err := client.UpdateIssue("BLG-1", &UpdateIssueInput{
-		Summary: String("first issue"),
+		Summary:        String("first issue"),
+		EstimatedHours: String(""), // set empty value
 		CustomFields: []*IssueCustomField{
 			{
 				ID:          Int(111),

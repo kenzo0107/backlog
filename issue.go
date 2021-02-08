@@ -771,22 +771,34 @@ type CreateIssueInput struct {
 }
 
 // UpdateIssueInput specifies parameters to the UpdateIssue method.
+//
+// The following values ​​are updated as integer or an empty string:
+// - resolutionId
+// - estimatedHours
+// - actualHours
+// - assigneeId
+//
+// ex. update `estimatedHours` to 10
+// - UpdateIssue("EX-1", &UpdateIssueInput{ EstimatedHours: Int(10) })
+//
+// ex. update `estimatedHours` to an empty string
+// - UpdateIssue("EX-1", &UpdateIssueInput{ EstimatedHours: String("") })
 type UpdateIssueInput struct {
 	Summary         *string             `json:"summary,omitempty"`
 	ParentIssueID   *int                `json:"parentIssueId,omitempty"`
 	Description     *string             `json:"description,omitempty"`
 	StatusID        *int                `json:"statusId,omitempty"`
-	ResolutionID    *int                `json:"resolutionId,omitempty"`
+	ResolutionID    interface{}         `json:"resolutionId,omitempty"`
 	StartDate       *string             `json:"startDate,omitempty"`
 	DueDate         *string             `json:"dueDate,omitempty"`
-	EstimatedHours  *int                `json:"estimatedHours,omitempty"`
-	ActualHours     *int                `json:"actualHours,omitempty"`
+	EstimatedHours  interface{}         `json:"estimatedHours,omitempty"`
+	ActualHours     interface{}         `json:"actualHours,omitempty"`
 	IssueTypeID     *int                `json:"issueTypeId,omitempty"`
 	CategoryIDs     []int               `json:"categoryId,omitempty"`
 	VersionIDs      []int               `json:"versionId,omitempty"`
 	MilestoneIDs    []int               `json:"milestoneId,omitempty"`
 	PriorityID      *int                `json:"priorityId,omitempty"`
-	AssigneeID      *int                `json:"assigneeId,omitempty"`
+	AssigneeID      interface{}         `json:"assigneeId,omitempty"`
 	NotifiedUserIDs []int               `json:"notifiedUserId,omitempty"`
 	AttachmentIDs   []int               `json:"attachmentId,omitempty"`
 	Comment         *string             `json:"comment,omitempty"`
