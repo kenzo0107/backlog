@@ -96,8 +96,8 @@ type Issue struct {
 	Milestone      []*Milestone        `json:"milestone,omitempty"`
 	StartDate      *string             `json:"startDate,omitempty"`
 	DueDate        *string             `json:"dueDate,omitempty"`
-	EstimatedHours *int                `json:"estimatedHours,omitempty"`
-	ActualHours    *int                `json:"actualHours,omitempty"`
+	EstimatedHours *float64            `json:"estimatedHours,omitempty"`
+	ActualHours    *float64            `json:"actualHours,omitempty"`
 	ParentIssueID  *int                `json:"parentIssueId,omitempty"`
 	CreatedUser    *User               `json:"createdUser,omitempty"`
 	Created        *Timestamp          `json:"created,omitempty"`
@@ -757,8 +757,8 @@ type CreateIssueInput struct {
 	Description     *string             `json:"description,omitempty"`
 	StartDate       *string             `json:"startDate,omitempty"`
 	DueDate         *string             `json:"dueDate,omitempty"`
-	EstimatedHours  *int                `json:"estimatedHours,omitempty"`
-	ActualHours     *int                `json:"actualHours,omitempty"`
+	EstimatedHours  *float64            `json:"estimatedHours,omitempty"`
+	ActualHours     *float64            `json:"actualHours,omitempty"`
 	IssueTypeID     *int                `json:"issueTypeId"`
 	CategoryIDs     []int               `json:"categoryId,omitempty"`
 	VersionIDs      []int               `json:"versionId,omitempty"`
