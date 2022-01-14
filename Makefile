@@ -1,7 +1,7 @@
-## Install library for production
-deps:
-	@go mod tidy
-.PHONY: deps
+## upgrade library
+upgrade:
+	@go get -u -d ./...
+.PHONY: upgrade
 
 ## Install library for development
 devel-deps: deps
@@ -32,8 +32,13 @@ cov:
 	@go tool cover -html=cover.out
 .PHONY: cov
 
+## Install linter tool
+install_linter:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.43.0
+.PHONY: install_linter
+
 ## Lint
-lint:
+lint: install_linter
 	golangci-lint run --tests
 .PHONY: lint
 
