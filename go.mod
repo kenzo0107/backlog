@@ -1,6 +1,6 @@
 module github.com/kenzo0107/backlog
 
-go 1.17
+go 1.19
 
 require (
 	github.com/google/go-querystring v1.1.0
