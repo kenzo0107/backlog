@@ -3,7 +3,7 @@ package backlog
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"reflect"
@@ -108,7 +108,7 @@ func TestGetSpaceFailed(t *testing.T) {
 type mockHTTPClient struct{}
 
 func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
-	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(`OK`))}, nil
+	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
 
 func TestGetSpaceIcon(t *testing.T) {

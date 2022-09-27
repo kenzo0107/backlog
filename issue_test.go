@@ -13,7 +13,7 @@ import (
 	"github.com/kylelemons/godebug/pretty"
 )
 
-var testJSONSharedFile string = fmt.Sprintf(`{
+var testJSONSharedFile = fmt.Sprintf(`{
 	"id": 454403,
 	"type": "file",
 	"dir": "/ユーザアイコン/",
@@ -25,7 +25,7 @@ var testJSONSharedFile string = fmt.Sprintf(`{
 	"updated": "2006-01-02T15:04:05Z"
 }`, testJSONUser, testJSONUser)
 
-var testJSONIssue string = fmt.Sprintf(`{
+var testJSONIssue = fmt.Sprintf(`{
 	"id": 1,
 	"projectId": 1,
 	"issueKey": "BLG-1",
@@ -105,7 +105,7 @@ var testJSONIssue string = fmt.Sprintf(`{
 	]
 }`, testJSONUser, testJSONUser, testJSONUser, testJSONSharedFile, testJSONUser)
 
-var testJSONNotification string = fmt.Sprintf(`{
+var testJSONNotification = fmt.Sprintf(`{
 	"id":22,
 	"alreadyRead":false,
 	"reason":2,
@@ -113,7 +113,7 @@ var testJSONNotification string = fmt.Sprintf(`{
 	"resourceAlreadyRead":false
 }`, testJSONUser)
 
-var testJSONIssueComment string = fmt.Sprintf(`{
+var testJSONIssueComment = fmt.Sprintf(`{
     "id": 6586,
     "content": "テスト",
     "changeLog": null,
@@ -124,7 +124,7 @@ var testJSONIssueComment string = fmt.Sprintf(`{
     "notifications": [%s]
 }`, testJSONUser, testJSONNotification)
 
-var testJSONAttachment string = fmt.Sprintf(`{
+var testJSONAttachment = fmt.Sprintf(`{
 	"id": 1,
 	"name": "Duke.png",
 	"size": 196186,

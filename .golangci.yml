@@ -1,7 +1,7 @@
 linters:
   enable:
     - goimports
-    - golint
+    - revive
     - gosec
 
 linters-settings:
@@ -9,10 +9,6 @@ linters-settings:
     # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
     # default is false: such cases aren't reported by default.
     check-type-assertions: true
-  golint:
-    # minimal confidence for issues, default is 0.8
-    # 小さいほど厳しくチェックする
-    min-confidence: 0.3
   govet:
     # report about shadowed variables
     check-shadowing: true
@@ -24,4 +20,8 @@ issues:
         - staticcheck
       # NOTE: TestMain での os.Exit 呼び出しは Go 1.15 で不要
       # see: https://golang.org/doc/go1.15#testing
-      text: "SA3000:"
+      text: 'SA3000:'
+    - linters:
+        - revive
+      # NOTE: パッケージコメントを適宜追加するのは開発効率が悪くなるという判断よりコメントは不要
+      text: 'package-comments: should have a package comment'

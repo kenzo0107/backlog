@@ -199,19 +199,21 @@ type Issues []*struct {
 // GetUserMySelfRecentrlyViewedIssues returns the list of issues a user view recently
 // This api returns a json below:
 // [
-// 		{
-//         "issue":{
-// 				"id":1111111,
-// 				...
-// 			}
-// 		},
-// 		{
-//         "issue":{
-// 				"id":2222222,
-// 				...
-// 			}
-// 		}
-// 		...
+//
+//			{
+//	        "issue":{
+//					"id":1111111,
+//					...
+//				}
+//			},
+//			{
+//	        "issue":{
+//					"id":2222222,
+//					...
+//				}
+//			}
+//			...
+//
 // ]
 func (c *Client) GetUserMySelfRecentrlyViewedIssues(opts *GetUserMySelfRecentrlyViewedIssuesOptions) (Issues, error) {
 	return c.GetUserMySelfRecentrlyViewedIssuesContext(context.Background(), opts)

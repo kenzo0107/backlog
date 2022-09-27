@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var testJSONUserWatching string = fmt.Sprintf(`{
+var testJSONUserWatching = fmt.Sprintf(`{
 	"id": 1,
 	"resourceAlreadyRead": true,
 	"note": "This is a note for the watching issue.",
