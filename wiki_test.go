@@ -57,7 +57,7 @@ const testJSONWiki string = `{
 	"updated": "2006-01-02T15:04:05Z"
 }`
 
-var testJSONRecentlyViewedWiki string = fmt.Sprintf(`{
+var testJSONRecentlyViewedWiki = fmt.Sprintf(`{
     "page": %s,
     "updated": "2006-01-02T15:04:05Z"
 }`, testJSONWiki)

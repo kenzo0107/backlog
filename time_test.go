@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var referenceTime time.Time = time.Date(2006, time.January, 02, 15, 04, 05, 0, time.UTC)
+var referenceTime = time.Date(2006, time.January, 02, 15, 04, 05, 0, time.UTC)
 
 func TestTimestamp_String(t *testing.T) {
 	tests := []struct {
