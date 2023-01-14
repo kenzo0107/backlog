@@ -1,0 +1,40 @@
+name: auto release demo
+on:
+  push:
+    # master ブランチにコミットがpushされたときに限定
+    branches:
+      - master
+    paths:
+      - '**.go'
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_IT_VERSION: 15.6.0
+    steps:
+      - name: Check out codes
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '19'
+      - name: Set releaser settings
+        run: |
+          git config --global user.name kenzo0107
+          git config --global user.email kenzo.tanaka0107@gmail.com
+      - name: Major release
+        id: major
+        if: contains(toJSON(github.event.commits.*.message), 'bump up version major')
+        run: npx release-it@${RELEASE_IT_VERSION} -- major --ci
+      - name: Minor release
+        id: minor
+        # メジャーバージョンアップをしていないときマイナーバージョンアップを行なうか
+        if: steps.major.conclusion == 'skipped'  && contains(toJSON(github.event.commits.*.message), 'bump up version minor')
+        run: npx release-it@${RELEASE_IT_VERSION} -- minor --ci
+      - name: Patch release
+        # コミットメッセージに特に指定がない場合はマイナーバージョンを更新する
+        if: "!(steps.major.conclusion == 'success' || steps.minor.conclusion == 'success')"
+        run: npx release-it@${RELEASE_IT_VERSION} -- patch --ci
