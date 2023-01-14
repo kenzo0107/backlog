@@ -3,9 +3,7 @@ on:
   push:
     # master ブランチにコミットがpushされたときに限定
     branches:
-      - master
-    paths:
-      - '**.go'
+      - versioning
 jobs:
   auto-release:
     runs-on: ubuntu-latest
