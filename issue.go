@@ -268,7 +268,7 @@ func (c *Client) GetIssueCountContext(ctx context.Context, opts *GetIssuesCountO
 	return r.Count, nil
 }
 
-func createQueryStringsFromIssueCustomFileds(icf []*IssueCustomField) string {
+func createQueryStringsFromIssueCustomFields(icf []*IssueCustomField) string {
 	if len(icf) == 0 {
 		return ""
 	}
@@ -304,7 +304,7 @@ func (c *Client) CreateIssue(input *CreateIssueInput) (*Issue, error) {
 func (c *Client) CreateIssueContext(ctx context.Context, input *CreateIssueInput) (*Issue, error) {
 	u := "/api/v2/issues"
 
-	if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" {
+	if q := createQueryStringsFromIssueCustomFields(input.CustomFields); q != "" {
 		u += "?" + q
 	}
 
@@ -350,7 +350,7 @@ func (c *Client) UpdateIssue(issueIDOrKey string, input *UpdateIssueInput) (*Iss
 func (c *Client) UpdateIssueContext(ctx context.Context, issueIDOrKey string, input *UpdateIssueInput) (*Issue, error) {
 	u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
 
-	if q := createQueryStringsFromIssueCustomFileds(input.CustomFields); q != "" {
+	if q := createQueryStringsFromIssueCustomFields(input.CustomFields); q != "" {
 		u += "?" + q
 	}
 
