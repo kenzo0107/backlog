@@ -5,7 +5,31 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/kylelemons/godebug/pretty"
+	"github.com/pkg/errors"
 )
+
+func TestResetAsTime(t *testing.T) {
+	ls := &LimitStatus{
+		Reset: Int(1603881873),
+	}
+	expected := ls.ResetAsTime().UTC()
+	want := time.Date(2020, time.October, 28, 10, 44, 33, 0, time.UTC)
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestResetAsTimeWithResetNull(t *testing.T) {
+	ls := &LimitStatus{}
+	expected := ls.ResetAsTime()
+	want := time.Time{}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(errors.New(pretty.Compare(want, expected)))
+	}
+}
 
 const testJSONRateLimit string = `{
 	"rateLimit": {

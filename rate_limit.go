@@ -2,6 +2,7 @@ package backlog
 
 import (
 	"context"
+	"time"
 )
 
 // LimitStatus : limit status
@@ -9,6 +10,14 @@ type LimitStatus struct {
 	Limit     *int `json:"limit,omitempty"`
 	Remaining *int `json:"remaining,omitempty"`
 	Reset     *int `json:"reset,omitempty"`
+}
+
+// ResetAsTime returns reset as time
+func (ls *LimitStatus) ResetAsTime() time.Time {
+	if ls.Reset == nil {
+		return time.Time{}
+	}
+	return time.Unix(int64(*ls.Reset), 0)
 }
 
 // RateLimit : rate limit
