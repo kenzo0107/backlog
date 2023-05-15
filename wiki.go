@@ -3,6 +3,7 @@ package backlog
 import (
 	"context"
 	"fmt"
+	"io"
 )
 
 // Wiki : wiki
@@ -270,6 +271,26 @@ func (c *Client) GetWikiAttachmentsContext(ctx context.Context, wikiID int) ([]*
 		return nil, err
 	}
 	return attachments, nil
+}
+
+// GetWikiAttachmentContent writes the content to writer
+func (c *Client) GetWikiAttachmentContent(wikiID, attachmentID int, w io.Writer) error {
+	return c.GetWikiAttachmentContentContext(context.Background(), wikiID, attachmentID, w)
+}
+
+// GetWikiAttachmentContentContext writes the content to writer
+func (c *Client) GetWikiAttachmentContentContext(ctx context.Context, wikiID, attachmentID int, w io.Writer) error {
+	u := fmt.Sprintf("/api/v2/wikis/%v/attachments/%v", wikiID, attachmentID)
+
+	req, err := c.NewRequest("GET", u, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Do(ctx, req, w); err != nil {
+		return err
+	}
+	return nil
 }
 
 // AddAttachmentToWiki adds attachments to a wiki
