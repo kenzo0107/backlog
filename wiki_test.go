@@ -1,6 +1,7 @@
 package backlog
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -553,6 +554,32 @@ func TestGetWikiAttachmentsFailed(t *testing.T) {
 	})
 
 	if _, err := client.GetWikiAttachments(1); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetWikiAttachmentContent(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	client.httpclient = &mockHTTPClient{}
+
+	err := client.GetWikiAttachmentContent(1, 1, &bytes.Buffer{})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestGetWikiAttachmentContentFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/wikis/1/attachments/2", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	if err := client.GetWikiAttachmentContent(1, 2, &bytes.Buffer{}); err == nil {
 		t.Fatal("expected an error but got none")
 	}
 }
