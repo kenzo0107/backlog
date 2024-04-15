@@ -366,6 +366,27 @@ func (c *Client) UpdateIssueContext(ctx context.Context, issueIDOrKey string, in
 	return issue, nil
 }
 
+// DeleteIssue deletes an issue
+func (c *Client) DeleteIssue(issueIDOrKey string) (*Issue, error) {
+	return c.DeleteIssueContext(context.Background(), issueIDOrKey)
+}
+
+// DeleteIssueContext deletes an issue with context
+func (c *Client) DeleteIssueContext(ctx context.Context, issueIDOrKey string) (*Issue, error) {
+	u := fmt.Sprintf("/api/v2/issues/%v", issueIDOrKey)
+
+	req, err := c.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	issue := new(Issue)
+	if err := c.Do(ctx, req, &issue); err != nil {
+		return nil, err
+	}
+	return issue, nil
+}
+
 // GetIssueComments get list of the issue comments
 func (c *Client) GetIssueComments(issueIDOrKey string, opts *GetIssueCommentsOptions) ([]*IssueComment, error) {
 	return c.GetIssueCommentsContext(context.Background(), issueIDOrKey, opts)
