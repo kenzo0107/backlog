@@ -768,6 +768,52 @@ func TestUpdateIssueInvalidIssueKey(t *testing.T) {
 	}
 }
 
+func TestDeleteIssue(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.DeleteIssue("BLG-1")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := getTestIssue()
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestDeleteIssueFailed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.DeleteIssue("BLG-1")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteIssueInvalidIssueKey(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.DeleteIssue("%")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestGetIssueComments(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
