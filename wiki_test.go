@@ -146,7 +146,7 @@ func TestGetMyRecentlyViewedWikis(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONRecentlyViewedWiki)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -177,7 +177,7 @@ func TestGetMyRecentlyViewedWikisFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedWikis", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -194,7 +194,7 @@ func TestGetWikis(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONWiki)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -233,7 +233,7 @@ func TestGetWikisFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -249,7 +249,7 @@ func TestGetWikiCount(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"count": 1}`); err != nil {
 			t.Fatal(err)
 		}
@@ -271,7 +271,7 @@ func TestGetWikiCountFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/count", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -299,7 +299,7 @@ func TestGetWikiTags(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `
 			[
 				{
@@ -340,7 +340,7 @@ func TestGetWikiTagsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/tags", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -356,7 +356,7 @@ func TestGetWikiByID(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
 			t.Fatal(err)
 		}
@@ -378,7 +378,7 @@ func TestGetWikiByIDFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -392,7 +392,7 @@ func TestCreateWiki(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
 			t.Fatal(err)
 		}
@@ -420,7 +420,7 @@ func TestCreateWikiFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -440,7 +440,7 @@ func TestUpdateWiki(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
 			t.Fatal(err)
 		}
@@ -467,7 +467,7 @@ func TestUpdateWikiFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -484,7 +484,7 @@ func TestDeleteWiki(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWiki); err != nil {
 			t.Fatal(err)
 		}
@@ -506,7 +506,7 @@ func TestDeleteWikiFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -519,7 +519,7 @@ func TestGetAttachmentToWiki(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `
 			[
 				{
@@ -549,7 +549,7 @@ func TestGetWikiAttachmentsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -575,7 +575,7 @@ func TestGetWikiAttachmentContentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments/2", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments/2", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -588,7 +588,7 @@ func TestAddAttachmentToWiki(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONAttachment)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -614,7 +614,7 @@ func TestAddAttachmentToWikiFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -630,7 +630,7 @@ func TestDeleteWikiAttachment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments/8", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments/8", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONAttachment); err != nil {
 			t.Fatal(err)
 		}
@@ -652,7 +652,7 @@ func TestDeleteAttachmentInWikiFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/wikis/1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wikis/1/attachments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

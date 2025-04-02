@@ -79,7 +79,7 @@ func TestGetUserActivities(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONActivity)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -110,7 +110,7 @@ func TestGetUserActivitiesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/activities", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -124,7 +124,7 @@ func TestGetProjectActivities(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/activities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/activities", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONActivity)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -147,7 +147,7 @@ func TestGetProjectActivitiesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/activities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/activities", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

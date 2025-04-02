@@ -21,7 +21,7 @@ func TestGetResolutions(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/resolutions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/resolutions", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `[{"id": 0, "name": "対応済み"}]`); err != nil {
 			t.Fatal(err)
 		}
@@ -43,7 +43,7 @@ func TestGetResolutionsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/resolutions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/resolutions", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

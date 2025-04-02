@@ -86,7 +86,7 @@ func TestGetTeams(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONTeam)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -109,7 +109,7 @@ func TestGetTeamsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -122,7 +122,7 @@ func TestCreateTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -147,7 +147,7 @@ func TestCreateTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -163,7 +163,7 @@ func TestGetTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -185,7 +185,7 @@ func TestGetTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -198,7 +198,7 @@ func TestUpdateTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -223,7 +223,7 @@ func TestUpdateTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -239,7 +239,7 @@ func TestDeleteTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -261,7 +261,7 @@ func TestDeleteTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -270,7 +270,7 @@ func TestDeleteTeamFailed(t *testing.T) {
 	}
 }
 
-func TestGetTeamIcon(t *testing.T) {
+func TestGetTeamIcon(_ *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
@@ -286,7 +286,7 @@ func TestGetTeamIconFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teams/1/icon", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teams/1/icon", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -299,7 +299,7 @@ func TestGetProjectTeams(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONTeam)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -322,7 +322,7 @@ func TestGetProjectTeamsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -344,7 +344,7 @@ func TestAddProjectTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -368,7 +368,7 @@ func TestAddProjectTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -394,7 +394,7 @@ func TestDeleteProjectTeam(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONTeam); err != nil {
 			t.Fatal(err)
 		}
@@ -418,7 +418,7 @@ func TestDeleteProjectTeamFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/teams", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

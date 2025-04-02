@@ -39,7 +39,7 @@ func TestGetUserWatchings(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/watchings", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/watchings", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONUserWatching)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -62,7 +62,7 @@ func TestGetUserWatchingsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/watchings", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/watchings", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -75,7 +75,7 @@ func TestGetUserWatchingsCount(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/watchings/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/watchings/count", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{
 			"count": 138
 		}`); err != nil {
@@ -99,7 +99,7 @@ func TestGetUserWatchingsCountFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/watchings/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/watchings/count", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -112,7 +112,7 @@ func TestGetWatching(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUserWatching); err != nil {
 			t.Fatal(err)
 		}
@@ -134,7 +134,7 @@ func TestGetWatchingFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -147,7 +147,7 @@ func TestCreateWatching(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUserWatching); err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +172,7 @@ func TestCreateWatchingFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -188,7 +188,7 @@ func TestUpdateWatching(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUserWatching); err != nil {
 			t.Fatal(err)
 		}
@@ -212,7 +212,7 @@ func TestUpdateWatchingFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -227,7 +227,7 @@ func TestDeleteWatching(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUserWatching); err != nil {
 			t.Fatal(err)
 		}
@@ -249,7 +249,7 @@ func TestDeleteWatchingFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -258,11 +258,11 @@ func TestDeleteWatchingFailed(t *testing.T) {
 	}
 }
 
-func TestMarkAsReadWatching(t *testing.T) {
+func TestMarkAsReadWatching(_ *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/watchings/1/markAsRead", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/watchings/1/markAsRead", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -275,7 +275,7 @@ func TestMarkAsReadWatchingFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("watchings/1/markAsRead", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("watchings/1/markAsRead", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

@@ -67,7 +67,7 @@ func TestGetWebhooks(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONWebhook)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -99,7 +99,7 @@ func TestGetWebhooksFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -112,7 +112,7 @@ func TestCreateWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWebhook); err != nil {
 			t.Fatal(err)
 		}
@@ -154,7 +154,7 @@ func TestAddWebhookFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -171,7 +171,7 @@ func TestGetWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/webhooks/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/webhooks/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWebhook); err != nil {
 			t.Fatal(err)
 		}
@@ -202,7 +202,7 @@ func TestGetWebhookFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v2/projects/SRE/webhooks/10", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/projects/SRE/webhooks/10", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -215,7 +215,7 @@ func TestUpdateWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/webhooks/10", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/webhooks/10", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWebhook); err != nil {
 			t.Fatal(err)
 		}
@@ -257,7 +257,7 @@ func TestUpdateWebhookFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -274,7 +274,7 @@ func TestDeleteWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/webhooks/10", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/webhooks/10", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONWebhook); err != nil {
 			t.Fatal(err)
 		}
@@ -305,7 +305,7 @@ func TestDeleteWebhookFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/projects/SRE/webhooks", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

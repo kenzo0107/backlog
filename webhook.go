@@ -7,11 +7,12 @@ import (
 
 // Webhook : -
 type Webhook struct {
-	ID              *int       `json:"id,omitempty"`
-	Name            *string    `json:"name,omitempty"`
-	Description     *string    `json:"description,omitempty"`
-	HookURL         *string    `json:"hookUrl,omitempty"`
-	AllEvent        *bool      `json:"allEvent,omitempty"`
+	ID          *int    `json:"id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	HookURL     *string `json:"hookUrl,omitempty"`
+	AllEvent    *bool   `json:"allEvent,omitempty"`
+	// revive:disable-next-line var-naming
 	ActivityTypeIds []int      `json:"activityTypeIds,omitempty"`
 	CreatedUser     *User      `json:"createdUser,omitempty"`
 	Created         *Timestamp `json:"created,omitempty"`

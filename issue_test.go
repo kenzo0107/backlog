@@ -267,7 +267,7 @@ func TestGetIssues(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONIssue)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -318,7 +318,7 @@ func TestGetIssuesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -450,7 +450,7 @@ func TestGetUserMySelfRecentrlyViewedIssues(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[{"issue":%s, "updated": "2006-01-02T15:04:05Z"}]`, testJSONIssue)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -481,7 +481,7 @@ func TestGetUserMySelfRecentrlyViewedIssuesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -496,7 +496,7 @@ func TestGetUserMySelfRecentrlyViewedIssues4xxErrorFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedIssues", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `
 			{
 				status:     "400 Bad Request",
@@ -518,7 +518,7 @@ func TestGetIssueCount(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"count":1}`); err != nil {
 			t.Fatal(err)
 		}
@@ -545,7 +545,7 @@ func TestGetIssueCountFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/count", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -559,7 +559,7 @@ func TestCreateIssue(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
 			t.Fatal(err)
 		}
@@ -626,7 +626,7 @@ func TestCreateIssueFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -642,7 +642,7 @@ func TestGetIssue(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
 			t.Fatal(err)
 		}
@@ -664,7 +664,7 @@ func TestGetIssueFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -688,7 +688,7 @@ func TestUpdateIssue(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
 			t.Fatal(err)
 		}
@@ -744,7 +744,7 @@ func TestUpdateIssueFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -772,7 +772,7 @@ func TestDeleteIssue(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssue); err != nil {
 			t.Fatal(err)
 		}
@@ -794,7 +794,7 @@ func TestDeleteIssueFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -818,7 +818,7 @@ func TestGetIssueComments(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONIssueComment)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -841,7 +841,7 @@ func TestGetIssueCommentsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -865,7 +865,7 @@ func TestCreateIssueComment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
 			t.Fatal(err)
 		}
@@ -890,7 +890,7 @@ func TestCreateIssueCommentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -920,7 +920,7 @@ func TestGetIssueCommentsCount(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"count": 1}`); err != nil {
 			t.Fatal(err)
 		}
@@ -941,7 +941,7 @@ func TestGetIssueCommentsCountFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/count", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -965,7 +965,7 @@ func TestGetIssueComment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
 			t.Fatal(err)
 		}
@@ -987,7 +987,7 @@ func TestGetIssueCommentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1011,7 +1011,7 @@ func TestDeleteIssueComment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
 			t.Fatal(err)
 		}
@@ -1033,7 +1033,7 @@ func TestDeleteIssueCommentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1057,7 +1057,7 @@ func TestUpdateIssueComment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
 			t.Fatal(err)
 		}
@@ -1081,7 +1081,7 @@ func TestUpdateIssueCommentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1109,7 +1109,7 @@ func TestGetIssueCommentsNotifications(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONNotification)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -1132,7 +1132,7 @@ func TestGetIssueCommentsNotificationsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1156,7 +1156,7 @@ func TestCreateIssueCommentsNotification(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueComment); err != nil {
 			t.Fatal(err)
 		}
@@ -1180,7 +1180,7 @@ func TestCreateIssueCommentsNotificationFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/comments/1/notifications", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1208,7 +1208,7 @@ func TestGetIssueAttachments(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONAttachment)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -1231,7 +1231,7 @@ func TestGetIssueAttachmentsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/attachments", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1251,7 +1251,7 @@ func TestGetIssueAttachmentsInvalidIssueKey(t *testing.T) {
 	}
 }
 
-func TestGetIssueAttachment(t *testing.T) {
+func TestGetIssueAttachment(_ *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
@@ -1267,7 +1267,7 @@ func TestGetIssueAttachmentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/SRE-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/SRE-1/attachments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1289,7 +1289,7 @@ func TestDeleteIssueAttachment(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONAttachment); err != nil {
 			t.Fatal(err)
 		}
@@ -1311,7 +1311,7 @@ func TestDeleteIssueAttachmentFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/attachments/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1335,7 +1335,7 @@ func TestGetIssueParticipants(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONUser)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -1358,7 +1358,7 @@ func TestGetIssueParticipantsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/participants", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1382,7 +1382,7 @@ func TestGetIssueSharedFiles(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONSharedFile)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -1405,7 +1405,7 @@ func TestGetIssueSharedFilesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1429,7 +1429,7 @@ func TestCreateIssueSharedFiles(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONSharedFile)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -1454,7 +1454,7 @@ func TestCreateIssueSharedFilesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1482,7 +1482,7 @@ func TestDeleteIssueSharedFile(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONSharedFile); err != nil {
 			t.Fatal(err)
 		}
@@ -1504,7 +1504,7 @@ func TestDeleteIssueSharedFileFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/issues/BLG-1/sharedFiles/454403", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

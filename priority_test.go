@@ -26,7 +26,7 @@ func TestGetPriorities(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/priorities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/priorities", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONPriority)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -49,7 +49,7 @@ func TestGetPrioritiesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/priorities", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/priorities", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

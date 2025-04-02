@@ -65,7 +65,7 @@ func TestGetMyRecentlyViewedProjects(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedProjects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedProjects", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[{
 			"project": %v,
 			"updated": "2006-01-02T15:04:05Z"
@@ -91,7 +91,7 @@ func TestGetMyRecentlyViewedProjectsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself/recentlyViewedProjects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself/recentlyViewedProjects", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -108,7 +108,7 @@ func TestGetProjects(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONProject)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -135,7 +135,7 @@ func TestGetProjectsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -150,7 +150,7 @@ func TestGetProject(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +172,7 @@ func TestGetProjectFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -195,7 +195,7 @@ func TestGetStatuses(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONProjectStatus)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -218,7 +218,7 @@ func TestGetProjectStatusesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -240,7 +240,7 @@ func TestCreateProject(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
 			t.Fatal(err)
 		}
@@ -270,7 +270,7 @@ func TestCreateProjectFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -311,7 +311,7 @@ func TestUpdateProject(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
 			t.Fatal(err)
 		}
@@ -342,7 +342,7 @@ func TestUpdateProjectFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -362,7 +362,7 @@ func TestUpdateProjectWithoutIDFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -399,7 +399,7 @@ func TestDeleteProject(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProject); err != nil {
 			t.Fatal(err)
 		}
@@ -421,7 +421,7 @@ func TestDeleteProjectFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -440,7 +440,7 @@ func TestDeleteProjectWithInvalidProjectIDOrKeyFailed(t *testing.T) {
 	}
 }
 
-func TestGetProjectIcon(t *testing.T) {
+func TestGetProjectIcon(_ *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
@@ -456,7 +456,7 @@ func TestGetProjectIconFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/image", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/image", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -478,7 +478,7 @@ func TestAddProjectUser(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -502,7 +502,7 @@ func TestAddProjectUserFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -530,7 +530,7 @@ func TestGetProjectUsers(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONUser)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -555,7 +555,7 @@ func TestGetProjectUsersFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -583,7 +583,7 @@ func TestDeleteProjectUser(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -607,7 +607,7 @@ func TestDeleteProjectUserFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/users", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -635,7 +635,7 @@ func TestAddProjectAdministrator(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -659,7 +659,7 @@ func TestAddProjectAdministratorFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -687,7 +687,7 @@ func TestGetProjectAdministrators(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONUser)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -710,7 +710,7 @@ func TestGetProjectAdministratorsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -734,7 +734,7 @@ func TestDeleteProjectAdministrator(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -758,7 +758,7 @@ func TestDeleteProjectAdministratorFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/administrators", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -786,7 +786,7 @@ func TestCreateStatus(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProjectStatus); err != nil {
 			t.Fatal(err)
 		}
@@ -811,7 +811,7 @@ func TestCreateStatusFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -841,7 +841,7 @@ func TestUpdateStatus(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProjectStatus); err != nil {
 			t.Fatal(err)
 		}
@@ -866,7 +866,7 @@ func TestUpdateStatusFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -896,7 +896,7 @@ func TestDeleteStatus(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONProjectStatus); err != nil {
 			t.Fatal(err)
 		}
@@ -920,7 +920,7 @@ func TestDeleteStatusFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -948,7 +948,7 @@ func TestSortStatuses(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses/updateDisplayOrder", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses/updateDisplayOrder", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf(`[%s]`, testJSONProjectStatus)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -973,7 +973,7 @@ func TestSortStatusesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/statuses", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -1001,7 +1001,7 @@ func TestGetProjectDiskUsage(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/diskUsage", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{
 			"projectId": 1,
 			"issue": 11931,
@@ -1039,7 +1039,7 @@ func TestGetProjectDiskUsageFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/diskUsage", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

@@ -28,7 +28,7 @@ func TestGetCategories(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONCategory)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -61,7 +61,7 @@ func TestCreateCategoriesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -75,7 +75,7 @@ func TestCreateCategory(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONCategory); err != nil {
 			t.Fatal(err)
 		}
@@ -100,7 +100,7 @@ func TestCreateCategoryFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -127,7 +127,7 @@ func TestUpdateCategory(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONCategory); err != nil {
 			t.Fatal(err)
 		}
@@ -152,7 +152,7 @@ func TestUpdateCategoryFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -179,7 +179,7 @@ func TestDeleteCategory(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONCategory); err != nil {
 			t.Fatal(err)
 		}
@@ -201,7 +201,7 @@ func TestDeleteCategoryFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/categories/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
