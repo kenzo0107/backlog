@@ -11,15 +11,24 @@ on:
 
 jobs:
   lint:
+    name: lint
+    timeout-minutes: 5
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
-        go-version: [1.19.x]
-        os: [ubuntu-latest]
-    name: lint
-    runs-on: ${{ matrix.os }}
+        os:
+          - ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
+      - name: Pick terraform_version
+        id: golang
+        run: echo "version=$(awk '$1 ~ /^golang/{print $2}' .tool-versions)" >> $GITHUB_OUTPUT
+
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: ${{ steps.golang.outputs.version }}
+
       - run: make lint
