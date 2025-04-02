@@ -1,6 +1,6 @@
 ## upgrade library
 upgrade:
-	@go get -u -d ./...
+	@go get -u ./...
 .PHONY: upgrade
 
 ## Install library for development
