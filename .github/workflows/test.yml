@@ -30,13 +30,4 @@ jobs:
         with:
           go-version: ${{ steps.golang.outputs.version }}
 
-      - run: go test -v -count=1 -race -cover -coverprofile=coverage ./...
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage
-          flags: unittests
-          name: codecov
-          fail_ci_if_error: true
+      - run: go test -v -count=1 -race -cover ./...
