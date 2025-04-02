@@ -96,7 +96,7 @@ func TestGetSpaceFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -111,7 +111,7 @@ func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
 	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
 
-func TestGetSpaceIcon(t *testing.T) {
+func TestGetSpaceIcon(_ *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
@@ -127,7 +127,7 @@ func TestGetSpaceIconFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/image", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/image", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -140,7 +140,7 @@ func TestGetSpaceNotification(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"content": "Notification", "updated": "2006-01-02T15:04:05Z"}`); err != nil {
 			t.Fatal(err)
 		}
@@ -162,7 +162,7 @@ func TestGetSpaceNotificationFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -175,7 +175,7 @@ func TestUpdateSpaceNotification(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"content": "Notification", "updated": "2006-01-02T15:04:05Z"}`); err != nil {
 			t.Fatal(err)
 		}
@@ -199,7 +199,7 @@ func TestUpdateSpaceNotificationFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/notification", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -214,7 +214,7 @@ func TestGetSpaceDiskUsage(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `
 			{
 				"capacity": 1073741824,
@@ -257,7 +257,7 @@ func TestGetSpaceDiskUsageFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/diskUsage", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -361,7 +361,7 @@ func TestGetSpaceLicenseFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/licence", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/licence", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

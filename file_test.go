@@ -20,7 +20,7 @@ func TestUploadFile(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"id": 1, "name": "test.txt", "size": 8857}`); err != nil {
 			t.Fatal(err)
 		}
@@ -43,7 +43,7 @@ func TestUploadFileFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/space/attachment", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

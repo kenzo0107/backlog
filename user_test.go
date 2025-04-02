@@ -240,7 +240,7 @@ func TestGetUserMySelfFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/myself", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/myself", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -276,7 +276,7 @@ func TestGetUserByIDFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -289,7 +289,7 @@ func TestGetUsers(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONUser)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -311,7 +311,7 @@ func TestGetUsersFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -324,7 +324,7 @@ func TestCreateUser(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -353,7 +353,7 @@ func TestCreateUserFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -373,7 +373,7 @@ func TestUpdateUser(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -401,7 +401,7 @@ func TestUpdateUserFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -420,7 +420,7 @@ func TestDeleteUser(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONUser); err != nil {
 			t.Fatal(err)
 		}
@@ -442,7 +442,7 @@ func TestDeleteUserFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -451,7 +451,7 @@ func TestDeleteUserFailed(t *testing.T) {
 	}
 }
 
-func TestGetUserIcon(t *testing.T) {
+func TestGetUserIcon(_ *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
 
@@ -467,7 +467,7 @@ func TestGetUserStars(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONStar)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -496,7 +496,7 @@ func TestGetUserStarsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/stars", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -510,7 +510,7 @@ func TestGetUserStarCount(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, `{"count":54 }`); err != nil {
 			t.Fatal(err)
 		}
@@ -534,7 +534,7 @@ func TestGetUserStarCountFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/users/1/stars/count", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

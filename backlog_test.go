@@ -31,7 +31,7 @@ func setupWithPath(path string) (client *Client, mux *http.ServeMux, serverURL s
 
 	apiHandler := http.NewServeMux()
 	apiHandler.Handle(baseURLPath+"/", http.StripPrefix(baseURLPath, mux))
-	apiHandler.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+	apiHandler.HandleFunc("/", func(_ http.ResponseWriter, req *http.Request) {
 		fmt.Fprintln(os.Stderr, "\t"+req.URL.String())
 		fmt.Fprintln(os.Stderr)
 	})

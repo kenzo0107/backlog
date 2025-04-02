@@ -11,7 +11,7 @@ linters-settings:
     check-type-assertions: true
   govet:
     # report about shadowed variables
-    check-shadowing: true
+    shadow: true
 
 issues:
   exclude-use-default: false

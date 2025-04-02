@@ -38,7 +38,7 @@ func TestGetVersions(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONVersion)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -61,7 +61,7 @@ func TestGetVersionsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -85,7 +85,7 @@ func TestCreateVersion(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
@@ -110,7 +110,7 @@ func TestCreateVersionsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -140,7 +140,7 @@ func TestUpdateVersion(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
@@ -165,7 +165,7 @@ func TestUpdateVersionsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -195,7 +195,7 @@ func TestDeleteVersion(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONVersion); err != nil {
 			t.Fatal(err)
 		}
@@ -217,7 +217,7 @@ func TestDeleteVersionsFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/versions/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 

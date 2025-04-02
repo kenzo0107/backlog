@@ -36,7 +36,7 @@ func TestGetIssueTypes(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, _ *http.Request) {
 		j := fmt.Sprintf("[%s]", testJSONIssueType)
 		if _, err := fmt.Fprint(w, j); err != nil {
 			t.Fatal(err)
@@ -59,7 +59,7 @@ func TestGetIssueTypesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -83,7 +83,7 @@ func TestCreateIssueType(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueType); err != nil {
 			t.Fatal(err)
 		}
@@ -111,7 +111,7 @@ func TestCreateIssueTypesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -147,7 +147,7 @@ func TestUpdateIssueType(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueType); err != nil {
 			t.Fatal(err)
 		}
@@ -175,7 +175,7 @@ func TestUpdateIssueTypesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -211,7 +211,7 @@ func TestDeleteIssueType(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, _ *http.Request) {
 		if _, err := fmt.Fprint(w, testJSONIssueType); err != nil {
 			t.Fatal(err)
 		}
@@ -236,7 +236,7 @@ func TestDeleteIssueTypesFailed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/projects/SRE/issueTypes/1", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
