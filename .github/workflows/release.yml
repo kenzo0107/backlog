@@ -14,7 +14,7 @@ jobs:
       RELEASE_IT_VERSION: 15.6.0
     steps:
       - name: Check out codes
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node
