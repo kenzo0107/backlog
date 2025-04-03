@@ -1,4 +1,4 @@
-Backlog API in Go [![GoDoc](https://godoc.org/github.com/kenzo0107/backlog?status.svg)](https://godoc.org/github.com/kenzo0107/backlog) [![test](https://github.com/kenzo0107/backlog/workflows/test/badge.svg?branch=master)](https://github.com/kenzo0107/backlog/actions?query=workflow%3Atest) [![lint](https://github.com/kenzo0107/backlog/workflows/lint/badge.svg?branch=master)](https://github.com/kenzo0107/backlog/actions?query=workflow%3A%22lint%22)
+Backlog API in Go [![GoDoc](https://godoc.org/github.com/kenzo0107/backlog?status.svg)](https://godoc.org/github.com/kenzo0107/backlog) [![test](https://github.com/kenzo0107/backlog/actions/workflows/test.yml/badge.svg)](https://github.com/kenzo0107/backlog/actions/workflows/test.yml) [![lint](https://github.com/kenzo0107/backlog/actions/workflows/lint.yml/badge.svg)](https://github.com/kenzo0107/backlog/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/gh/kenzo0107/backlog/branch/master/graph/badge.svg)](https://codecov.io/gh/kenzo0107/backlog)
 ===============
 
