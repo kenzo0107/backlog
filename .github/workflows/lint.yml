@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Pick terraform_version
+      - name: Pick golang version
         id: golang
         run: echo "version=$(awk '$1 ~ /^golang/{print $2}' .tool-versions)" >> $GITHUB_OUTPUT
 
