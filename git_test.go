@@ -20,7 +20,7 @@ func TestGetGitRepositories(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories", projectKey),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `[
+			_, _ = fmt.Fprint(w, `[
 				{
 					"id": 1,
 					"projectId": 1,
@@ -61,15 +61,15 @@ func TestGetGitRepositories(t *testing.T) {
 
 	want := &ResponseGitRepositories{
 		{
-			ID:          Int(1),
-			ProjectID:   Int(1),
-			Name:        String("test-repo"),
-			Description: String("Test repository"),
-			HookURL:     nil,
-			HTTPURL:     String("https://test.backlog.com/git/TEST/test-repo.git"),
-			SSHURL:      String("git@test.backlog.com:TEST/test-repo.git"),
+			ID:           Int(1),
+			ProjectID:    Int(1),
+			Name:         String("test-repo"),
+			Description:  String("Test repository"),
+			HookURL:      nil,
+			HTTPURL:      String("https://test.backlog.com/git/TEST/test-repo.git"),
+			SSHURL:       String("git@test.backlog.com:TEST/test-repo.git"),
 			DisplayOrder: Int(0),
-			PushedAt:    &Timestamp{time.Date(2015, 5, 21, 5, 36, 0, 0, time.UTC)},
+			PushedAt:     &Timestamp{time.Date(2015, 5, 21, 5, 36, 0, 0, time.UTC)},
 			CreatedUser: &User{
 				ID:          Int(1),
 				UserID:      String("admin"),
@@ -104,7 +104,7 @@ func TestGetGitRepositoriesContext(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories", projectKey),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `[]`)
+			_, _ = fmt.Fprint(w, `[]`)
 		})
 
 	ctx := context.Background()
@@ -123,7 +123,7 @@ func TestGetGitRepository(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `{
+			_, _ = fmt.Fprint(w, `{
 				"id": 1,
 				"projectId": 1,
 				"name": "test-repo",
@@ -161,15 +161,15 @@ func TestGetGitRepository(t *testing.T) {
 	}
 
 	want := &GitRepository{
-		ID:          Int(1),
-		ProjectID:   Int(1),
-		Name:        String("test-repo"),
-		Description: String("Test repository"),
-		HookURL:     nil,
-		HTTPURL:     String("https://test.backlog.com/git/TEST/test-repo.git"),
-		SSHURL:      String("git@test.backlog.com:TEST/test-repo.git"),
+		ID:           Int(1),
+		ProjectID:    Int(1),
+		Name:         String("test-repo"),
+		Description:  String("Test repository"),
+		HookURL:      nil,
+		HTTPURL:      String("https://test.backlog.com/git/TEST/test-repo.git"),
+		SSHURL:       String("git@test.backlog.com:TEST/test-repo.git"),
 		DisplayOrder: Int(0),
-		PushedAt:    &Timestamp{time.Date(2015, 5, 21, 5, 36, 0, 0, time.UTC)},
+		PushedAt:     &Timestamp{time.Date(2015, 5, 21, 5, 36, 0, 0, time.UTC)},
 		CreatedUser: &User{
 			ID:          Int(1),
 			UserID:      String("admin"),
@@ -204,7 +204,7 @@ func TestGetGitRepositoryContext(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `{}`)
+			_, _ = fmt.Fprint(w, `{}`)
 		})
 
 	ctx := context.Background()

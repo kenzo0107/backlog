@@ -21,7 +21,7 @@ func TestGetPullRequests(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `[
+			_, _ = fmt.Fprint(w, `[
 				{
 					"id": 1,
 					"projectId": 1,
@@ -138,7 +138,7 @@ func TestGetPullRequestsContext(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `[]`)
+			_, _ = fmt.Fprint(w, `[]`)
 		})
 
 	ctx := context.Background()
@@ -157,7 +157,7 @@ func TestGetPullRequestsCount(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests/count", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `{"count": 5}`)
+			_, _ = fmt.Fprint(w, `{"count": 5}`)
 		})
 
 	count, err := client.GetPullRequestsCount(projectKey, repoName, nil)
@@ -185,7 +185,7 @@ func TestGetPullRequest(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests/%d", projectKey, repoName, number),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "GET")
-			fmt.Fprint(w, `{
+			_, _ = fmt.Fprint(w, `{
 				"id": 1,
 				"projectId": 1,
 				"repositoryId": 1,
@@ -284,7 +284,7 @@ func TestCreatePullRequest(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests", projectKey, repoName),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "POST")
-			fmt.Fprint(w, `{
+			_, _ = fmt.Fprint(w, `{
 				"id": 1,
 				"projectId": 1,
 				"repositoryId": 1,
@@ -343,7 +343,7 @@ func TestUpdatePullRequest(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/projects/%s/git/repositories/%s/pullRequests/%d", projectKey, repoName, number),
 		func(w http.ResponseWriter, r *http.Request) {
 			testMethod(t, r, "PATCH")
-			fmt.Fprint(w, `{
+			_, _ = fmt.Fprint(w, `{
 				"id": 1,
 				"projectId": 1,
 				"repositoryId": 1,

@@ -7,70 +7,70 @@ import (
 
 // PullRequest : pull request
 type PullRequest struct {
-	ID          *int    `json:"id,omitempty"`
-	ProjectID   *int    `json:"projectId,omitempty"`
-	RepositoryID *int   `json:"repositoryId,omitempty"`
-	Number      *int    `json:"number,omitempty"`
-	Summary     *string `json:"summary,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Base        *string `json:"base,omitempty"`
-	Branch      *string `json:"branch,omitempty"`
-	Status      *Status `json:"status,omitempty"`
-	Assignee    *User   `json:"assignee,omitempty"`
-	Issue       *Issue  `json:"issue,omitempty"`
-	BaseCommit  *string `json:"baseCommit,omitempty"`
-	BranchCommit *string `json:"branchCommit,omitempty"`
-	CloseAt     *Timestamp `json:"closeAt,omitempty"`
-	MergeAt     *Timestamp `json:"mergeAt,omitempty"`
-	CreatedUser *User      `json:"createdUser,omitempty"`
-	Created     *Timestamp `json:"created,omitempty"`
-	UpdatedUser *User      `json:"updatedUser,omitempty"`
-	Updated     *Timestamp `json:"updated,omitempty"`
+	ID           *int       `json:"id,omitempty"`
+	ProjectID    *int       `json:"projectId,omitempty"`
+	RepositoryID *int       `json:"repositoryId,omitempty"`
+	Number       *int       `json:"number,omitempty"`
+	Summary      *string    `json:"summary,omitempty"`
+	Description  *string    `json:"description,omitempty"`
+	Base         *string    `json:"base,omitempty"`
+	Branch       *string    `json:"branch,omitempty"`
+	Status       *Status    `json:"status,omitempty"`
+	Assignee     *User      `json:"assignee,omitempty"`
+	Issue        *Issue     `json:"issue,omitempty"`
+	BaseCommit   *string    `json:"baseCommit,omitempty"`
+	BranchCommit *string    `json:"branchCommit,omitempty"`
+	CloseAt      *Timestamp `json:"closeAt,omitempty"`
+	MergeAt      *Timestamp `json:"mergeAt,omitempty"`
+	CreatedUser  *User      `json:"createdUser,omitempty"`
+	Created      *Timestamp `json:"created,omitempty"`
+	UpdatedUser  *User      `json:"updatedUser,omitempty"`
+	Updated      *Timestamp `json:"updated,omitempty"`
 }
 
 // PullRequestComment : pull request comment
 type PullRequestComment struct {
-	ID            *int    `json:"id,omitempty"`
-	Content       *string `json:"content,omitempty"`
-	ChangeLog     []*ChangeLog `json:"changeLog,omitempty"`
-	CreatedUser   *User      `json:"createdUser,omitempty"`
-	Created       *Timestamp `json:"created,omitempty"`
-	UpdatedUser   *User      `json:"updatedUser,omitempty"`
-	Updated       *Timestamp `json:"updated,omitempty"`
-	Stars         []*Star `json:"stars,omitempty"`
+	ID            *int            `json:"id,omitempty"`
+	Content       *string         `json:"content,omitempty"`
+	ChangeLog     []*ChangeLog    `json:"changeLog,omitempty"`
+	CreatedUser   *User           `json:"createdUser,omitempty"`
+	Created       *Timestamp      `json:"created,omitempty"`
+	UpdatedUser   *User           `json:"updatedUser,omitempty"`
+	Updated       *Timestamp      `json:"updated,omitempty"`
+	Stars         []*Star         `json:"stars,omitempty"`
 	Notifications []*Notification `json:"notifications,omitempty"`
 }
 
 // GetPullRequestsOptions : options for GetPullRequests
 type GetPullRequestsOptions struct {
-	StatusID     []int `url:"statusId[],omitempty"`
-	AssigneeID   []int `url:"assigneeId[],omitempty"`
-	IssueID      []int `url:"issueId[],omitempty"`
+	StatusID      []int `url:"statusId[],omitempty"`
+	AssigneeID    []int `url:"assigneeId[],omitempty"`
+	IssueID       []int `url:"issueId[],omitempty"`
 	CreatedUserID []int `url:"createdUserId[],omitempty"`
-	Offset       *int  `url:"offset,omitempty"`
-	Count        *int  `url:"count,omitempty"`
+	Offset        *int  `url:"offset,omitempty"`
+	Count         *int  `url:"count,omitempty"`
 }
 
 // CreatePullRequestOptions : options for CreatePullRequest
 type CreatePullRequestOptions struct {
-	Summary     *string `json:"summary,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Base        *string `json:"base,omitempty"`
-	Branch      *string `json:"branch,omitempty"`
-	IssueID     *int    `json:"issueId,omitempty"`
-	AssigneeID  *int    `json:"assigneeId,omitempty"`
-	NotifiedUserID []int `json:"notifiedUserId,omitempty"`
-	AttachmentID []int `json:"attachmentId,omitempty"`
+	Summary        *string `json:"summary,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	Base           *string `json:"base,omitempty"`
+	Branch         *string `json:"branch,omitempty"`
+	IssueID        *int    `json:"issueId,omitempty"`
+	AssigneeID     *int    `json:"assigneeId,omitempty"`
+	NotifiedUserID []int   `json:"notifiedUserId,omitempty"`
+	AttachmentID   []int   `json:"attachmentId,omitempty"`
 }
 
 // UpdatePullRequestOptions : options for UpdatePullRequest
 type UpdatePullRequestOptions struct {
-	Summary     *string `json:"summary,omitempty"`
-	Description *string `json:"description,omitempty"`
-	IssueID     *int    `json:"issueId,omitempty"`
-	AssigneeID  *int    `json:"assigneeId,omitempty"`
-	NotifiedUserID []int `json:"notifiedUserId,omitempty"`
-	Comment     *string `json:"comment,omitempty"`
+	Summary        *string `json:"summary,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	IssueID        *int    `json:"issueId,omitempty"`
+	AssigneeID     *int    `json:"assigneeId,omitempty"`
+	NotifiedUserID []int   `json:"notifiedUserId,omitempty"`
+	Comment        *string `json:"comment,omitempty"`
 }
 
 // ResponsePullRequests : response for pull requests
@@ -212,9 +212,9 @@ func (c *Client) UpdatePullRequestContext(ctx context.Context, projectIDOrKey in
 
 // GetPullRequestCommentsOptions : options for GetPullRequestComments
 type GetPullRequestCommentsOptions struct {
-	MinID *int `json:"minId,omitempty"`
-	MaxID *int `json:"maxId,omitempty"`
-	Count *int `json:"count,omitempty"`
+	MinID *int    `json:"minId,omitempty"`
+	MaxID *int    `json:"maxId,omitempty"`
+	Count *int    `json:"count,omitempty"`
 	Order *string `json:"order,omitempty"`
 }
 
