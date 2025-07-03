@@ -1,6 +1,7 @@
 package backlog
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 const baseURLPath string = "/api/v2"
@@ -66,4 +68,32 @@ func TestBaseURLWithPath(t *testing.T) {
 	if _, err := client.GetSpace(); err != nil {
 		t.Fatal("Unexpected error", err)
 	}
+}
+
+func TestClient_Debug(t *testing.T) {
+	client := New("test-token", "https://example.com", OptionDebug(true))
+	assert.True(t, client.Debug())
+
+	client = New("test-token", "https://example.com", OptionDebug(false))
+	assert.False(t, client.Debug())
+}
+
+func TestClient_Debugf(t *testing.T) {
+	buf := bytes.NewBufferString("")
+	client := New("test-token", "https://example.com",
+		OptionDebug(true),
+		OptionLog(log.New(buf, "", 0)))
+
+	client.Debugf("test %s", "message")
+	assert.Contains(t, buf.String(), "test message")
+}
+
+func TestClient_Debugln(t *testing.T) {
+	buf := bytes.NewBufferString("")
+	client := New("test-token", "https://example.com",
+		OptionDebug(true),
+		OptionLog(log.New(buf, "", 0)))
+
+	client.Debugln("test", "message")
+	assert.Contains(t, buf.String(), "test message")
 }

@@ -52,3 +52,13 @@ func TestUploadFileFailed(t *testing.T) {
 		t.Fatal("expected an error but got none")
 	}
 }
+
+func TestUploadFileNotFound(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	fpath := filepath.Clean(filepath.Join("testdata", "nonexistent.jpg"))
+	if _, err := client.UploadFile(fpath); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}

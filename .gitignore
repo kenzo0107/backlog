@@ -16,3 +16,6 @@
 
 # env
 .envrc
+
+# ai-agent
+.claude
