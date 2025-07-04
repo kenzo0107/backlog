@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -96,4 +97,47 @@ func TestClient_Debugln(t *testing.T) {
 
 	client.Debugln("test", "message")
 	assert.Contains(t, buf.String(), "test message")
+}
+
+func TestNewRequestWithTrailingSlashError(t *testing.T) {
+	client := New("test-token", "https://example.com/api/v2/")
+
+	_, err := client.NewRequest("GET", "/test", nil)
+	if err == nil {
+		t.Error("Expected error for baseURL with trailing slash")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+}
+
+func TestNewRequestWithInvalidURL(t *testing.T) {
+	client := New("test-token", "https://example.com/api/v2")
+
+	// 無効な文字を含むURLを使用してbaseURL.Parseを失敗させる
+	_, err := client.NewRequest("GET", string([]byte{0x00, 0x01, 0x02}), nil)
+	if err == nil {
+		t.Error("Expected error for invalid URL")
+	}
+}
+
+func TestNewRequestWithJSONEncodeError(t *testing.T) {
+	client := New("test-token", "https://example.com/api/v2")
+
+	// JSONエンコードできないボディ（チャンネル型）を使用
+	invalidBody := make(chan int)
+	_, err := client.NewRequest("POST", "/test", invalidBody)
+	if err == nil {
+		t.Error("Expected error for invalid JSON body")
+	}
+}
+
+func TestNewRequestWithInvalidHTTPMethod(t *testing.T) {
+	client := New("test-token", "https://example.com/api/v2")
+
+	// 無効なHTTPメソッドを使用してhttp.NewRequestを失敗させる
+	_, err := client.NewRequest("INVALID\nMETHOD", "/test", nil)
+	if err == nil {
+		t.Error("Expected error for invalid HTTP method")
+	}
 }
