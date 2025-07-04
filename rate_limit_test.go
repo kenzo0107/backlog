@@ -3,7 +3,9 @@ package backlog
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -117,4 +119,23 @@ func TestGetRateLimitFailed(t *testing.T) {
 	if _, err := client.GetRateLimit(); err == nil {
 		t.Fatal("expected an error but got none")
 	}
+}
+
+func TestGetRateLimit_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://example.com/api/v2/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetRateLimit()
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
 }

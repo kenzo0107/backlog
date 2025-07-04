@@ -3,7 +3,9 @@ package backlog
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -312,4 +314,42 @@ func TestDeleteWebhookFailed(t *testing.T) {
 	if _, err := client.DeleteWebhook("SRE", 10); err == nil {
 		t.Fatal("expected an error but got none")
 	}
+}
+
+func TestGetWebhooks_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://example.com/api/v2/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetWebhooks("SRE")
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestCreateWebhook_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://example.com/api/v2/")
+	client.baseURL = invalidURL
+
+	_, err := client.CreateWebhook("SRE", &CreateWebhookInput{Name: String("test"), HookURL: String("http://example.com")})
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
 }

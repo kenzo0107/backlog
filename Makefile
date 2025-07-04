@@ -28,7 +28,7 @@ test-integration:
 
 ## Output coverage of testing
 cov:
-	@go test -count 1 -coverprofile=cover.out ./... | grep -v "examples/"
+	@go test -count 1 -coverprofile=cover.out $$(go list ./... | grep -v examples)
 	@go tool cover -html=cover.out
 .PHONY: cov
 
